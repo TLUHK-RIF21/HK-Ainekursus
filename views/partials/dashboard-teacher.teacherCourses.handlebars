@@ -11,7 +11,7 @@
               <img src="{{ this.avatar_url }}" alt="Avatar" class="w-16 rounded-full">
             </div>
             <div class="inline-block">
-              <h3 class="mt-0 mb-1">{{this.displayName}}</h3>
+              <h4 class="mt-0 mb-1">{{this.displayName}}</h4>
               {{#if this.email}}
                 <a class="m-0 mb-1" href="mailto:{{this.email}}">{{this.email}}<a>
               {{else}}
@@ -20,9 +20,9 @@
             </div>
           </div>
         {{/with }}
-        <ul class="list-none mt-2">
+        <ul class="list-disc mt-2">
         {{#each this }}
-          <li ><a href="/course/{{this.courseSlug}}/about?ref={{this.refBranch}}">{{this.courseName}}</a></li>
+          <li><a class="font-bold" href="/course/{{this.courseSlug}}/about?ref={{this.refBranch}}">{{this.courseName}}</a></li>
         {{/each }}
         </ul>
       </div>
