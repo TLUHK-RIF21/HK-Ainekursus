@@ -1,32 +1,37 @@
 /*--------------------------- accordion components ---------------------------*/
 
 .tab-close {
-  @apply flex justify-end p-4 cursor-pointer;
+    @apply flex justify-end p-4 cursor-pointer;
 }
+
 .tabs {
-  @apply overflow-hidden;
+    @apply overflow-hidden;
 }
+
 .tab {
-  @apply overflow-hidden w-full;
+    @apply overflow-hidden w-full;
 }
+
 .tab-label,
 .no-tab-label {
-  @apply flex justify-between font-bold cursor-pointer pl-4 text-link-idle;
+    @apply flex justify-between font-bold cursor-pointer pl-4 text-link-idle;
 }
+
 .tab-label:hover,
 .no-tab-label:hover {
-  @apply text-text;
-  position: relative;
-  background: var(--menu-card-background) padding-box,
+    @apply text-text;
+    position: relative;
+    background: var(--menu-card-background) padding-box,
     var(--menu-card-stroke) border-box;
-  border-radius: 100px;
+    border-radius: 100px;
 }
+
 /*.tab-content {
   @apply max-h-0 py-0 px-4 text-link-idle;
 }*/
 .active-tab .no-tab-label,
 .active-tab .tab-label {
-  @apply text-text;
+    @apply text-text;
 }
 
 /*.active-tab-content,
@@ -50,46 +55,51 @@ input:checked + .tab-label::after {
   @apply rotate-90;
 }*/
 input:checked ~ .tab-label {
-  @apply max-h-screen;
+    @apply max-h-screen;
 }
+
 .tab-label::after {
-  @apply content-['\276F'] py-[0.4rem] px-[1.4rem] text-center flex justify-center items-center;
+    @apply content-['\276F'] py-[0.4rem] px-[1.4rem] text-center flex justify-center items-center;
 }
+
 .active-tab .tab-label::after {
-  @apply hidden;
+    @apply hidden;
 }
+
 /* opened accordion. If only with input:chekced: input:checked ~ .tab-content */
 /*.active-tab .tab-content,
 input:checked ~ .tab-content {
   @apply max-h-screen;
 }*/
 .sidebar input {
-  @apply absolute opacity-0 -z-10;
+    @apply absolute opacity-0 -z-10;
 }
 
 .menu-card {
-  position: relative;
-  background: var(--menu-card-background) padding-box,
+    position: relative;
+    background: var(--menu-card-background) padding-box,
     var(--menu-card-stroke) border-box;
-  border: 2px solid transparent;
-  border-radius: 100px;
+    border: 2px solid transparent;
+    border-radius: 100px;
 }
 
 .light-theme .menu-card::before {
-  opacity: 0.1;
+    opacity: 0.1;
 }
 
 .right-side-menu a {
-  @apply text-link-idle;
+    @apply text-link-idle;
 }
+
 .right-side-menu a:hover {
-  @apply text-link;
+    @apply text-link;
 }
 
 /* arrow animations */
 .left-pan #left-side-button i {
-  transform: rotate(900deg);
+    transform: rotate(900deg);
 }
+
 .right-pan #right-side-button i {
-  transform: rotate(-900deg);
+    transform: rotate(-900deg);
 }

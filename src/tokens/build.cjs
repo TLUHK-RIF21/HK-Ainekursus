@@ -6,10 +6,9 @@ const { createArray } = require('./fns.cjs');
 StyleDictionaryPackage.registerFormat({
   name: 'css/variables',
   formatter: function (dictionary, config) {
-    return `${this.selector} {\n${dictionary.allProperties
-      .map((prop) => `  --${prop.name}: ${prop.value};`)
-      .join('\n')}\n}`;
-  },
+    return `${ this.selector } {\n${ dictionary.allProperties.map(
+      (prop) => `  --${ prop.name }: ${ prop.value };`).join('\n') }\n}`;
+  }
 });
 
 StyleDictionaryPackage.registerTransform({
@@ -22,20 +21,20 @@ StyleDictionaryPackage.registerTransform({
       'spacing',
       'borderRadius',
       'borderWidth',
-      'sizing',
+      'sizing'
     ].includes(prop.attributes.category);
   },
   transformer: function (prop) {
     // You can also modify the value here if you want to convert pixels to ems
     return parseFloat(prop.original.value) + 'px';
-  },
+  }
 });
 
 function getStyleDictionaryConfig(theme) {
   return {
-    source: [`src/tokens/converted-tokens/${theme}.json`],
+    source: [`src/tokens/converted-tokens/${ theme }.json`],
     format: {
-      createArray,
+      createArray
     },
     platforms: {
       web: {
@@ -43,17 +42,17 @@ function getStyleDictionaryConfig(theme) {
         buildPath: `src/css/`,
         files: [
           {
-            destination: `${theme}.json`,
-            format: 'createArray',
-          }, 
-          {
-            destination: `${theme}.css`,
-            format: 'css/variables',
-            selector: theme === 'global' ? ':root' : `.${theme}-theme`,
+            destination: `${ theme }.json`,
+            format: 'createArray'
           },
-        ],
-      },
-    },
+          {
+            destination: `${ theme }.css`,
+            format: 'css/variables',
+            selector: theme === 'global' ? ':root' : `.${ theme }-theme`
+          }
+        ]
+      }
+    }
   };
 }
 
@@ -63,7 +62,7 @@ console.log('Build started...');
 
 ['global', 'dark', 'light'].map(function (theme) {
   console.log('\n==============================================');
-  console.log(`\nProcessing: [${theme}]`);
+  console.log(`\nProcessing: [${ theme }]`);
 
   const StyleDictionary = StyleDictionaryPackage.extend(
     getStyleDictionaryConfig(theme)

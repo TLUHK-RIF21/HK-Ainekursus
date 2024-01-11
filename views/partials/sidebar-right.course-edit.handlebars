@@ -4,45 +4,34 @@
 
     <!-- Branch (version) selection menu. Only visible to 'teachers' team -->
 
-    {{#if_equal user.team.slug 'teachers'}}
+    {{#if_equal path.refBranch 'master'}}
+        {{#unless (isTeacher user)}}
+            <div class="card-header m-0">Ainekursuse versioonid:</div>
+            <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
+                <!-- Radio buttons -->
+                {{#each ../../branches }}
 
-        <div class="card-header m-0">Ainekursuse grupp:</div>
-        <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
-            <!-- Radio buttons -->
-            {{#each ../branches }}
+                    <ul class=" flex items-center">
+                        <li class="w-full ml-2 text-sm font-medium"> {{this }}</li>
+                    </ul>
 
-                <div class="radio flex items-center">
-                    <input {{setDefaultChecked this ../../refBranch ../../selectedVersion ../../branches }}
-                            id="default-radio-{{@index}}" type="radio" value="{{this}}" name="default-radio"
-                            onclick="handleRadioClick('{{this}}')">
-                    <label for="default-radio-{{@index}}" class="radio-label w-full ml-2 text-sm font-medium"
-                           onclick="handleRadioClick('{{this}}')"> {{this }}</label><span
-                        class="radio-check"></span>
-                </div>
-
-            {{/each }}
-            <hr class="my-4">
-            <label for="year" class="radio-label w-full ml-2 mb-2 text-sm font-medium">Vali semester: </label>
-            <select name="year" id="year" class="input-single h-8" required>
-                <option value="0" disabled></option>
-                {{#each ../years }}
-                    <option value="K{{this}}">Kevad {{this}}</option>
-                    <option value="S{{this}}">Sügis {{this}}</option>
                 {{/each }}
-            </select>
+                <!--hr class="my-4">
+                <form action="/add-version" method="post">
+                    <input type="hidden" name="parentBranch" id="currentPath" value="{{../refBranch}}"/>
+                    <input type="hidden" name="courseSlug" id="courseSlug" value="{{../path.courseSlug}}"/>
 
-            <hr class="my-4">
-            <label for="teacher" class="radio-label w-full ml-2 mb-2 text-base font-medium">Õppejõud:</label>
-            <select name="teacher" id="teacher" class="input-single h-8" required>
-                {{#each ../teachers }}
-                    <option value="{{this.id}}" {{#if_equal this.login
-                                                           ../../config.teacherUsername}}selected{{/if_equal}}>{{this.login}}</option>
-                {{/each }}
-            </select>
-            <hr class="my-4">
-            <button class="btn btn-primary my-4">Salvesta</button>
-            <button class="btn btn-danger mb-4">Kustuta</button>
-        </div>
+                    <input type="text" name="version" id="version" class="input-single h-8" required
+                           placeholder="arhiivi nimi"/>
+                    <button type="submit" class="btn btn-primary w-full mt-2 min-h-min">Arhiveeri</button>
+                </form!-->
+                <hr class="my-4">
+            </div>
+            <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
+                <a href="/course-edit/publish/{{../../path.courseId}}"
+                   class="btn btn-primary my-4 text-white">Avalda</a>
+                <button class="btn btn-primary my-4">Salvesta</button>
+            </div>
+        {{/unless}}
     {{/if_equal}}
-
 </nav>

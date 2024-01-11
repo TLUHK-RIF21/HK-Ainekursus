@@ -1,58 +1,69 @@
 <!-- dashboard-student.courses -->
-  <div class="">
+<div class="">
     <h2>Sinu kursused</h2>
-      <div class="flex flex-col gap-4">
-        {{#unless courses }}  
-          <div class='text-md font-bold mt-4 ml-4'>Sul pole ligipääsu ühelegi kursusele.</div>
-          <p class='mt-4 ml-4'>Kui see ei tundu õige, võta ühendust {{adminName}}: <a href = "mailto: {{adminEmail}}">{{adminEmail}}</a></p>
+    <div class="flex flex-col gap-4">
+        {{#unless courses }}
+            <div class='text-md font-bold mt-4 ml-4'>Sul pole ligipääsu ühelegi kursusele.</div>
+            <p class='mt-4 ml-4'>Kui see ei tundu õige, võta ühendust {{adminName}}: <a
+                    href="mailto: {{adminEmail}}">{{adminEmail}}</a></p>
         {{/unless }}
         {{#if courses }}
-          <div class="flex flex-wrap gap-4 pt-2 pb-4"> 
-            <form method="POST" action="/courses-display-by" name="displayByName" id="displayByName">
-              <!-- Hidden form inputs to send req.body values -->
-              <input type="hidden" name="coursesDisplayBy" id="coursesDisplayBy" value="name" >
-              <button name="displayByNameButton" class="btn {{#if_equal coursesDisplayBy 'name'}} btn-primary{{else}}btn-secondary{{/if_equal}}">Nime järgi</button>
-            </form>
-            <form method="POST" action="/courses-display-by" name="displayByProgress" id="displayByProgress">
-              <!-- Hidden form inputs to send req.body values -->
-              <input type="hidden" name="coursesDisplayBy" id="coursesDisplayBy" value="progress" >
-              <button name="displayByProgressButton" class="btn {{#if_equal coursesDisplayBy 'progress'}}btn-primary{{else}}btn-secondary{{/if_equal}}">Edenemise järgi</button>
-            </form>
-            <form method="POST" action="/courses-display-by" name="displayBySemester" id="displayBySemester">
-              <!-- Hidden form inputs to send req.body values -->
-              <input type="hidden" name="coursesDisplayBy" id="coursesDisplayBy" value="semester" >
-              <button name="displayBySemesterButton" class="btn {{#if_equal coursesDisplayBy 'semester'}}btn-primary{{else}}btn-secondary{{/if_equal}}">Semestri järgi</button>
-            </form>
-          </div>
+            <div class="flex flex-wrap gap-4 pt-2 pb-4">
+                <form method="POST" action="/courses-display-by" name="displayByName" id="displayByName">
+                    <!-- Hidden form inputs to send req.body values -->
+                    <input type="hidden" name="coursesDisplayBy" id="coursesDisplayBy" value="name">
+                    <button name="displayByNameButton" class="btn {{#if_equal coursesDisplayBy
+                                                                              'name'}} btn-primary{{else}}btn-secondary{{/if_equal}}">
+                        Nime järgi
+                    </button>
+                </form>
+                <form method="POST" action="/courses-display-by" name="displayByProgress" id="displayByProgress">
+                    <!-- Hidden form inputs to send req.body values -->
+                    <input type="hidden" name="coursesDisplayBy" id="coursesDisplayBy" value="progress">
+                    <button name="displayByProgressButton" class="btn {{#if_equal coursesDisplayBy
+                                                                                  'progress'}}btn-primary{{else}}btn-secondary{{/if_equal}}">
+                        Edenemise järgi
+                    </button>
+                </form>
+                <form method="POST" action="/courses-display-by" name="displayBySemester" id="displayBySemester">
+                    <!-- Hidden form inputs to send req.body values -->
+                    <input type="hidden" name="coursesDisplayBy" id="coursesDisplayBy" value="semester">
+                    <button name="displayBySemesterButton" class="btn {{#if_equal coursesDisplayBy
+                                                                                  'semester'}}btn-primary{{else}}btn-secondary{{/if_equal}}">
+                        Semestri järgi
+                    </button>
+                </form>
+            </div>
 
-          {{#if_equal coursesDisplayBy 'name' }}
-            {{#each ../courses}}
-              {{> dashboard-course-component 
-              user=../../user
-              teachers=../../teachers }}
-            {{/each}}
-          {{/if_equal }}
+            {{#if_equal coursesDisplayBy 'name' }}
+                {{#each ../courses}}
+                    {{> dashboard-course-component
+                            user=../../user
+                            teachers=../../teachers }}
+                {{/each}}
+            {{/if_equal }}
 
-          {{#if_equal coursesDisplayBy 'progress' }}
-            {{#each ../courses}}
-              {{> dashboard-course-component 
-              user=../../user 
-              teachers=../../teachers }}
-            {{/each}}
-          {{/if_equal }}
+            {{#if_equal coursesDisplayBy 'progress' }}
+                {{#each ../courses}}
+                    {{> dashboard-course-component
+                            user=../../user
+                            teachers=../../teachers }}
+                {{/each}}
+            {{/if_equal }}
 
-          {{#if_equal coursesDisplayBy 'semester' }}
-            {{#each ../courses }}
-              <div class=""><div class="font-bold mb-2">{{@key}}</div>
-              {{#each this }}
-                {{> dashboard-course-component 
-                user=../../../user
-                teachers=../../../teachers }}
-              {{/each }}
-              </div>
-            {{/each }}
-          {{/if_equal }}
+            {{#if_equal coursesDisplayBy 'semester' }}
+                {{#each ../courses }}
+                    <div class="">
+                        <div class="font-bold mb-2">{{@key}}</div>
+                        {{#each this }}
+                            {{> dashboard-course-component
+                                    user=../../../user
+                                    teachers=../../../teachers }}
+                        {{/each }}
+                    </div>
+                {{/each }}
+            {{/if_equal }}
 
         {{/if }}
     </div>
-  </div> 
+</div>

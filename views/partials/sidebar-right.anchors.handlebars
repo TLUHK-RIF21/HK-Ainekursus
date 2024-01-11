@@ -4,67 +4,46 @@
 
     <!-- Branch (version) selection menu. Only visible to 'teachers' team -->
 
-    {{#if_equal user.team.slug 'teachers'}}
-        <div class="">
-            <div class="card-header m-0">Ainekursuse versioonid:</div>
-            <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
-                <!-- Radio buttons -->
-                {{#each ../branches }}
 
-                    <div class="radio flex items-center">
-                        <input {{setDefaultChecked this ../../refBranch ../../selectedVersion ../../branches }}
-                                id="default-radio-{{@index}}" type="radio" value="{{this}}" name="default-radio"
-                                onclick="handleRadioClick('{{this}}')">
-                        <label for="default-radio-{{@index}}" class="radio-label w-full ml-2 text-sm font-medium"
-                               onclick="handleRadioClick('{{this}}')"> {{this }}</label><span
-                            class="radio-check"></span>
-                    </div>
-
-                {{/each }}
-            </div>
-
-            <!-- Hidden forms to send req.body values -->
-            <form id="my-form" style="display:none;" method="POST" action="/save-selected-version">
-                <input type="hidden" name="selectedVersion" id="selectedVersion">
-                <input type="hidden" name="currentPath" id="currentPath" value="/course/{{../path.courseSlug}}/about">
-                <input type="hidden" name="courseSlug" id="courseSlug" value="{{../path.courseSlug}}">
+    {{#if (isTeacher user)}}
+        <div class="card-header m-0">Ainekursuse versioonid:</div>
+        <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
+            <!-- Radio buttons -->
+            {{#each branches }}
+                <div class="radio flex items-center">
+                    <input {{setDefaultChecked this ../path.refBranch ../selectedVersion ../branches }}
+                            id="default-radio-{{@index}}" type="radio" value="{{this}}" name="default-radio"
+                            onclick="handleRadioClick('{{this}}')"/>
+                    <label for="default-radio-{{@index}}" class="radio-label w-full ml-2 text-sm font-medium"
+                           onclick="handleRadioClick('{{this}}')"> {{this }}</label><span
+                        class="radio-check"></span>
+                </div>
+            {{/each }}
+            <hr class="my-4">
+            <form action="/add-version" method="post">
+                <input type="hidden" name="parentBranch" id="parentBranch" value="{{refBranch}}"/>
+                <input type="hidden" name="courseId" id="courseId" value="{{path.courseId}}"/>
+                {{#if_equal selectedVersion 'master'}}
+                    <input type="text" name="version" id="version" class="input-single h-8" required
+                           placeholder="arhiivi nimi"/>
+                    <button type="submit" class="btn btn-primary w-full mt-2 min-h-min">Arhiveeri</button>
+                    <hr class="my-4">
+                {{/if_equal}}
             </form>
 
         </div>
-        <hr class="my-4">
-        <form action="/add-branch" method="post">
-            <input type="hidden" name="parentBranch" id="currentPath" value="{{../refBranch}}">
-            <input type="hidden" name="courseSlug" id="courseSlug" value="{{../path.courseSlug}}">
-            <label for="team" class="radio-label w-full ml-2 mb-2 text-lg font-bold">Lisa grupp: </label>
-            <select name="team" id="team" class="input-single h-8" required>
-                <option value="0" disabled></option>
-                {{#each ../allTeams }}
-                    <option value="{{this}}" class="text-sm font-medium">{{this}}</option>
-                {{/each }}
-            </select>
-            <label for="year" class="radio-label w-full ml-2 mb-2 text-sm font-medium">Vali semester: </label>
-            <select name="year" id="year" class="input-single h-8" required>
-                <option value="0" disabled></option>
-                {{#each ../years }}
-                    <option value="K{{this}}">Kevad {{this}}</option>
-                    <option value="S{{this}}">Sügis {{this}}</option>
-                {{/each }}
-            </select>
-            <button type="submit" class="btn btn-primary w-full mt-2">Lisa grupp</button>
-        </form>
-        <hr class="my-4">
-    {{/if_equal}}
+    {{/if}}
+
 
     <!-- Table of contents -->
 
     <!-- sidebar sticky behavior beginning from lg size -->
-    <div class="">
+    <div>
         <div class="card-header m-0">Lehekülje teemad:</div>
         <div class="pl-2 mt-2 lg:max-h-screen drop-shadow-2xl w-full text-sm">
             {{{ ToC }}}
         </div>
     </div>
-
 
 </nav>
 

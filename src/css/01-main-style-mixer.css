@@ -1,18 +1,18 @@
-@import 'tailwindcss/base';
-@import 'light.css';
-@import 'dark.css';
-@import 'custom.css';
+@import "tailwindcss/base";
+@import "light.css";
+@import "dark.css";
+@import "custom.css";
 
-@import 'tailwindcss/components';
-@import '02-background.css';
-@import '03-buttons-inputs.css';
-@import '04-mode-switch.css';
-@import '05-typography.css';
-@import '06-header.css';
-@import '07-cards.css';
-@import '08-sidebar-menu.css';
-@import '09-first-page.css';
-@import '10-markdown-editor.css';
-@import '11-modal.css';
+@import "tailwindcss/components";
+@import "02-background.css";
+@import "03-buttons-inputs.css";
+@import "04-mode-switch.css";
+@import "05-typography.css";
+@import "06-header.css";
+@import "07-cards.css";
+@import "08-sidebar-menu.css";
+@import "09-first-page.css";
+@import "10-markdown-editor.css";
+@import "11-modal.css";
 
-@import 'tailwindcss/utilities';
+@import "tailwindcss/utilities";

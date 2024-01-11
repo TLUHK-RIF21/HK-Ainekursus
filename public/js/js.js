@@ -2,6 +2,7 @@ function closeMenu() {
   let x = document.querySelector('.closing-menu');
   x.classList.toggle('menu-zero');
 }
+
 //function to add or togle sidebar menus
 const panMainContentLeft = () => {
   const x = document.querySelector('.main-wrapper');
@@ -25,17 +26,18 @@ const panMainContentRight = () => {
 
 // function to close sidebar menus, when clicked outside
 /* const remMainContent = () => {
-  const x = document.querySelector('.main-wrapper');
-  const y = document.querySelector('.side-btn-wrapper');
-  x.classList.remove('left-pan');
-  x.classList.remove('right-pan');
+ const x = document.querySelector('.main-wrapper');
+ const y = document.querySelector('.side-btn-wrapper');
+ x.classList.remove('left-pan');
+ x.classList.remove('right-pan');
 
-  y.classList.remove('left-pan');
-  y.classList.remove('right-pan');
-}; */
+ y.classList.remove('left-pan');
+ y.classList.remove('right-pan');
+ }; */
 
 // add class on mediaquery change
 const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
 function handleTabletChange(e) {
   // Check if the media query is true
   if (e.matches) {
@@ -44,7 +46,8 @@ function handleTabletChange(e) {
   }
 }
 
-// scroll first horisontally then vertically, you must use it with: scrollToAnchor('myAnchor');
+// scroll first horisontally then vertically, you must use it with:
+// scrollToAnchor('myAnchor');
 const scrollToAnchor = (anchorId) => {
   const anchorElement = document.getElementById(anchorId);
   if (anchorElement) {
@@ -56,10 +59,10 @@ const scrollToAnchor = (anchorId) => {
 };
 
 /* // Register event listener
-mediaQuery.addListener(handleTabletChange);
+ mediaQuery.addListener(handleTabletChange);
 
-// Initial check
-handleTabletChange(mediaQuery); */
+ // Initial check
+ handleTabletChange(mediaQuery); */
 
 // copy the anchor link into memory for coping
 
@@ -71,10 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
       event.preventDefault();
 
       const href = window.location.href;
-      const anchorHref = `${href.split('#')[0]}${anchor.getAttribute('href')}`;
+      const anchorHref = `${ href.split('#')[0] }${ anchor.getAttribute(
+        'href') }`;
 
       copyToClipboard(anchorHref);
-      alert(`Kopeerisid veebiaadressi: ${anchorHref}`);
+      alert(`Kopeerisid veebiaadressi: ${ anchorHref }`);
     });
   });
 });
@@ -89,19 +93,22 @@ const copyToClipboard = (text) => {
 };
 
 // radiobuttons behavior in lessons pages
-function handleRadioClick(value) {
+function handleRadioClick(branch) {
   //  console.log('value1:', value);
-  document.getElementById('selectedVersion').value = value;
-  document.getElementById('my-form').submit();
+  const id = document.getElementById('courseId').value;
+  console.log(id, branch, window.location);
+  window.location.href = `${ window.location.origin }/course/${ id }/about?ref=${ branch }`;
+  //document.getElementById('selectedVersion').value = value;
+  //document.getElementById('my-form').submit();
 }
 
 function handleCourseClick(team, courseSlug) {
-  const formId = `overview-${team}-${courseSlug}`;
+  const formId = `overview-${ team }-${ courseSlug }`;
   // console.log('formId:', formId);
   document.getElementById(formId).submit();
   // console.log('team:', team);
   // console.log('courseSlug:', courseSlug);
-  document.getElementById(`overview-${team}-${courseSlug}`).submit();
+  document.getElementById(`overview-${ team }-${ courseSlug }`).submit();
 }
 
 

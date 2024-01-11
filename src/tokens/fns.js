@@ -4,7 +4,7 @@ function deepen(obj) {
   // For each object path (property key) in the object
   for (const objectPath in obj) {
     // Split path into component parts
-    const parts = objectPath.split(".");
+    const parts = objectPath.split('.');
 
     // Create sub-objects along path as needed
     let target = result;
@@ -28,7 +28,7 @@ function createArray({ dictionary }) {
 function filterTokensByType(type, tokens) {
   const obj = tokens.reduce((acc, cur) => {
     if (cur.type === type) {
-      acc[cur.path.join(".")] = `var(--${cur.name}, ${cur.value})`;
+      acc[cur.path.join('.')] = `var(--${ cur.name }, ${ cur.value })`;
     }
     return acc;
   }, {});

@@ -14,22 +14,16 @@
     </button>
 </div>
 
-<div onclick='remMainContent()'
-     class="main-wrapper flex flex-row grow justify-between lg:px-6 lg:left-pan lg:right-pan">
+<div class="main-wrapper flex flex-row grow justify-between lg:px-6 lg:left-pan lg:right-pan">
     <aside class="left-side-menu">
-        <!-- Refers to sidebar-left-course.handlebars fail in /partials folder -->
         {{> sidebar-left.course }}
     </aside>
 
     <main id="main-content" class="main px-4 py-20">
-
         <!-- Refers to content.handlebars fail in /partials folder -->
-        {{> content.course }}
-
+        {{> content.course}}
     </main>
     <aside class="right-side-menu p-2">
-
         {{> sidebar-right.anchors }}
-
     </aside>
 </div>

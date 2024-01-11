@@ -1,38 +1,40 @@
 <!-- dashboard-teacher.notifications.handlebars -->
 <div>
-  <h2>Teated</h2>
-  <p class="border-b border-stroke mb-0 pb-2">Siin näed viimaseid teateid enda ja teiste õppejõudude kursuste kohta. Teateid näed ainult vaikimisi harust.</p>
+    <h2>Teated</h2>
+    <p class="border-b border-stroke mb-0 pb-2">Siin näed viimaseid teateid enda ja teiste õppejõudude kursuste kohta.
+        Teateid näed ainult vaikimisi harust.</p>
     <div class="flex flex-col divide-y divide-stroke">
-      {{#unless courseUpdates7Days }}
-        <div class='text-md'>Hiljutised teated puuduvad.</div>
-      {{/unless }}
-      {{#each (limit courseUpdates7Days 3) }} {{! Limit displayed notifications to 3 }}
-        <div class="flex py-2">
-                  <div class="!text-base material-symbols-outlined text-system-red-tlu pr-2">notifications</div>
-                    <div class="w-full">
-                      <div class="flex justify-between">
+        {{#unless courseUpdates7Days }}
+            <div class='text-md'>Hiljutised teated puuduvad.</div>
+        {{/unless }}
+        {{#each (limit courseUpdates7Days 3) }} {{! Limit displayed notifications to 3 }}
+            <div class="flex py-2">
+                <div class="!text-base material-symbols-outlined text-system-red-tlu pr-2">notifications</div>
+                <div class="w-full">
+                    <div class="flex justify-between">
                         <div class="text-sm">
-                          <a href="/course/{{this.course.courseSlug}}/about?ref={{this.course.refBranch}}">
-                            <div class="text-sm"><span class="font-bold">{{this.course.courseName}}</span> {{this.course.refBranch}} haru</div>
-                          </a>
+                            <a href="/course/{{this.course.id}}/about?ref=master">
+                                <div class="text-sm"><span
+                                        class="font-bold">{{this.course.name}}</span>
+                                </div>
+                            </a>
                         </div>
-                        <div class="text-sm basis-20 text-right">{{#with (findTeacher this.user.login ../teachers)}}{{this.displayName}}{{/with }}
-                        </div>
-                      </div>
-                      <div class="notifications py-2">
-                        <a class="basis-4/6 shrink-0 grow-0 pr-4" href="/course/{{this.course.courseSlug}}/about?ref={{this.course.refBranch}}">{{this.body}}</a>
-                      </div>
-                      <div class="text-sm text-right">{{timeSince this.created_at }}
-                      </div>
+                        <div class="text-sm basis-20 text-right">{{this.course.teacher}}</div>
                     </div>
-                  </div>
-                  {{#unless @last}}
-                  {{/unless}}
-                  {{/each }}
+                    <div class="notifications py-2">
+                        <a class="basis-4/6 shrink-0 grow-0 pr-4"
+                           href="/course/{{this.course.id}}/about?ref=master">{{this.body}}</a>
+                    </div>
+                    <div class="text-sm text-right">{{timeSince this.created_at }}
+                    </div>
                 </div>
-      <div class="pt-4">
-
-        <a class="btn-link" href="/notifications"><span class="material-symbols-outlined">read_more</span>Kõik teated</a>
-      </div>
+            </div>
+        {{/each }}
     </div>
+    <div class="pt-4">
+
+        <a class="btn-link" href="/notifications"><span class="material-symbols-outlined">read_more</span>Kõik
+            teated</a>
+    </div>
+</div>
 </div>

@@ -1,96 +1,115 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Serif:wght@700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
-@import 'global.css';
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Serif:wght@700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap");
+@import "global.css";
 
 ::-webkit-input-placeholder {
-  font-style: italic;
+    font-style: italic;
 }
+
 ::-moz-placeholder {
-  font-style: italic;
+    font-style: italic;
 }
+
 :-ms-input-placeholder {
-  font-style: italic;
+    font-style: italic;
 }
+
 ::-ms-input-placeholder {
-  font-style: italic;
+    font-style: italic;
 }
+
 ::placeholder {
-  font-style: italic;
+    font-style: italic;
 }
 
 section {
-  margin-bottom: var(--article-bottom);
+    margin-bottom: var(--article-bottom);
 }
+
 body {
-  line-height: var(--body-line-height);
-  margin: var(--body-spacing);
+    line-height: var(--body-line-height);
+    margin: var(--body-spacing);
 }
+
 .text-sm {
-  line-height: var(--body-sm-line-height);
+    line-height: var(--body-sm-line-height);
 }
+
 h1 {
-  line-height: var(--h1-line-height);
-  margin-top: var(--h1-spacing-top);
-  margin-bottom: var(--h1-spacing-bottom);
+    line-height: var(--h1-line-height);
+    margin-top: var(--h1-spacing-top);
+    margin-bottom: var(--h1-spacing-bottom);
 }
+
 h2 {
-  line-height: var(--h2-line-height);
-  margin-top: var(--h2-spacing-top);
-  margin-bottom: var(--h2-spacing-bottom);
+    line-height: var(--h2-line-height);
+    margin-top: var(--h2-spacing-top);
+    margin-bottom: var(--h2-spacing-bottom);
 }
+
 h3 {
-  line-height: var(--h3-line-height);
-  margin-top: var(--h3-spacing-top);
-  margin-bottom: var(--h3-spacing-bottom);
+    line-height: var(--h3-line-height);
+    margin-top: var(--h3-spacing-top);
+    margin-bottom: var(--h3-spacing-bottom);
 }
+
 h4 {
-  line-height: var(--h4-line-height);
-  margin-top: var(--h4-spacing-top);
-  margin-bottom: var(--h4-spacing-bottom);
+    line-height: var(--h4-line-height);
+    margin-top: var(--h4-spacing-top);
+    margin-bottom: var(--h4-spacing-bottom);
 }
+
 h5 {
-  line-height: var(--h5-line-height);
-  margin-top: var(--h5-spacing-top);
-  margin-bottom: var(--h5-spacing-bottom);
+    line-height: var(--h5-line-height);
+    margin-top: var(--h5-spacing-top);
+    margin-bottom: var(--h5-spacing-bottom);
 }
+
 h6 {
-  line-height: var(--h6-line-height);
-  margin-top: var(--h6-spacing-top);
-  margin-bottom: var(--h6-spacing-bottom);
+    line-height: var(--h6-line-height);
+    margin-top: var(--h6-spacing-top);
+    margin-bottom: var(--h6-spacing-bottom);
 }
+
 p {
-  margin-bottom: var(--body-paragraph-spacing);
+    margin-bottom: var(--body-paragraph-spacing);
 }
+
 .display-big {
-  /*@apply text-6xl lg:text-7xl;*/
-  font-size: clamp(2.8rem, 16vw, 5.96rem);
-  line-height: var(--display-big-line-height);
+    /*@apply text-6xl lg:text-7xl;*/
+    font-size: clamp(2.8rem, 16vw, 5.96rem);
+    line-height: var(--display-big-line-height);
 }
+
 .display-sub-serif {
-  @apply text-2xl;
+    @apply text-2xl;
 }
+
 .display-sub-sans {
-  @apply text-lg;
+    @apply text-lg;
 }
+
 .card-header {
-  font-size: var(--card-header-font-size);
-  font-weight: var(--card-header-font-weight);
-  text-transform: var(--card-header-text-case);
+    font-size: var(--card-header-font-size);
+    font-weight: var(--card-header-font-weight);
+    text-transform: var(--card-header-text-case);
 }
+
 html {
-  font-size: 87.5%;
+    font-size: 87.5%;
 }
+
 @media (min-width: 1440px) {
-  html {
-    font-size: 112.5%;
-  }
+    html {
+        font-size: 112.5%;
+    }
 }
 
 .material-symbols-outlined {
-  font-size: 1.5rem;
+    font-size: 1.5rem;
 }
 
 .notifications {
-  line-height: var(--notifications-line-height);
+    line-height: var(--notifications-line-height);
 }

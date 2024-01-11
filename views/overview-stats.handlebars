@@ -1,106 +1,97 @@
 <!-- overview-stats.handlebars -->
 <div class="flex flex-row grow 2xl:justify-between ">
-  <main id="main-content" class="w-full px-4 py-8">
-    
-    <div class="flex flex-col flex-nowrap grow justify-between">
-      {{#unless user }}  
-        <h3 class='mt-4 ml-4'>Logi sisse, et näha ülevaadet</h3>
-      {{/unless }}
+    <main id="main-content" class="px-4 py-8 dashboard_content">
 
-      {{#if user }}
-      <div class=" dashboard_content">
-        <div class="flex flex-row justify-start gap-x-4 py-4">
-          <form method="POST" action="/progress-overview" name="displayByTeams" id="displayByTeams">
-            <!-- Hidden form inputs to send req.body values -->
-            <input type="hidden" name="displayBy" id="displayBy" value="teams" >
-            <button name="displayByTeamsButton" class="btn btn-secondary">Tiimide järgi</button>
-          </form>
-          <form method="POST" action="/progress-overview" name="displayByCourses" id="displayByCourses">
-            <!-- Hidden form inputs to send req.body values -->
-            <input type="hidden" name="displayBy" id="displayBy" value="courses" >
-            <button name="displayByCoursesButton" class="btn btn-secondary">Ainekursuste järgi</button>
-          </form>
-        </div>
+        <div class="flex flex-col flex-nowrap grow justify-between">
+            {{#unless user }}
+                <h3 class='mt-4 ml-4'>Logi sisse, et näha ülevaadet</h3>
+            {{/unless }}
 
-        <h1>Õpilaste progressi ülevaade:</h1>
-        <h4 class="m-0 pl-4 pt-4 pb-4">Tiim: <span class="uppercase">{{team}}</span></h4>
-        <div class="flex flex-nowrap content-center">
-          <h4 class="m-0 pl-4">Ainekursus: <span class="uppercase">{{courseData.courseName}}</span></h4>
-        </div>
-        <div class="flex flex-nowrap justify-start gap-x-4 items-center mt-4 mb-4 pb-4 pl-4">
-          <p class="m-0 p-0">{{courseData.courseCode}}</p>
-          <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">account_tree</span>{{courseData.refBranch}} haru</p>
-          <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">grade</span>{{courseData.courseEAP}} EAP</p>
-          <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">grading</span>{{capitalize courseData.courseGrading}}</p>
-          <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">calendar_month</span>{{courseData.courseSemester}}</p>
-          <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">person</span>{{#with (findTeacher courseData.teacherUsername teachers)}}{{this.displayName}}{{/with }}</p>
-        </div>
-        </div>
-        <div>
-        <div>
-          <div class="block">
-            
+            {{#if user }}
 
-            
-            <div class="headers">
-              <div class="scroller syncscroll" name="myElements">
-                <div class="flex bg-table-header-cell mx-auto" style="width:calc(12rem + 12rem * {{courseData.courseBranchComponentsUUIDs.length }})">
-                    <div class="sticky left-0 basis-48 grow-0 shrink-0 bg-table-header-cell border-r border-r-neutral-200"></div>
-                    <div class="flex w-full"> 
-                      {{#each courseData.config.lessons }}
-                      <div class="cell bg-table-header-cell p-3 font-bold text-center flex-shrink-0 flex-grow-0" style="flex-basis:calc(12rem * {{this.components.length}})"><a href="/course/{{../courseData.courseSlug}}/{{this.slug}}?ref={{../courseData.refBranch}}">{{this.name}}</a></div>
-                      {{/each }}
-                    </div>
-                </div> 
-                <div class="flex bg-table-header-cell mx-auto" style="width:calc(12rem + 12rem * {{courseData.courseBranchComponentsUUIDs.length }})">
-                  <div class="sticky left-0 basis-48 grow-0 shrink-0 bg-table-header-cell border-r border-r-neutral-200"></div>
-                    
-                  <div class="flex w-full"> 
+                <h1>Õpilaste progressi ülevaade:</h1>
+                <div class="flex flex-nowrap content-center">
+                    <h4 class="m-0 pl-4">Ainekursus: <span class="uppercase">{{courseData.name}}</span></h4>
+                </div>
+                <div class="flex flex-nowrap justify-start gap-x-4 items-center mt-4 mb-4 pb-4 pl-4">
+                    <p class="m-0 p-0">{{courseData.code}}</p>
+                    <!--p class="flex items-start gap-2 m-0 p-0"><span
+                        class="material-symbols-outlined">account_tree</span>{{courseData.refBranch}} haru</p!-->
+                    <p class="flex items-start gap-2 m-0 p-0"><span
+                            class="material-symbols-outlined">grade</span>{{courseData.credits}} EAP</p>
+                    <p class="flex items-start gap-2 m-0 p-0"><span
+                            class="material-symbols-outlined">grading</span>{{capitalize courseData.form}}</p>
+                    <p class="flex items-start gap-2 m-0 p-0"><span
+                            class="material-symbols-outlined">calendar_month</span>{{courseData.semester}}</p>
+                    <p class="flex items-start gap-2 m-0 p-0"><span
+                            class="material-symbols-outlined">person</span>{{courseData.students.length}}</p>
+                </div>
 
-                    {{#each courseData.config.lessons }}
-                      {{#each this.components}}
-                        <div class="cell bg-table-header-cell text-center basis-48 flex-shrink-0 flex-grow-0">
-                        {{#with (showComponentName this ../../courseData.config.concepts ../../courseData.config.practices)}}
-                          <a href="/course/{{../../../courseData.courseSlug}}/{{../../this.slug}}/{{../this}}?ref={{../../../courseData.refBranch}}">{{this}}</a>
-                        {{/with}}
+                <div class="block">
+                    <div class="headers">
+                        <div class="scroller syncscroll">
+                            <div class="flex bg-table-header-cell mx-auto"
+                                 style="width:calc(12rem + 12rem * {{courseData.courseBranchComponentsUUIDs.length }})">
+                                <div class="sticky left-0 basis-48 grow-0 shrink-0 bg-table-header-cell border-r border-r-neutral-200"></div>
+                                <div class="flex w-full">
+                                    {{#each courseData.config.lessons }}
+                                        <div class="cell bg-table-header-cell p-3 font-bold text-center flex-shrink-0 flex-grow-0"
+                                             style="flex-basis:calc(12rem * {{this.components.length}})"><a
+                                                href="/course/{{../courseData.id}}/{{this.slug}}?ref=master">{{this.name}}</a>
+                                        </div>
+                                    {{/each }}
+                                </div>
+                            </div>
+                            <div class="flex bg-table-header-cell mx-auto"
+                                 style="width:calc(12rem + 12rem * {{courseData.courseBranchComponentsUUIDs.length }})">
+                                <div class="sticky left-0 basis-48 grow-0 shrink-0 bg-table-header-cell border-r border-r-neutral-200"></div>
+
+                                <div class="flex w-full">
+
+                                    {{#each courseData.config.lessons }}
+                                        {{#each this.components}}
+                                            <div class="cell bg-table-header-cell text-center basis-48 flex-shrink-0 flex-grow-0">
+                                                {{#with
+                                                        (showComponentName this ../../courseData.config.concepts ../../courseData.config.practices)}}
+                                                    <a href="/course/{{../../../courseData.id}}/{{../../this.slug}}/{{../this}}?ref=master">{{this}}</a>
+                                                {{/with}}
+                                            </div>
+                                        {{/each }}
+                                    {{/each }}
+                                </div>
+                            </div>
                         </div>
-                      {{/each }}
-                    {{/each }}
-                  </div>
-                </div>
-              </div>
-            </div> 
-            
-            <div class="tracks syncscroll" name="myElements"> <!-- body part -->
-            {{#each usersData}}
-              <div class="hoverrow mx-auto flex hover:bg-table-hover-cell" style="width:calc(12rem + 12rem * {{../courseData.courseBranchComponentsUUIDs.length }})">
-                <div class="hoverrowchild bg-table-header-cell hover:bg-table-hover-cell cell p-1 basis-48 sticky left-0">{{this.displayName}}{{!-- comp: {{this.markedAsDoneComponents}} --}}</div>
+                    </div>
 
-                <div class="flex text-center">
-                  {{#each ../courseData.config.lessons }}
-                    {{#each this.components}}
-                      {{#ifInMarkedComponents (showComponentUUID this ../../../courseData.config.concepts ../../../courseData.config.practices) ../../this.markedAsDoneComponents}}
-                        <div class="cell p-1 basis-48 flex-shrink-0 flex-grow-0"><span class="material-symbols-outlined">task_alt</span></div>
-                      {{else}}
-                        <div class="cell p-1 basis-48 flex-shrink-0 flex-grow-0">-</div>
-                      {{/ifInMarkedComponents}}
-                    {{/each }}
-                  {{/each }}
-                </div>
-              </div>
-            {{/each }}
-            </div>
-          </div>
-        </div> 
-        </div> 
-        
+                    <div class="tracks syncscroll"> <!-- body part -->
+                        {{#each courseData.students}}
+                            <div class="hoverrow mx-auto flex hover:bg-table-hover-cell"
+                                 style="width:calc(12rem + 12rem * {{../courseData.courseBranchComponentsUUIDs.length }})">
+                                <div class="hoverrowchild bg-table-header-cell hover:bg-table-hover-cell cell p-1 basis-48 sticky left-0">{{this.displayName}}{{!-- comp: {{this.markedAsDoneComponents}} --}}</div>
 
-      {{/if }}
-    </div>
-    
-  </main>
+                                <div class="flex text-center">
+                                    {{#each ../courseData.config.lessons }}
+                                        {{#each this.components}}
+                                            {{#ifInMarkedComponents
+                                                    (showComponentUUID this ../../../courseData.config.concepts ../../../courseData.config.practices)
+                                                    ../../this.uuids}}
+                                                <div class="cell p-1 basis-48 flex-shrink-0 flex-grow-0"><span
+                                                        class="material-symbols-outlined">task_alt</span></div>
+                                            {{else}}
+                                                <div class="cell p-1 basis-48 flex-shrink-0 flex-grow-0">-</div>
+                                            {{/ifInMarkedComponents}}
+                                        {{/each }}
+                                    {{/each }}
+                                </div>
+                            </div>
+                        {{/each }}
+                    </div>
+                </div>
+
+            {{/if }}
+        </div>
+
+    </main>
 
 </div>
-<script>
-  !function(e,n){"function"==typeof define&&define.amd?define(["exports"],n):n("undefined"!=typeof exports?exports:e.syncscroll={})}(this,function(e){var n="Width",t="Height",o="Top",r="Left",f="scroll",i="client",s="EventListener",d="add"+s,c="length",a=Math.round,u={},l=function(){var e,l,p,y,m,h=document.getElementsByClassName("sync"+f);for(m in u)if(u.hasOwnProperty(m))for(e=0;e<u[m][c];e++)u[m][e]["remove"+s](f,u[m][e].syn,0);for(e=0;e<h[c];)if(y=l=0,p=h[e++],m=p.getAttribute("name")){for(p=p[f+"er"]||p;l<(u[m]=u[m]||[])[c];)y|=u[m][l++]==p;y||u[m].push(p),p.eX=p.eY=0,function(e,s){e[d](f,e.syn=function(){var d,l=u[s],p=e[f+r],y=e[f+o],m=p/(e[f+n]-e[i+n]),h=y/(e[f+t]-e[i+t]),v=p!=e.eX,g=y!=e.eY,X=0;for(e.eX=p,e.eY=y;X<l[c];)d=l[X++],d!=e&&(v&&a(d[f+r]-(p=d.eX=a(m*(d[f+n]-d[i+n]))))&&(d[f+r]=p),g&&a(d[f+o]-(y=d.eY=a(h*(d[f+t]-d[i+t]))))&&(d[f+o]=y))},0)}(p,m)}};"complete"==document.readyState?l():window[d]("load",l,0),e.reset=l});
-</script>
+

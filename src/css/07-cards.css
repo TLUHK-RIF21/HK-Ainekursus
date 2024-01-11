@@ -1,45 +1,47 @@
-@import 'dark.css';
-@import 'light.css';
+@import "dark.css";
+@import "light.css";
 
 .card {
-  position: relative;
-  padding: 1rem;
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  box-shadow: var(--drop-shadow-x) var(--drop-shadow-y) var(--drop-shadow-blur)
-    var(--drop-shadow-color);
+    position: relative;
+    padding: 1rem;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    box-shadow: var(--drop-shadow-x) var(--drop-shadow-y) var(--drop-shadow-blur) var(--drop-shadow-color);
 }
 
 .card::before {
-  content: '';
-  display: block;
-  background-image: var(--card-background);
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  border-radius: 0.8rem;
-  border-width: 2px;
-  border-style: solid;
-  border-color: var(--card-stroke);
-  z-index: -1;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-.card.cardlink {
-  cursor: pointer;
-  border-radius: 0.8rem;
-}
-.card.cardlink:hover {
-  box-shadow: 0 0 22px var(--card-hover-shadow-color);
-  border-radius: 1rem;
-}
-.card.cardlink:active {
-  box-shadow: 0 0 22px var(--card-hover-shadow-color);
-}
-.card.cardlink:active::before {
-  opacity: 0.2;
-  border-radius: 1rem;
+    content: "";
+    display: block;
+    background-image: var(--card-background);
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 0.8rem;
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--card-stroke);
+    z-index: -1;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
 }
 
+.card.cardlink {
+    cursor: pointer;
+    border-radius: 0.8rem;
+}
+
+.card.cardlink:hover {
+    box-shadow: 0 0 22px var(--card-hover-shadow-color);
+    border-radius: 1rem;
+}
+
+.card.cardlink:active {
+    box-shadow: 0 0 22px var(--card-hover-shadow-color);
+}
+
+.card.cardlink:active::before {
+    opacity: 0.2;
+    border-radius: 1rem;
+}

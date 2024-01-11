@@ -1,0 +1,32 @@
+<!-- dashboard-teatcher.handlebars -->
+<div class="flex flex-row grow 2xl:justify-between overflow-x-hidden lg:overflow-x-clip">
+
+    <main id="main-content" class="px-4 py-8 dashboard_content">
+        {{#unless user }}
+            <h3 class='mt-4 ml-4'>Logi sisse, et näha töölauda</h3>
+        {{/unless }}
+
+        {{#if user }}
+            <div class="flex flex-row mt-4 gap-x-4 items-end">
+                {{#if user.displayName }}
+                    <h1>Tere, {{user.displayName}}!</h1>
+                {{else}}
+                    <h1>Tere, {{user.username}}!</h1>
+                {{/if }}
+                {{!-- {{#if_equal user.team.slug 'teachers' }}
+                  <h4>Mida täna õpetame?</h4>
+                {{/if_equal }} --}}
+            </div>
+
+            <div class="md:grid grid-cols-2 gap-12">
+                <!-- refers to content.handlebars fail in /partials folder -->
+                <div class="col-span-1">
+                    {{> dashboard-teacher.teacherCourses }}
+                </div>
+
+            </div>
+        {{/if }}
+
+    </main>
+
+</div>

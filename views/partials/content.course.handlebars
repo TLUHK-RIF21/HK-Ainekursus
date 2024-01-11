@@ -1,142 +1,146 @@
 <!-- content.course.handlebars -->
 <div class="reading_content">
-
-  <div class='breadcrumb'>
+    <div class='breadcrumb'>
       <span class="material-symbols-outlined">
-        <a class='hover:underline' href='/'>
-        home
-        </a>
+        <a class='hover:underline' href='/'>home</a>
       </span>
-      >
-    {{#if breadcrumb.courseName}}
-      <a
-        class='hover:underline'
-        href='/course/{{path.courseSlug}}/about?ref={{path.refBranch}}'
-      >{{breadcrumb.courseName}}</a>
-    {{/if}}
-    {{#if_not_equal path.contentSlug 'about'}}
-      {{#if ../breadcrumb.contentName }}
         >
-        <a
-          class='hover:underline'
-          href='/course/{{../../path.courseSlug}}/{{../../path.contentSlug}}?ref={{../../path.refBranch}}'
-        >{{../../breadcrumb.contentName}}</a>
-      {{/if}}
-    {{/if_not_equal }}
-    {{#if breadcrumb.componentName}}
-      >
-      <a
-        class='hover:underline'
-        href='/course/{{path.courseSlug}}/{{path.contentSlug}}/{{path.componentSlug}}?ref={{path.refBranch}}'
-      >{{breadcrumb.componentName}}</a>
+        {{#if breadcrumb.courseName}}
+            <a class='hover:underline'
+               href='/course/{{path.id}}/about?ref={{path.refBranch}}'>{{breadcrumb.courseName}}</a>
+        {{/if}}
+        {{#if_not_equal path.contentSlug 'about'}}
+            {{#if ../breadcrumb.contentName }}
+                >
+                <a class='hover:underline'
+                   href='/course/{{../../path.id}}/{{../../path.contentSlug}}?ref={{../../path.refBranch}}'>{{../../breadcrumb.contentName}}</a>
+            {{/if}}
+        {{/if_not_equal }}
+        {{#if breadcrumb.componentName}}
+            >
+            <a class='hover:underline'
+               href='/course/{{path.code}}/{{path.contentSlug}}/{{path.componentSlug}}?ref={{path.refBranch}}'
+            >{{breadcrumb.componentName}}</a>
+        {{/if}}
+    </div>
+
+    <!-- Refers to the "content" option in the app.js file, which is passed along with every res.render() function.
+          The "content" option contains the readme.md file fetched with the GitHub API, which is decoded and its Markdown is rendered. -->
+    <div id="markdown-content">
+        {{#unless component}}
+            <h3>Midagi läks valesti. Lehekülje sisu ei ole võimalik laadida.</h3>
+            <p>Õppejõud peab üle vaatama kursuse seadistused (config fail, kaustade nimetused, failide nimetused).</p>
+        {{/unless }}
+        {{{component}}}
+
+    </div>
+
+    <!-- NB! Sources are sent only with "Teemade endpointid" axios call. If sourcesJSON stays NULL (is false), then content.handlebars does not display "Allikad"" div. If sourcesJSON gets filled (is true), then "Allikad" div is displayed. -->
+    {{#if sources}}
+        <div class='sources pt-4'>
+            <h4>Allikad:</h4>
+            <ul class="markdown">
+                {{#each sources}}
+                    <li>
+                        <a href='{{this.url}}'
+                           class="markdown"
+                           target='_blank'
+                        >{{this.description}}</a>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
     {{/if}}
-  </div>
 
-  <!-- Refers to the "content" option in the app.js file, which is passed along with every res.render() function. 
-        The "content" option contains the readme.md file fetched with the GitHub API, which is decoded and its Markdown is rendered. -->
-  <div id="markdown-content">
-    {{#unless component}}
-      <h3>Midagi läks valesti. Lehekülje sisu ei ole võimalik laadida.</h3>
-      <p>Õppejõud peab üle vaatama kursuse seadistused (config fail, kaustade nimetused, failide nimetused).</p>
-    {{/unless }}
-    {{{component}}}
-    
-  </div>
+    <!-- NB! The course syllabus link from the config.json file is only displayed on the "about" / Course Information page. -->
 
-  <!-- NB! Sources are sent only with "Teemade endpointid" axios call. If sourcesJSON stays NULL (is false), then content.handlebars does not display "Allikad"" div. If sourcesJSON gets filled (is true), then "Allikad" div is displayed. -->
-  {{#if sources}}
-    <div class='sources pt-4'>
-      <h4>Allikad:</h4>
-      <ul class="markdown">
-        {{#each sources}}
-        <li>
-            <a
-              href='{{this.url}}'
-              class="markdown"
-              target='_blank'
-            >{{this.description}}</a>
-        </li>
-        {{/each}}
-      </ul>
-    </div>
-  {{/if
-    }}
+    {{#if_equal path.contentSlug 'about'}}
+        <div class=""><b>Ainekava: </b>
+            <a class="flex items-center hover:text-link-action"
+               href='{{../course.courseUrl}}' target='_blank'>{{../course.courseName}}
+                ({{../course.courseCode}})<span class="material-symbols-outlined">open_in_new</span>
+            </a>
+        </div>
+    {{/if_equal}}
 
-  <!-- NB! The course syllabus link from the config.json file is only displayed on the "about" / Course Information page. -->
+    <!-- NB! Files are only displayed on the Additional Materials pages.
+  Since GitHub adds a ".DS_Store" file to each folder and we don't want to display that file, it has been hard-coded to be excluded.
 
-  {{#if_equal path.contentSlug 'about'}}
-  <div class=""><b>Ainekava: </b><a class="flex items-center hover:text-link-action" href='{{../course.courseUrl}}' target='_blank'>{{../course.courseName}} ({{../course.courseCode}})<span class="material-symbols-outlined">
-open_in_new
-</span></a></div>
-  {{/if_equal}}
+    Github raw download_url howto: https://stackoverflow.com/questions/73819136/how-do-i-get-and-download-the-contents-of-a-file-in-github-using-the-rest-api/73824136
+    The download_url token changes every 7 days by GitHub's system: https://github.com/orgs/community/discussions/23845#discussioncomment-3241866-->
+    {{#if files}}
+        <div class='files pt-4'>
+            <h3>Failid:</h3>
+            <ul class="markdown">
+                {{#each files}}
+                    <li>
+                        <a href="#"
+                           class="markdown"
+                           onclick="window.open(
+                                   '{{this.download_url}}','_blank');"
+                        >{{this.name}}</a>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
+    {{/if}}
 
-  <!-- NB! Files are only displayed on the Additional Materials pages.
-Since GitHub adds a ".DS_Store" file to each folder and we don't want to display that file, it has been hard-coded to be excluded. 
-  
-  Github raw download_url howto: https://stackoverflow.com/questions/73819136/how-do-i-get-and-download-the-contents-of-a-file-in-github-using-the-rest-api/73824136
-  The download_url token changes every 7 days by GitHub's system: https://github.com/orgs/community/discussions/23845#discussioncomment-3241866-->
-  {{#if files}}
-    <div class='files pt-4'>
-      <h3>Failid:</h3>
-      <ul class="markdown">
-        {{#each files}}
-        <li>
-          <a
-              href="#"
-              class="markdown"
-              onclick="window.open(
-                '{{this.download_url}}','_blank');"
-            >{{this.name}}</a>
-        </li> 
-        {{/each}}
-      </ul>
-    </div>
-  {{/if}}
-  
-  <br> <br>
-  <!-- 
+    <br> <br>
+    <!--
   {{backAndForwardPaths }}
-  {{path.fullPath }} 
+        {{path.fullPath }}
   -->
-  
-  <div class='flex flex-wrap gap-4'>
-  {{#ifInPaths path.fullPath backAndForwardPaths }}
-    {{#if_not_equal ../path.fullPath ../backAndForwardPaths.[0].path }}
-      <input type="button" class="btn btn-secondary"
-      onclick="location.href='/course/{{../path.courseSlug}}/{{../returnPreviousPage ../path.fullPath ../backAndForwardPaths}}?ref={{../path.refBranch}}';" 
-      value="Eelmine" />
-    {{/if_not_equal }}
 
-    {{#if_not_equal ../path.fullPath (last ../backAndForwardPaths) }}
-      <input type="button" class="btn btn-primary"
-      onclick="location.href='/course/{{../path.courseSlug}}/{{../returnNextPage ../path.fullPath ../backAndForwardPaths}}?ref={{../path.refBranch}}';" value="Järgmine" />
-    {{/if_not_equal }}
-  {{/ifInPaths }}
+    <div class='flex flex-wrap gap-4'>
 
+        {{#ifInPaths path.fullPath backAndForwardPaths }}
+            {{#if_not_equal ../path.fullPath ../backAndForwardPaths.[0].path }}
+                <a class="btn btn-secondary" href="/course/{{../path.courseId}}/{{../returnPreviousPage ../path.fullPath
+                                                                                                        ../backAndForwardPaths}}?ref={{../path.refBranch}}
+                ">Eelmine</a>
+            {{/if_not_equal }}
 
-  {{#ifInPaths path.fullPath markAsDonePaths }}
-    {{#if_not_equal ../user.team.slug 'teachers'}}
-      {{#ifInMarkedComponents ../path.componentUUID ../markedAsDoneComponentsArr }}
-        <form method="POST" action="/remove-component-as-done" name="removeComponentAsDone" id="removeComponentAsDone">
-          <!-- Hidden form inputs to send req.body values -->
-          <input type="hidden" name="courseSlug" id="courseSlug" value="{{../path.courseSlug}}" >
-          <input type="hidden" name="componentSlug" id="componentSlug" value="{{../path.componentSlug}}" >
-          <input type="hidden" name="componentUUID" id="componentUUID" value="{{../path.componentUUID}}" >
-          <button name="markAsDone" class="btn btn-secondary">Eemalda märge</button>
-        </form>
-      {{else }} 
-        <form method="POST" action="/mark-component-as-done" name="markComponentAsDone" id="markComponentAsDone">
-        <!-- Hidden form inputs to send req.body values -->
-        <input type="hidden" name="courseSlug" id="courseSlug" value="{{../path.courseSlug}}" >
-        <input type="hidden" name="componentSlug" id="componentSlug" value="{{../path.componentSlug}}" >
-        <input type="hidden" name="componentUUID" id="componentUUID" value="{{../path.componentUUID}}" >
-        <input type="hidden" name="nextPagePath" id="nextPagePath" value="/course/{{../path.courseSlug}}/{{../returnNextPage ../path.fullPath ../backAndForwardPaths}}?ref={{../path.refBranch}}" >
-        <button name="markAsDone" class="btn btn-primary">Märgi tehtuks ja edasi</button>
-      </form>
-      {{/ifInMarkedComponents }}
-    {{/if_not_equal }}
-  {{/ifInPaths }}
-  
-  </div>
+            {{#if_not_equal ../path.fullPath (last ../backAndForwardPaths) }}
+                <a class="btn btn-primary"
+                   href="/course/{{../path.courseId}}/{{../returnNextPage ../path.fullPath
+                                                                          ../backAndForwardPaths}}?ref={{../path.refBranch}}
+                ">Järgmine</a>
+            {{/if_not_equal }}
+        {{/ifInPaths }}
+
+        {{#ifInPaths path.fullPath markAsDonePaths }}
+            {{#unless (isTeacher ../user)}}
+                {{#ifInMarkedComponents ../../path.componentUUId ../../markedAsDoneComponentsArr }}
+                    <form method="POST" action="/remove-component-as-done" name="removeComponentAsDone"
+                          id="removeComponentAsDone">
+                        <!-- Hidden form inputs to send req.body values -->
+                        <input type="hidden" name="courseId" id="courseId" value="{{../../../path.courseId}}">
+                        <input type="hidden" name="componentSlug" id="componentSlug"
+                               value="{{../../../path.componentSlug}}">
+                        <input type="hidden" name="componentUUId" id="componentUUId"
+                               value="{{../../../path.componentUUId}}">
+                        <button name="markAsDone" class="btn btn-secondary">Eemalda märge</button>
+                    </form>
+                {{else }}
+                    <form method="POST" action="/mark-component-as-done" name="markComponentAsDone"
+                          id="markComponentAsDone">
+                        <!-- Hidden form inputs to send req.body values -->
+                        <input type="hidden" name="courseId" id="courseId" value="{{../../../path.courseId}}">
+                        <input type="hidden" name="componentSlug" id="componentSlug"
+                               value="{{../../../path.componentSlug}}">
+                        <input type="hidden" name="componentUUId" id="componentUUId"
+                               value="{{../../../path.componentUUId}}">
+                        <input type="hidden" name="nextPagePath" id="nextPagePath"
+                               value="/course/{{../../../path.courseId}}/{{../../../returnNextPage
+                                       ../../../path.fullPath
+                                       ../../../backAndForwardPaths}}?ref={{../../../path.refBranch}}
+                        " >
+                        <button name="markAsDone" class="btn btn-primary">Märgi tehtuks ja edasi</button>
+                    </form>
+                {{/ifInMarkedComponents }}
+            {{/unless }}
+        {{/ifInPaths }}
+
+    </div>
 
 </div>

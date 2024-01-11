@@ -12,16 +12,21 @@
  */
 const ensureAuthenticated = (req, res, next) => {
   // console.log('req.isAuthenticated1:', req.isAuthenticated);
-  // console.log('req.user1:', req.user);
+  //console.log('req.user1:', req.user);
   if (req.isAuthenticated()) {
     // console.log('req.session1:', req.session);
-    // console.log('req.session.passport.user.id1:', req.session.passport.user.id);
-    // console.log('Authenticated');
+    // console.log('req.session.passport.user.id1:',
+    // req.session.passport.user.id); console.log('Authenticated');
+    /* check for multiple user roles */
+    if (req.user.roles.includes('teacher') &&
+      req.user.roles.includes('student')) {
+      return res.redirect('/role-select');
+    }
     return next();
   }
   // console.log('req.session2:', req.session);
-  console.log("User is NOT Authenticated");
-  return res.redirect("/login");
+  console.log('User is NOT Authenticated');
+  return res.redirect('/login');
 };
 
 export default ensureAuthenticated;

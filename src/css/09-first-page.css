@@ -1,127 +1,133 @@
 .first-page body {
-  margin: 0;
-  overflow-x: hidden;
+    margin: 0;
+    overflow-x: hidden;
 
-  background-image: radial-gradient(
-      circle,
-      rgba(14, 2, 25, 1) 0%,
-      rgba(14, 2, 25, 0) 29%
+    background-image: radial-gradient(
+            circle,
+            rgba(14, 2, 25, 1) 0%,
+            rgba(14, 2, 25, 0) 29%
     ),
     conic-gradient(
-      from 133deg at center center,
-      rgba(14, 2, 25, 1) 0%,
-      rgba(24, 8, 46, 1) 25%,
-      rgba(78, 28, 148, 1) 50%,
-      rgba(23, 8, 45, 1) 75%,
-      rgba(14, 2, 25, 1) 99%
+            from 133deg at center center,
+            rgba(14, 2, 25, 1) 0%,
+            rgba(24, 8, 46, 1) 25%,
+            rgba(78, 28, 148, 1) 50%,
+            rgba(23, 8, 45, 1) 75%,
+            rgba(14, 2, 25, 1) 99%
     );
 
-  background-attachment: fixed;
-  @apply text-primary-100;
+    background-attachment: fixed;
+    @apply text-primary-100;
 }
+
 .first-page body:after {
-  content: '';
-  position: fixed;
-  top: 0;
-  height: 100vh;
-  background-image: url(/images/noise.png);
-  mix-blend-mode: color;
-  left: 0;
-  right: 0;
-  opacity: 0.4;
-  background-attachment: fixed;
+    content: "";
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    background-image: url(/images/noise.png);
+    mix-blend-mode: color;
+    left: 0;
+    right: 0;
+    opacity: 0.4;
+    background-attachment: fixed;
 }
 
 .parallax-bg-slower,
 .parallax-bg-slow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 }
 
 .parallax-bg-slower {
-  /* background-image: url(/images/jooned.svg); */
-  z-index: -1;
+    /* background-image: url(/images/jooned.svg); */
+    z-index: -1;
 }
+
 .parallax-bg-slower img {
-  margin: 0 auto;
+    margin: 0 auto;
 }
 
 .parallax-bg-slow {
-  /* background-image: url(/images/kolledz.png); */
-  z-index: -2;
+    /* background-image: url(/images/kolledz.png); */
+    z-index: -2;
 }
+
 .parallax-bg-slow img {
-  margin: 0 auto;
-  margin-top: 5rem;
-  margin-right: calc(50% - 16rem);
-  width: 50rem;
+    margin: 0 auto;
+    margin-top: 5rem;
+    margin-right: calc(50% - 16rem);
+    width: 50rem;
 }
 
 .first-page-content {
-  overflow: hidden;
-  display: flex;
-  position: relative;
-  z-index: 1;
-  flex-direction: column;
-  width: 48rem;
-  max-width: 100%;
-  margin: auto;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    z-index: 1;
+    flex-direction: column;
+    width: 48rem;
+    max-width: 100%;
+    margin: auto;
 }
 
-@media (min-width:1024px) {
-  .first-page-content {
-    width: 56rem;
-  }
+@media (min-width: 1024px) {
+    .first-page-content {
+        width: 56rem;
+    }
 }
 
 /* first page – fp – decoration */
 @media (min-width: 1024px) {
+    .fp-bullets {
+        position: relative;
+        padding-left: 0rem;
+    }
 
-.fp-bullets{
-  position: relative;
-  padding-left: 0rem;
-}
-.fp-bullets::before {
-  content: '';
-    background-image: url(/images/bullets.png);
-    width: 0.9rem;
-    position: absolute;
-    background-repeat: no-repeat;
-    height: 150%;
-    left: -1.4rem;
-    background-size: 83%;
-    margin-top: 0.7rem;
-}
-.fp-deco {
-  position: relative;
-}
-.fp-deco::before {
-  content: '';
-    background-image: url(/images/crosses.png);
-    position: absolute;
-    background-repeat: no-repeat;
-    height: 100%;
-    width: 100%;
-    background-position: 0rem 12.54rem;
-    left: -1rem;
-    background-size: 55%;
-}
-.fp-deco::after {
-  content: '';
-    background-image: url(/images/waves.png);
-    position: absolute;
-    background-repeat: no-repeat;
-    height: 100%;
-    width: 100%;
-    background-position: right bottom;
-    bottom: -3rem;
-    left: 0;
-    background-size: 45%;
-}
+    .fp-bullets::before {
+        content: "";
+        background-image: url(/images/bullets.png);
+        width: 0.9rem;
+        position: absolute;
+        background-repeat: no-repeat;
+        height: 150%;
+        left: -1.4rem;
+        background-size: 83%;
+        margin-top: 0.7rem;
+    }
+
+    .fp-deco {
+        position: relative;
+    }
+
+    .fp-deco::before {
+        content: "";
+        background-image: url(/images/crosses.png);
+        position: absolute;
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 100%;
+        background-position: 0rem 12.54rem;
+        left: -1rem;
+        background-size: 55%;
+    }
+
+    .fp-deco::after {
+        content: "";
+        background-image: url(/images/waves.png);
+        position: absolute;
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 100%;
+        background-position: right bottom;
+        bottom: -3rem;
+        left: 0;
+        background-size: 45%;
+    }
 }

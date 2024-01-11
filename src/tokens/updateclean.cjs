@@ -7,8 +7,7 @@ function updateGlobalCSS(cssFilePath) {
   const fileContents = fs.readFileSync(cssFilePath, 'utf8');
 
   // Remove any lines that contain "[object Object];"
-  const newFileContents = fileContents
-    .split('\n')
+  const newFileContents = fileContents.split('\n')
     .filter((line) => !line.includes('[object Object];'))
     .join('\n');
 

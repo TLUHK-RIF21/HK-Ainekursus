@@ -1,42 +1,47 @@
 /** Endpoints for progress overview pages.
  * Only available for teachers.
  */
-import express from "express";
+import express from 'express';
 
 const router = express.Router();
-import resetSelectedVersion from "../middleware/resetSelectedVersion.js";
-import validateTeacher from "../middleware/validateTeacher.js";
-import allOverviewController from "../components/progress-overview/overviewController.js";
+import resetSelectedVersion from '../middleware/resetSelectedVersion.js';
+import validateTeacher from '../middleware/validateTeacher.js';
+import allOverviewController
+  from '../components/progress-overview/overviewController.js';
 
 router.get(
-  "/",
+  '/',
   resetSelectedVersion,
   validateTeacher,
-  allOverviewController.getOverview,
+  allOverviewController.getOverview
 );
 
 router.get(
-  "/:team?/:courseSlug?",
+  '/:courseId?',
   resetSelectedVersion,
   validateTeacher,
-  allOverviewController.getOverview,
+  allOverviewController.getOverview
 );
 
-router.post("/", validateTeacher, (req, res) => {
+router.post('/', validateTeacher, (req, res) => {
   let selectedCourseDataParsed;
-  if (req.body && req.body.selectedCourseData)
+  if (req.body && req.body.selectedCourseData) {
     selectedCourseDataParsed = JSON.parse(req.body.selectedCourseData);
+  }
   req.session.courseSlugData = selectedCourseDataParsed;
 
-  if (req.body && req.body.selectedTeam && req.body.selectedCourse)
+  if (req.body && req.body.selectedTeam && req.body.selectedCourse) {
     return res.redirect(
-      `/progress-overview/${req.body.selectedTeam}/${req.body.selectedCourse}`,
+      `/progress-overview/${ req.body.selectedTeam }/${ req.body.selectedCourse }`
     );
+  }
 
   // Store the displayBy in the session
   req.session.displayBy = req.body.displayBy;
 
-  return res.redirect(`/progress-overview?displayBy=${req.session.displayBy}`);
+  return res.redirect(
+    `/progress-overview?displayBy=${ req.session.displayBy }`
+  );
 });
 
 export default router;

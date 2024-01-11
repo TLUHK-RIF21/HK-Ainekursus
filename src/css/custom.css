@@ -1,260 +1,279 @@
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 a.markdown::after {
-  font-family: 'Material Symbols Outlined';
-  content: 'open_in_new';
-  font-size: 1.25rem;
-  margin-left: 0.25rem;
+    font-family: "Material Symbols Outlined";
+    content: "open_in_new";
+    font-size: 1.25rem;
+    margin-left: 0.25rem;
 }
+
 a.markdown {
-  display: flex;
-  @apply hover:text-link-action;
+    display: flex;
+    @apply hover:text-link-action;
 }
 
 main {
-  @apply !mt-20;
+    @apply !mt-20;
 }
 
 .dashboard_content {
-  max-width: 100%;
-  width: 60rem;
-  margin: 0 auto;
+    max-width: 100%;
+    width: 60rem;
+    margin: 0 auto;
 }
+
 .reading_content {
-  /*max-width: 60ch;*/
-  margin: 0 auto;
+    /*max-width: 60ch;*/
+    margin: 0 auto;
 }
 
 /* sticky table */
 .headers {
-  top: 8rem;
-  position: -webkit-sticky;
-  position: sticky;
-  z-index: 1;
+    top: 8rem;
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 1;
 }
+
 .scroller {
-  overflow-x: hidden;
+    overflow-x: hidden;
 }
+
 .tracks,
 .scroller {
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
+
 .tracks {
-  overflow: auto;
-  -ms-scroll-snap-type: x mandatory;
-  scroll-snap-type: x mandatory;
+    overflow: auto;
+    -ms-scroll-snap-type: x mandatory;
+    scroll-snap-type: x mandatory;
 }
+
 .grid {
-  display: grid;
-  grid-template-columns: repeat(5, 250px);
-  grid-template-rows: repeat(3, 50px);
-  overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(5, 250px);
+    grid-template-rows: repeat(3, 50px);
+    overflow-x: auto;
 }
 
 .cell {
-  border: 1px solid;
-  box-sizing: border-box;
-  @apply border-neutral-400;
+    border: 1px solid;
+    box-sizing: border-box;
+    @apply border-neutral-400;
 }
 
 .cell.fix {
-  position: -webkit-sticky;
-  position: sticky;
-  left: 0;
-  z-index: 1;
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    z-index: 1;
 }
 
 .tracks::-webkit-scrollbar {
-  -webkit-appearance: none;
-  height: 1rem;
+    -webkit-appearance: none;
+    height: 1rem;
 }
+
 .tracks::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background-color: var(--neutral-500);
-  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    background-color: var(--neutral-500);
+    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .hoverrow:hover .hoverrowchild {
-  @apply bg-table-hover-cell;
+    @apply bg-table-hover-cell;
 }
 
 pre {
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  border-radius: 0.25rem;
-  background-color: var(--neutral-800, #414a58);
-  color: var(--neutral-100, #f4f5f7);
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 1.5rem;
-  padding-bottom: 0.5rem;
-  margin-bottom: 2rem;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    border-radius: 0.25rem;
+    background-color: var(--neutral-800, #414a58);
+    color: var(--neutral-100, #f4f5f7);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
 }
 
 /* if we want to wrap code element text */
 code {
-  white-space: pre-wrap !important; /* css-3 */
-  white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-  white-space: -pre-wrap !important; /* Opera 4-6 */
-  white-space: -o-pre-wrap !important; /* Opera 7 */
-  word-wrap: break-word !important;
+    white-space: pre-wrap !important; /* css-3 */
+    white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+    white-space: -pre-wrap !important; /* Opera 4-6 */
+    white-space: -o-pre-wrap !important; /* Opera 7 */
+    word-wrap: break-word !important;
 }
 
 @layer components {
-  .side-btn-wrapper {
-    @apply top-32 relative md:sticky z-[2] flex justify-between w-full;
-  }
-  /*   .sidebar {
-    @apply top-[194px] lg:top-0 w-80;
-  }
-  .sidebar.menu-zero {
-    @apply top-[194px] lg:top-0 left-0 z-10;
-  }
-  .aside.menu-zero {
-    @apply -ml-80 lg:ml-0 lg:-left-80 lg:relative;
-  } */
-
-  /* to hide overwlof but keep sticky working */
-  :root {
-    --sidebar-width: 20rem;
-    --main-width: calc(100% - (2 * var(--sidebar-width)));
-  }
-  .main-wrapper {
-    contain: paint;
-  }
-
-  aside {
-    @apply break-words;
-  }
-
-  .main {
-    @apply w-full /*lg:w-[var(--main-width)]*/ /*lg:max-w-[60ch]*/ relative right-0 left-0 lg:!left-auto lg:!right-auto;
-    transition: all 0.5s ease-in-out;
-  }
-  .left-side-menu {
-    @apply w-[var(--sidebar-width)] -ml-[var(--sidebar-width)] lg:ml-0 relative left-0 z-[1];
-    transition: all 0.5s ease-in-out;
-  }
-  .right-side-menu {
-    @apply w-[var(--sidebar-width)] -mr-[var(--sidebar-width)] lgbig:mr-0 relative right-0;
-    transition: all 0.5s ease-in-out;
-  }
-
-  .left-pan .main {
-    @apply relative -right-[var(--sidebar-width)] left-[var(--sidebar-width)] lg:inset-0 lg:left-auto;
-  }
-  .left-pan .left-side-menu {
-    @apply relative left-[var(--sidebar-width)] lg:left-0 lg:inset-0;
-  }
-
-  .right-pan .main {
-    @apply relative -left-[var(--sidebar-width)];
-  }
-  .right-pan .right-side-menu {
-    @apply relative right-[var(--sidebar-width)] lg:-right-8 lgbig:right-0;
-  }
-
-  /* this is for cover sidemenus with main content */
-  /* .right-pan .main,
-  .left-pan .main {
-    z-index: 1;
-    background-attachment: fixed;
-    background-position: right -11rem top -1rem;
-    background-repeat: no-repeat;
-  }
-  .main {
-    background-attachment: fixed;
-    background-position: right -11rem top -1rem;
-    background-repeat: no-repeat;
-  }
-
-  @media (min-width: 1024px) {
-    .right-pan .main,
-    .left-pan .main {
-      z-index: 1;
-      background-attachment: fixed;
-      background-position: right -85px top;
-      background-repeat: no-repeat;
+    .side-btn-wrapper {
+        @apply top-32 relative md:sticky z-[2] flex justify-between w-full;
     }
+
+    /*   .sidebar {
+        @apply top-[194px] lg:top-0 w-80;
+      }
+      .sidebar.menu-zero {
+        @apply top-[194px] lg:top-0 left-0 z-10;
+      }
+      .aside.menu-zero {
+        @apply -ml-80 lg:ml-0 lg:-left-80 lg:relative;
+      } */
+    /* to hide overwlof but keep sticky working */
+    :root {
+        --sidebar-width: 20rem;
+        --main-width: calc(100% - (2 * var(--sidebar-width)));
+    }
+
+    .main-wrapper {
+        contain: paint;
+    }
+
+    aside {
+        @apply break-words;
+    }
+
     .main {
-      background-position: right -85px top;
+        @apply w-full /*lg:w-[var(--main-width)]*/
+            /*lg:max-w-[60ch]*/
+        relative right-0 left-0 lg:!left-auto lg:!right-auto;
+        transition: all 0.5s ease-in-out;
     }
-  }
 
-  .dark-theme .right-pan .main,
-  .dark-theme .left-pan .main {
-    background-image: url(/images/dark_bg.jpg);
-  }
-  .dark-theme .main {
-    background-image: url(/images/dark_bg.jpg);
-  }
-  .light-theme .right-pan .main,
-  .light-theme .left-pan .main {
-    background-image: url(/images/light_bg.jpg);
-  }
-  .light-theme .main {
-    background-image: url(/images/light_bg.jpg);
-  } */
+    .left-side-menu {
+        @apply w-[var(--sidebar-width)] -ml-[var(--sidebar-width)] lg:ml-0 relative left-0 z-[1];
+        transition: all 0.5s ease-in-out;
+    }
 
-  pre {
-    @apply bg-neutral-800 pt-6 px-4 pb-2 rounded whitespace-pre-wrap break-words;
-  }
+    .right-side-menu {
+        @apply w-[var(--sidebar-width)] -mr-[var(--sidebar-width)] lgbig:mr-0 relative right-0;
+        transition: all 0.5s ease-in-out;
+    }
 
-  /*--------------------------- end of sidebar tab's -------------------------------*/
-  .breadcrumb {
-    @apply flex items-start gap-1 pb-8;
-  }
-  .breadcrumb > * {
-    @apply whitespace-nowrap text-ellipsis inline-block overflow-hidden;
-  }
+    .left-pan .main {
+        @apply relative -right-[var(--sidebar-width)] left-[var(--sidebar-width)] lg:inset-0 lg:left-auto;
+    }
+
+    .left-pan .left-side-menu {
+        @apply relative left-[var(--sidebar-width)] lg:left-0 lg:inset-0;
+    }
+
+    .right-pan .main {
+        @apply relative -left-[var(--sidebar-width)];
+    }
+
+    .right-pan .right-side-menu {
+        @apply relative right-[var(--sidebar-width)] lg:-right-8 lgbig:right-0;
+    }
+
+    /* this is for cover sidemenus with main content */
+    /* .right-pan .main,
+      .left-pan .main {
+        z-index: 1;
+        background-attachment: fixed;
+        background-position: right -11rem top -1rem;
+        background-repeat: no-repeat;
+      }
+      .main {
+        background-attachment: fixed;
+        background-position: right -11rem top -1rem;
+        background-repeat: no-repeat;
+      }
+
+      @media (min-width: 1024px) {
+        .right-pan .main,
+        .left-pan .main {
+          z-index: 1;
+          background-attachment: fixed;
+          background-position: right -85px top;
+          background-repeat: no-repeat;
+        }
+        .main {
+          background-position: right -85px top;
+        }
+      }
+
+      .dark-theme .right-pan .main,
+      .dark-theme .left-pan .main {
+        background-image: url(/images/dark_bg.jpg);
+      }
+      .dark-theme .main {
+        background-image: url(/images/dark_bg.jpg);
+      }
+      .light-theme .right-pan .main,
+      .light-theme .left-pan .main {
+        background-image: url(/images/light_bg.jpg);
+      }
+      .light-theme .main {
+        background-image: url(/images/light_bg.jpg);
+      } */
+    pre {
+        @apply bg-neutral-800 pt-6 px-4 pb-2 rounded whitespace-pre-wrap break-words;
+    }
+
+    /*--------------------------- end of sidebar tab's -------------------------------*/
+    .breadcrumb {
+        @apply flex items-start gap-1 pb-8;
+    }
+
+    .breadcrumb > * {
+        @apply whitespace-nowrap text-ellipsis inline-block overflow-hidden;
+    }
 }
 
 a.table-of-contents {
-  line-height: 1.5rem;
+    line-height: 1.5rem;
 }
+
 /* those padding and margin are for correct placement, if someone clics on anchor links in the page and contenbt scrolls to top */
 
 .markdown-wrapper {
-  padding-top: 12.5rem;
-  margin-top: -12.5rem;
+    padding-top: 12.5rem;
+    margin-top: -12.5rem;
 }
+
 @media (min-width: 1024px) {
-  .markdown-wrapper {
-    padding-top: 10rem;
-    margin-top: -10rem;
-  }
+    .markdown-wrapper {
+        padding-top: 10rem;
+        margin-top: -10rem;
+    }
 }
 
 .iframe-container,
 .block-embed {
-  margin-bottom: 2rem;
+    margin-bottom: 2rem;
 }
 
 /* article formattings */
 
 ul.markdown {
-  list-style-type: inherit;
-  -webkit-margin-before: 1em;
-  margin-block-start: 1em;
-  -webkit-margin-after: 2em;
-  margin-block-end: 2em;
-  padding-left: 1rem;
+    list-style-type: inherit;
+    -webkit-margin-before: 1em;
+    margin-block-start: 1em;
+    -webkit-margin-after: 2em;
+    margin-block-end: 2em;
+    padding-left: 1rem;
 }
+
 .markdown li {
-  padding-left: 0.5rem;
-  margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    margin-bottom: 0.5rem;
 }
+
 .markdown li ul li {
-  list-style-type: circle;
+    list-style-type: circle;
 }
+
 li ul.markdown {
-  margin-top: 0;
-  margin-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 img.markdown-iframe {
-  border-radius: 0.5rem;
+    border-radius: 0.5rem;
 }

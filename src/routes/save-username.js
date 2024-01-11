@@ -2,19 +2,21 @@
  * GET method displays the html page with input.
  * POST method saves the profile name to DB.
  */
-import express from "express";
-import ensureAuthenticated from "../middleware/ensureAuthenticated.js";
-import pool from "../../db.js";
-import { cacheCommitComments, cacheTeamUsers } from "../setup/setupCache.js";
+import express from 'express';
+import ensureAuthenticated from '../middleware/ensureAuthenticated.js';
+import pool from '../../db.js';
+import { cacheCommitComments, cacheTeamUsers } from '../setup/setupCache.js';
 
 const router = express.Router();
-router.get("/", ensureAuthenticated, (req, res) => {
+router.get('/', ensureAuthenticated, (req, res) => {
   let { displayName } = req.user;
-  if (!displayName) displayName = req.user.username;
-  let message = "";
-  if (req.query && req.query.displayName)
-    message =
-      "Profiilinime sisestamine on kohustuslik. Lubatud on vaid tähed ja tühikud.";
+  if (!displayName) {
+    displayName = req.user.username;
+  }
+  let message = '';
+  if (req.query && req.query.displayName) {
+    message = 'Profiilinime sisestamine on kohustuslik. Lubatud on vaid tähed ja tühikud.';
+  }
 
   // console.log('req.body.displayName1:', req.user);
 
@@ -45,26 +47,27 @@ router.get("/", ensureAuthenticated, (req, res) => {
             </div>
             <div class=" text-lg mt-16 mb-4">Sisesta sobiv profiilinimi:</div>
             <form action="/save-displayName" method="post" class="input-w-button w-full mb-8">
-                <input class="input-single pr-[calc(6ch+3rem)]" name="displayName" type="text" placeholder="${displayName}"/><br>
+                <input class="input-single pr-[calc(6ch+3rem)]" name="displayName" type="text" placeholder="${ displayName }"/><br>
                 <input class="btn btn-primary" type="submit" value="Salvesta"/>
             </form>
-            <p style="color:red;">${message}</p>
+            <p style="color:red;">${ message }</p>
           </div>  
         </body>
         </html>
     `);
 });
 
-router.post("/", ensureAuthenticated, async (req, res) => {
+router.post('/', ensureAuthenticated, async (req, res) => {
   const { user } = req;
   /**
-   * Validate that input was entered and that it's a valid string containing only letters and spaces. Entering only spaces is not allowed either.
+   * Validate that input was entered and that it's a valid string containing
+   * only letters and spaces. Entering only spaces is not allowed either.
    */
   if (
-    !req.body.displayName ||
-    !req.body.displayName.trim().match(/^[A-zÀ-ú\s]+$/)
+    !req.body.displayName
+    || !req.body.displayName.trim().match(/^[A-zÀ-ú\s]+$/)
   ) {
-    return res.redirect("/save-displayName?displayName=true");
+    return res.redirect('/save-displayName?displayName=true');
   }
 
   if (req.body.displayName) {
@@ -72,23 +75,26 @@ router.post("/", ensureAuthenticated, async (req, res) => {
     try {
       conn = await pool.getConnection();
 
-      await conn.query("UPDATE users SET displayName = ? WHERE githubID = ?;", [
+      await conn.query('UPDATE users SET displayName = ? WHERE githubID = ?;', [
         req.body.displayName,
-        user.id,
+        user.id
       ]);
       req.user.displayName = req.body.displayName;
 
-      // Flush caches that store users names so that users names would be shown correctly across app.
-      cacheTeamUsers.del(`usersInTeam+${user.team.slug}`);
+      // Flush caches that store users names so that users names would be shown
+      // correctly across app.
+      cacheTeamUsers.del(`usersInTeam+${ user.team.slug }`);
       cacheCommitComments.flushAll();
     } catch (err) {
-      console.log("Unable to update user displayName in database");
+      console.log('Unable to update user displayName in database');
       console.error(err);
     } finally {
-      if (conn) await conn.release(); // release to pool
+      if (conn) {
+        await conn.release();
+      } // release to pool
     }
   }
-  return res.redirect("/dashboard");
+  return res.redirect('/dashboard');
 });
 
 export default router;

@@ -3,330 +3,386 @@
 @tailwind utilities;
 
 .mobileheight {
-  height: calc(100% - 149px);
+    height: calc(100% - 149px);
 }
 
 @layer base {
-  @screen sm {
-    h1 {
-      @apply text-xxxl;
+    @screen sm {
+        h1 {
+            @apply text-xxxl;
+        }
+
+        h2 {
+            @apply text-xxl;
+        }
+
+        h3 {
+            @apply text-xl;
+        }
+
+        h4 {
+            @apply text-lg;
+        }
     }
-    h2 {
-      @apply text-xxl;
-    }
-    h3 {
-      @apply text-xl;
-    }
-    h4 {
-      @apply text-lg;
-    }
-  }
 }
+
 @layer components {
-  .sidebar {
-    @apply mobileheight top-[194px] lg:top-0 w-full sm:w-[22rem];
-  }
-  .sidebar.menu-zero {
-    @apply top-[194px] lg:top-0 left-0 z-10;
-  }
-  .aside.menu-zero {
-    @apply ml-[calc(-100%+4rem)] sm:ml-[-21.5rem];
-  }
-  .aside {
-    @apply max-w-[calc(100%-3.5rem)] break-words;
-  }
-  .btn {
-    @apply py-2 px-4 rounded-full cursor-pointer;
-  }
-  .btn-primary {
-    @apply bg-primary-700 hover:bg-primary-800 text-white;
-  }
-  .btn-secondary {
-    @apply bg-white border-2 border-neutral-300 hover:bg-neutral-100;
-  }
+    .sidebar {
+        @apply mobileheight top-[194px] lg:top-0 w-full sm:w-[22rem];
+    }
 
-  a,
-  a.markdown {
-    @apply !text-neutral-600;
-  }
+    .sidebar.menu-zero {
+        @apply top-[194px] lg:top-0 left-0 z-10;
+    }
 
-  pre {
-    @apply bg-neutral-800 text-white pt-6 px-4 pb-2 rounded whitespace-pre-wrap break-words;
-  }
-  /*--------------------------- accordion components ---------------------------*/
+    .aside.menu-zero {
+        @apply ml-[calc(-100%+4rem)] sm:ml-[-21.5rem];
+    }
 
-  .tab-close {
-    @apply flex justify-end p-4 cursor-pointer bg-secondary-700;
-  }
-  .tabs {
-    @apply overflow-hidden;
-  }
-  .tab {
-    @apply overflow-hidden w-full;
-  }
-  .tab-label,
-  .no-tab-label {
-    @apply flex justify-between bg-neutral-100 hover:bg-neutral-200 font-bold cursor-pointer pl-4;
-  }
-  .tab-content {
-    @apply max-h-0 py-0 px-4 bg-white text-secondary-900;
-  }
-  .active-tab .no-tab-label,
-  .active-tab .tab-label {
-    @apply bg-neutral-200;
-  }
-  .active-tab-content,
-  .tab-content:hover {
-    @apply bg-brand_red;
-  }
-  .active-tab-content *,
-  .tab-content:hover * {
-    @apply !text-white;
-  }
-  .active-tab .tab-label:hover {
-    @apply bg-neutral-200;
-  }
-  .active-tab .tab-label::after,
-  input:checked + .tab-label::after {
-    @apply rotate-90;
-  }
-  .active-tab .tab-content,
-  .tab-label {
-    @apply border-b border-neutral-200;
-  }
-  input:checked ~ .tab-label {
-    @apply max-h-screen;
-  }
-  .tab-label::after {
-    @apply content-['\276F'] py-[0.4rem] px-[1.4rem] text-center flex justify-center items-center;
-  }
-  .active-tab .tab-label::after {
-    @apply hidden;
-  }
-  /* opened accordion. If only with input:chekced: input:checked ~ .tab-content */
-  .active-tab .tab-content,
-  input:checked ~ .tab-content {
-    @apply max-h-screen;
-  }
-  .sidebar input {
-    @apply absolute opacity-0 -z-10;
-  }
-  /*--------------------------- end of sidebar tab's -------------------------------*/
-  .breadcrumb {
-    @apply flex items-start gap-1;
-  }
-  .breadcrumb > * {
-    @apply whitespace-nowrap text-ellipsis inline-block overflow-hidden;
-  }
+    .aside {
+        @apply max-w-[calc(100%-3.5rem)] break-words;
+    }
+
+    .btn {
+        @apply py-2 px-4 rounded-full cursor-pointer;
+    }
+
+    .btn-primary {
+        @apply bg-primary-700 hover:bg-primary-800 text-white;
+    }
+
+    .btn-secondary {
+        @apply bg-white border-2 border-neutral-300 hover:bg-neutral-100;
+    }
+
+    a,
+    a.markdown {
+        @apply !text-neutral-600;
+    }
+
+    pre {
+        @apply bg-neutral-800 text-white pt-6 px-4 pb-2 rounded whitespace-pre-wrap break-words;
+    }
+
+    /*--------------------------- accordion components ---------------------------*/
+    .tab-close {
+        @apply flex justify-end p-4 cursor-pointer bg-secondary-700;
+    }
+
+    .tabs {
+        @apply overflow-hidden;
+    }
+
+    .tab {
+        @apply overflow-hidden w-full;
+    }
+
+    .tab-label,
+    .no-tab-label {
+        @apply flex justify-between bg-neutral-100 hover:bg-neutral-200 font-bold cursor-pointer pl-4;
+    }
+
+    .tab-content {
+        @apply max-h-0 py-0 px-4 bg-white text-secondary-900;
+    }
+
+    .active-tab .no-tab-label,
+    .active-tab .tab-label {
+        @apply bg-neutral-200;
+    }
+
+    .active-tab-content,
+    .tab-content:hover {
+        @apply bg-brand_red;
+    }
+
+    .active-tab-content *,
+    .tab-content:hover * {
+        @apply !text-white;
+    }
+
+    .active-tab .tab-label:hover {
+        @apply bg-neutral-200;
+    }
+
+    .active-tab .tab-label::after,
+    input:checked + .tab-label::after {
+        @apply rotate-90;
+    }
+
+    .active-tab .tab-content,
+    .tab-label {
+        @apply border-b border-neutral-200;
+    }
+
+    input:checked ~ .tab-label {
+        @apply max-h-screen;
+    }
+
+    .tab-label::after {
+        @apply content-['\276F'] py-[0.4rem] px-[1.4rem] text-center flex justify-center items-center;
+    }
+
+    .active-tab .tab-label::after {
+        @apply hidden;
+    }
+
+    /* opened accordion. If only with input:chekced: input:checked ~ .tab-content */
+    .active-tab .tab-content,
+    input:checked ~ .tab-content {
+        @apply max-h-screen;
+    }
+
+    .sidebar input {
+        @apply absolute opacity-0 -z-10;
+    }
+
+    /*--------------------------- end of sidebar tab's -------------------------------*/
+    .breadcrumb {
+        @apply flex items-start gap-1;
+    }
+
+    .breadcrumb > * {
+        @apply whitespace-nowrap text-ellipsis inline-block overflow-hidden;
+    }
 }
 
 .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
-  padding-top: 1px;
+    font-variation-settings: "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 48;
+    padding-top: 1px;
 }
 
 a {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .skip:focus {
-  left: 0;
+    left: 0;
 }
+
 /* to keep sidebar in same level when it's clodes and when is open */
 .menu-zero {
-  top: 0;
-  left: 0;
+    top: 0;
+    left: 0;
 }
+
 .menu-zero i {
-  transform: rotate(900deg);
+    transform: rotate(900deg);
 }
+
 .aside {
-  margin-left: inherit;
-  transition: margin 1s;
+    margin-left: inherit;
+    transition: margin 1s;
 }
 
 .aside .right {
-  margin-right: inherit;
-  transition: margin 1s;
+    margin-right: inherit;
+    transition: margin 1s;
 }
 
 .reading_content {
-  max-width: 100%;
-  width: 70ch;
-  margin: 0 auto;
+    max-width: 100%;
+    width: 70ch;
+    margin: 0 auto;
 }
 
 .dashboard_content {
-  max-width: 100%;
-  width: 100ch;
-  margin: 0 auto;
+    max-width: 100%;
+    width: 100ch;
+    margin: 0 auto;
 }
 
 /* List and links stiles with classname "markdown".
 "markdown" class will added in src/setup/SetupMarkdown.js
 */
 ul.markdown {
-  list-style: disc;
-  margin-left: 1rem;
+    list-style: disc;
+    margin-left: 1rem;
 }
+
 a.markdown {
-  color: #0000ee;
+    color: #0000ee;
 }
+
 a.markdown:visited {
-  color: #551a8b;
+    color: #551a8b;
 }
 
 /*
 Markdown styling
 */
 .markdown-wrapper {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
 }
+
 .header-anchor {
-  display: none;
+    display: none;
 }
+
 .markdown-wrapper:hover .header-anchor {
-  display: block;
+    display: block;
 }
 
 /**
  * Smooth scrolling on the whole document
  */
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 /* google search input */
 .gsc-control-cse {
-  background-color: transparent !important;
-  border: 1px solid transparent !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
 }
+
 .gsc-control-cse {
-  padding: 0 !important;
+    padding: 0 !important;
 }
+
 form.gsc-search-box {
-  margin-bottom: 6px !important;
+    margin-bottom: 6px !important;
 }
+
 table.gsc-search-box td.gsc-input {
-  padding-right: 0 !important;
+    padding-right: 0 !important;
 }
+
 .gsc-search-button {
-  margin-left: 0 !important;
+    margin-left: 0 !important;
 }
 
 .gsc-search-button-v2 {
-  padding: 8px 12px !important;
-  border: 1px solid #fff !important;
-  border-radius: 0 1rem 1rem 0 !important;
-  height: 2rem;
-  background-color: #fff !important;
+    padding: 8px 12px !important;
+    border: 1px solid #fff !important;
+    border-radius: 0 1rem 1rem 0 !important;
+    height: 2rem;
+    background-color: #fff !important;
 }
+
 .gsc-search-button-v2:hover {
-  background-color: #fff !important;
+    background-color: #fff !important;
 }
+
 .gsc-input-box {
-  border: 0 !important;
-  height: 2rem !important;
-  display: flex;
-  align-items: center;
-  border-radius: 1rem 0 0 1rem;
+    border: 0 !important;
+    height: 2rem !important;
+    display: flex;
+    align-items: center;
+    border-radius: 1rem 0 0 1rem;
 }
+
 .gsc-search-button-v2 svg {
-  fill: #30373e !important;
-  width: 1rem !important;
-  height: 1rem !important;
+    fill: #30373e !important;
+    width: 1rem !important;
+    height: 1rem !important;
 }
+
 .gsc-input-box {
-  width: 8.5rem;
+    width: 8.5rem;
 }
+
 .gsib_a {
-  padding: 5px 9px 4px 16px !important;
+    padding: 5px 9px 4px 16px !important;
 }
 
 /* Progressbar */
 
 progress::-webkit-progress-bar {
-  @apply bg-pink;
+    @apply bg-pink;
 }
+
 progress::-webkit-progress-value {
-  @apply bg-brand_red;
+    @apply bg-brand_red;
 }
+
 progress {
-  @apply w-full;
+    @apply w-full;
 }
 
 /* navbar accent shape */
 
 .img .markdown-iframe {
-  max-width: 400px;
+    max-width: 400px;
 }
 
 a.table-of-contents {
-  text-decoration: none;
-  color: rgb(156 163 175);
+    text-decoration: none;
+    color: rgb(156 163 175);
 }
+
 a.table-of-contents:hover {
-  color: rgb(55 65 81);
+    color: rgb(55 65 81);
 }
 
 /* sticky table */
 .headers {
-  top: 0;
-  position: -webkit-sticky;
-  position: sticky;
-  z-index: 1;
+    top: 0;
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 1;
 }
+
 .scroller {
-  overflow-x: hidden;
+    overflow-x: hidden;
 }
-.tracks, .scroller {
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+
+.tracks,
+.scroller {
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
+
 .tracks {
-  overflow: auto;
-  scroll-snap-type: x mandatory;
+    overflow: auto;
+    scroll-snap-type: x mandatory;
 }
+
 .grid {
-  display: grid;
-  grid-template-columns: repeat(5, 250px);
-  grid-template-rows: repeat(3, 50px);
-  overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(5, 250px);
+    grid-template-rows: repeat(3, 50px);
+    overflow-x: auto;
 }
 
 .cell {
-  border: 1px solid;
-  box-sizing: border-box;
-  @apply border-neutral-400;
+    border: 1px solid;
+    box-sizing: border-box;
+    @apply border-neutral-400;
 }
 
 .cell.fix {
-  position: sticky;
-  left: 0;
-  z-index: 1;
+    position: sticky;
+    left: 0;
+    z-index: 1;
 }
 
 .tracks::-webkit-scrollbar {
-  -webkit-appearance: none;
-  height: 7px;
+    -webkit-appearance: none;
+    height: 7px;
 }
+
 .tracks::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background-color: rgba(0,0,0,.5);
-  -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .hoverrow:hover .hoverrowchild {
-  @apply bg-neutral-100;
+    @apply bg-neutral-100;
 }
 
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
+
 @media (min-width: 1440px) {
-  html {
-    font-size: 18px;
-  }
+    html {
+        font-size: 18px;
+    }
 }

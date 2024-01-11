@@ -1,25 +1,27 @@
 body {
-  @apply bg-page-background text-text;
-  background-position-x: right;
-  background-repeat: no-repeat;
+    @apply bg-page-background text-text;
+    background-position-x: right;
+    background-repeat: no-repeat;
 }
+
 .dark-theme body {
-  background-image: url(/images/dark_bg.jpg);
-  background-attachment: fixed;
-  background-position: right -11rem top -1rem;
+    background-image: url(/images/dark_bg.jpg);
+    background-attachment: fixed;
+    background-position: right -11rem top -1rem;
 }
+
 .light-theme body {
-  background-image: url(/images/light_bg.jpg);
-  background-attachment: fixed;
-  background-position: right -11rem top -1rem;
+    background-image: url(/images/light_bg.jpg);
+    background-attachment: fixed;
+    background-position: right -11rem top -1rem;
 }
+
 @media (min-width: 1024px) {
-  .dark-theme body {
-    background-position: right -85px top;
-  }
-  .light-theme body {
-    background-position: right -85px top;
-  }
+    .dark-theme body {
+        background-position: right -85px top;
+    }
+
+    .light-theme body {
+        background-position: right -85px top;
+    }
 }
-
-

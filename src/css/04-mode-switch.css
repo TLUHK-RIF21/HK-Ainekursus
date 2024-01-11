@@ -1,79 +1,85 @@
 /* Dark-light mode switch */
 
 body {
-  transition: all 0.2s ease-in-out !important;
+    transition: all 0.2s ease-in-out !important;
 }
 
-.mode input[type='checkbox'] {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  height: 3.25rem;
-  width: 6.5rem;
-  justify-content: center;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border-radius: 100px;
+.mode input[type="checkbox"] {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    height: 3.25rem;
+    width: 6.5rem;
+    justify-content: center;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 100px;
 }
+
 .mode label {
-  display: block;
-  height: 3.25rem;
-  width: 6.5rem;
-  border-radius: 100px;
-  background-color: #fff7e7;
-  background-image: url(../images/sun.svg);
-  background-size: 38%;
-  background-position: 3.5rem 0.38rem !important;
-  background-repeat: no-repeat;
-  transition: all 1s;
-  cursor: pointer;
-}
-.mode input[type='checkbox']:checked ~ label {
-  background-color: var(--primary-600);
-  background-image: url(../images/moon.svg);
-  background-size: 20%;
-  background-position: 1rem 1rem !important;
-}
-.mode label:after {
-  content: '';
-  display: block;
-  height: 3.25rem;
-  width: 6.5rem;
-  border-radius: 100px;
-  border: solid 2px var(--primary-400);
-  position: absolute;
-  box-shadow: 3px 3px 8px #30293852 inset;
-}
-.mode label:before {
-  content: '';
-  display: block;
-  height: calc(3.25rem - 4px);
-  width: calc(3.25rem - 4px);
-  border-radius: 100px;
-  background-color: var(--primary-600);
-  border: solid 1px var(--primary-700);
-  margin: 2px;
-  position: absolute;
-  transition: all 0.3s;
-  transition-timing-function: ease-in;
-  transition-timing-function: cubic-bezier(0.42, 0, 1, 1);
-  box-shadow: 6px 0px 6px #00000060;
-}
-.mode input[type='checkbox']:checked ~ label::before {
-  margin-left: calc(3.5rem - 2px);
-  box-shadow: -6px 0px 6px #00000060;
-  background-color: var(--primary-800);
-  border-color: var(--primary-700);
-}
-.mode input[type='checkbox']:checked ~ label::after {
-  border: solid 2px var(--primary-500);
+    display: block;
+    height: 3.25rem;
+    width: 6.5rem;
+    border-radius: 100px;
+    background-color: #fff7e7;
+    background-image: url(../images/sun.svg);
+    background-size: 38%;
+    background-position: 3.5rem 0.38rem !important;
+    background-repeat: no-repeat;
+    transition: all 1s;
+    cursor: pointer;
 }
 
-.mode input[type='checkbox']:focus-visible {
-  border-style: solid;
-  outline-style: solid;
-  outline-width: 2px;
-  outline-offset: 2px;
-  outline-color: var(--system-focus);
+.mode input[type="checkbox"]:checked ~ label {
+    background-color: var(--primary-600);
+    background-image: url(../images/moon.svg);
+    background-size: 20%;
+    background-position: 1rem 1rem !important;
+}
+
+.mode label:after {
+    content: "";
+    display: block;
+    height: 3.25rem;
+    width: 6.5rem;
+    border-radius: 100px;
+    border: solid 2px var(--primary-400);
+    position: absolute;
+    box-shadow: 3px 3px 8px #30293852 inset;
+}
+
+.mode label:before {
+    content: "";
+    display: block;
+    height: calc(3.25rem - 4px);
+    width: calc(3.25rem - 4px);
+    border-radius: 100px;
+    background-color: var(--primary-600);
+    border: solid 1px var(--primary-700);
+    margin: 2px;
+    position: absolute;
+    transition: all 0.3s;
+    transition-timing-function: ease-in;
+    transition-timing-function: cubic-bezier(0.42, 0, 1, 1);
+    box-shadow: 6px 0px 6px #00000060;
+}
+
+.mode input[type="checkbox"]:checked ~ label::before {
+    margin-left: calc(3.5rem - 2px);
+    box-shadow: -6px 0px 6px #00000060;
+    background-color: var(--primary-800);
+    border-color: var(--primary-700);
+}
+
+.mode input[type="checkbox"]:checked ~ label::after {
+    border: solid 2px var(--primary-500);
+}
+
+.mode input[type="checkbox"]:focus-visible {
+    border-style: solid;
+    outline-style: solid;
+    outline-width: 2px;
+    outline-offset: 2px;
+    outline-color: var(--system-focus);
 }

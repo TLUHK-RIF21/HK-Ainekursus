@@ -1,70 +1,59 @@
 <!-- overview-courses.handlebars -->
 <div class="flex flex-row grow 2xl:justify-between overflow-x-hidden lg:overflow-x-clip">
-  <main id="main-content" class="px-4 py-8 dashboard_content">
-    
-      <div class="flex flex-col flex-nowrap grow justify-between">
-      {{#unless user }}  
-        <h3 class='mt-4 ml-4'>Logi sisse, et näha ülevaadet</h3>
-      {{/unless }}
+    <main id="main-content" class="px-4 py-8 dashboard_content">
 
-      {{#if user }}
-        <div class="flex flex-row justify-start gap-x-4 py-4">
-          <form method="POST" action="/progress-overview" name="displayByTeams" id="displayByTeams">
-            <!-- Hidden form inputs to send req.body values -->
-            <input type="hidden" name="displayBy" id="displayBy" value="teams" >
-            <button name="displayByTeamsButton" class="btn btn-secondary">Tiimide järgi</button>
-          </form>
-          <form method="POST" action="/progress-overview" name="displayByCourses" id="displayByCourses">
-            <!-- Hidden form inputs to send req.body values -->
-            <input type="hidden" name="displayBy" id="displayBy" value="courses" >
-            <button name="displayByCoursesButton" class="btn btn-primary">Ainekursuste järgi</button>
-          </form>
+        <div class="flex flex-col flex-nowrap grow justify-between">
+            {{#unless user }}
+                <h3 class='mt-4 ml-4'>Logi sisse, et näha ülevaadet</h3>
+            {{/unless }}
+
+            {{#if user }}
+                <div>
+
+                    <h1>Ainekursuste ülevaade</h1>
+                    <p>Siin lehel näed kõiki aktiivseid ainekursuseid.</p>
+
+                    <!--p>Kui sa vajutad mõne ainekursuse all tiimi nimele, siis avaneb ülevaade selle tiimi kasutajate
+                        progressist antud ainekursusel.</p!-->
+                    {{#each coursesWithTeams}}
+                        <a class='card cardlink block p-4 !pt-[0.1px] relative'
+                           href='/progress-overview/{{this.id}}'
+                        >
+                            <h3 class='text-lg'>{{this.name}}</h3>
+
+                            <div class="flex justify-between mb-1">
+                                <span class="text-base font-medium ">Läbitud teemad:</span>
+                                <span class="text-base font-medium">{{this.ttlMarkedAsDoneCount}}
+                                    / {{this.UUIDLength}}</span>
+                            </div>
+                            <div class="w-full progress rounded-full">
+                                <div class="progress-inner rounded-full"
+                                     style="width: {{this.donePercentage}}%"></div>
+                            </div>
+                            <div class="flex flex-nowrap justify-start gap-x-4 items-center mt-4">
+                                <p class="m-0 p-0">{{this.code}}</p>
+                                <p class="flex items-start gap-2 m-0 p-0"><span
+                                        class="material-symbols-outlined">grade</span>{{this.credits}}
+                                    EAP</p>
+                                <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">grading</span>{{this.form}}
+                                </p>
+                            </div>
+                            <div class="flex flex-nowrap justify-start gap-x-4 items-center mt-4">
+                                <p class="flex items-start gap-2 m-0 p-0"><span
+                                        class="material-symbols-outlined">calendar_month</span>{{this.semester}}</p>
+                                <p class="flex items-start gap-2 m-0 p-0"><span
+                                        class="material-symbols-outlined">person</span>
+                                    {{this.studentCount}}
+                                </p>
+                            </div>
+                        </a>
+                    {{/each}}
+
+                </div>
+
+            {{/if }}
         </div>
 
-        <div class="">
-
-          <h1>Ainekursuste ülevaade</h1>
-          <p>Siin lehel näed kõiki aktiivseid ainekursuseid, nendega seotud tiime ja millist ainekursuse haru näeb iga tiim vaikimisi.</p>
-
-          <p>Kui sa vajutad mõne ainekursuse all tiimi nimele, siis avaneb ülevaade selle tiimi kasutajate progressist antud ainekursusel.</p>
-          {{#each coursesWithTeams}}
-            <div class="card pt-0 mb-4">
-              <div class="flex content-end gap-x-4 items-end pt-4 pb-4">
-                <h2 class="text-lg font-sans items-start m-0">{{this.courseName}}</h2>
-                <p class="m-0">{{this.courseCode}}</p>
-              </div>
-              <div class="flex items-start gap-2 m-0">Tiimid ja nende vaikimisi harud:</div>
-               <div class="flex flex-nowrap justify-start gap-x-4 items-center">
-                  <ul class="w-full">
-                  {{#each this.courseConfigByTeam}}
-                    <li class="card cardlink px-4 flex flex-col gap-4 mt-2 cursor-pointer" onclick="handleCourseClick('{{@key}}', '{{../this.courseSlug}}')">
-                    <div class="flex flex-wrap gap-2">
-                      <h5 class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">groups</span>
-                      {{uppercase @key}} tiim</h5>
-                      <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">account_tree</span>{{this.refBranch}} haru</p>
-                      <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">grade</span>{{this.courseEAP}} EAP</p>
-                      <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">grading</span>{{capitalize this.courseGrading}}</p>
-                      <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">calendar_month</span>{{this.courseSemester}}</p>
-                      <p class="flex items-start gap-2 m-0 p-0"><span class="material-symbols-outlined">person</span>{{#with (findTeacher this.teacherUsername ../../teachers)}}{{this.displayName}}{{/with }}</p>
-                    </div>
-                      <form id="overview-{{@key}}-{{../this.courseSlug}}" name="overview-{{@key}}-{{../this.courseSlug}}" style="display:none;" method="POST" action="/progress-overview" >
-                        <!-- Hidden form inputs to send req.body values -->
-                        <input type="hidden" name="selectedTeam" id="selectedTeam-{{@key}}" value="{{@key}}" >
-                        <input type="hidden" name="selectedCourse" id="selectedCourse-{{../this.courseSlug}}" value="{{../this.courseSlug}}" >
-                        <input type="hidden" name="selectedCourseData" id="selectedCourseData-{{../this.courseSlug}}" >
-                      </form>
-                    </li>
-                  {{/each }}
-                  </ul>
-              </div>
-            </div>
-          {{/each}}
-
-        </div>
-
-      {{/if }}
-    </div>
-
-  </main>
+    </main>
 
 </div>

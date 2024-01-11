@@ -1,64 +1,65 @@
 <!-- notifications.handlebars -->
 <div class="flex flex-row grow 2xl:justify-between overflow-x-hidden lg:overflow-x-clip">
-  <main id="main-content" class="px-4 py-8 dashboard_content">
+    <main id="main-content" class="px-4 py-8 dashboard_content">
     <div class="flex flex-col flex-nowrap grow justify-between">
-      {{#unless user }}  
-        <h2 class='font-sans text-xl font-bold mt-4 ml-4'>Logi sisse, et näha teateid</h2>
-      {{/unless }}
+        {{#unless user }}
+            <h2 class='font-sans text-xl font-bold mt-4 ml-4'>Logi sisse, et näha teateid</h2>
+        {{/unless }}
 
-      {{#if user }}
-        <h1>Teated</h1>
-        {{#if_equal user.team.slug 'teachers'}}
-        <p class="m-0">Siin lehel näed kõiki teateid, mis on seotud sulle nähtavate ainekursustega.</p>
-        <p class="m-0">NB! Teateid kuvatakse ainult vaikimisi harudest!</p>
-        {{else}}
-        <p class="m-2">Siin lehel näed teateid, mis on seotud sulle nähtavate ainekursustega.</p>
-        {{/if_equal}}
-        <div class="">
-          <div>
-            {{#unless courseUpdates30Days }}
-              <h2 class="font-sans text-xl font-bold">Viimase 30 päeva jooksul teated puuduvad.</h2>
-            {{/unless }}
+        {{#if user }}
+            <h1>Teated</h1>
+            {{#unless (isTeacher user)}}
+                <p class="m-0">Siin lehel näed kõiki teateid, mis on seotud sulle nähtavate ainekursustega.</p>
+                <!--p class="m-0">NB! Teateid kuvatakse ainult vaikimisi harudest!</p!-->
+            {{else}}
+                <p class="m-2">Siin lehel näed teateid, mis on seotud sulle nähtavate ainekursustega.</p>
+            {{/unless}}
+            <div class="">
+            <div>
+                {{#unless courseUpdates30Days }}
+                    <h2 class="font-sans text-xl font-bold">Viimase 30 päeva jooksul teated puuduvad.</h2>
+                {{/unless }}
 
-            
-            
+                {{#if courseUpdates30Days }}
+                    <h2 class="font-sans text-xl font-bold">Viimase 30 päeva teated:</h2>
 
-            {{#if courseUpdates30Days }}
-              <h2 class="font-sans text-xl font-bold">Viimase 30 päeva teated:</h2>
+                    {{#each courseUpdates30Days }}
+                    <div class="flex flex-col divide-y divide-stroke">
 
-                {{#each courseUpdates30Days }} 
-              <div class="flex flex-col divide-y divide-stroke">
-
-                  <div class="flex py-2">
-          <div class="!text-base material-symbols-outlined text-system-red-tlu pr-2">notifications</div>
-          <div class="w-full">
-            <div class="flex justify-between">
-              <div class="text-sm">
-              {{#if_equal ../this.user.team.slug 'teachers' }}
-                <a href="/course/{{../this.course.courseSlug}}/about?ref={{../this.course.refBranch}}"><span class="font-bold">{{../this.course.courseName}}</span> {{../this.course.refBranch}} haru</a>
-              {{else }}
-                <a href="/course/{{../this.course.courseSlug}}/about?ref={{../this.course.refBranch}}"><span class="font-bold">{{../this.course.courseName}}</span></a>
-              {{/if_equal }}
-              </div>
-              <div class="text-sm basis-20 text-right">{{#with (findTeacher this.user.login ../teachers)}}{{this.displayName}}{{/with }}</div>
+                        <div class="flex py-2">
+                            <div class="!text-base material-symbols-outlined text-system-red-tlu pr-2">notifications
+                            </div>
+                            <div class="w-full">
+                                <div class="flex justify-between">
+                                    <div class="text-sm">
+                                        {{#unless (isTeacher user)}}
+                                            <a href="/course/{{this.course.id}}/about?ref=master"><span
+                                                    class="font-bold">{{this.course.name}}</span> master haru</a>
+                                        {{else }}
+                                            <a href="/course/{{this.course.id}}/about?ref=master">
+                                                <span class="font-bold">{{this.course.name}}</span>
+                                            </a>
+                                        {{/unless }}
+                                    </div>
+                                    <div class="text-sm basis-20 text-right">{{#with
+                                            (findTeacher this.user.login ../teachers)}}{{this.displayName}}{{/with }}</div>
+                                </div>
+                                <div class="notifications py-2">
+                                    <a class="basis-4/6 shrink-0 grow-0 pr-4"
+                                       href="/course/{{this.course.id}}/about?ref=master">{{this.body}}</a>
+                                </div>
+                                <div class="text-sm text-right">{{timeSince this.created_at }}</div>
+                            </div>
+                        </div>
+                    {{/each }}
+                </div>
+                </div>
+                {{/if }}
             </div>
-            <div class="notifications py-2">
-              <a class="basis-4/6 shrink-0 grow-0 pr-4" href="/course/{{this.course.courseSlug}}/about?ref={{this.course.refBranch}}">{{this.body}}</a>
-            </div>
-            <div class="text-sm text-right">{{timeSince this.created_at }}</div>
-          </div>
         </div>
-                  {{#unless @last}}
-                  {{/unless}}
-                  {{/each }}
-              </div>
-          </div>
-            {{/if }}
-        </div>
-        </div>
-      {{/if }}
-    </div>
+        {{/if }}
+</div>
 
-  </main>
+</main>
 
 </div>

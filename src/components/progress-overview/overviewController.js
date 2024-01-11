@@ -1,7 +1,10 @@
-import { performance } from "perf_hooks";
-import getAllCoursesData from "../../functions/getAllCoursesData.js";
-import getMarkedAsDoneComponents from "../../functions/getListOfDoneComponentUUIDs.js";
-import teamsController from "../teams/teamsController.js";
+import getAllCoursesData from '../../functions/getAllCoursesData.js';
+import {
+  getComponentsUUIDs, markedAsDone, ttlMarkedAsDone
+} from '../../functions/getListOfDoneComponentUUIDs.js';
+import { allCoursesController } from '../courses/coursesController.js';
+import apiRequests from '../courses/coursesService.js';
+import getCourseData from '../../functions/getCourseData.js';
 
 const allOverviewController = {
   getOverview: async (req, res) => {
@@ -10,266 +13,80 @@ const allOverviewController = {
      * If not, then reroute to "/notfound" page
      * If yes, then continue to get overview info
      */
-    let teamSlug;
-    if (req.user && req.user.team) teamSlug = req.user.team.slug;
-    if (teamSlug !== "teachers") return res.redirect("/notfound");
-
-    const { team, courseSlug } = req.params;
-    let { courseSlugData } = req.session;
-
-    /**
-     * Check if team, courseSlug params and courseSlugData from req.session are provided
-     * If team, courseSlug params and courseSlugData from req.session ARE NOT provided, then user is requesting to load /progress-overview page to see all team/course options. Then you will check if displayBy is provided with req.session. And then render /progress-overview.
-     */
-
-    // By default, set displayBy to 'teams'
-    const displayBy = req.session.displayBy || "teams";
-    res.locals.displayBy = displayBy;
-
-    if (displayBy && team && !courseSlug) {
-      return res.redirect("/progress-overview");
+    if (!req.user.roles.includes('teacher')) {
+      return res.redirect('/notfound');
     }
-    if (displayBy === "teams" && !team && !courseSlug)
-      return allOverviewController.getOverviewByTeams(req, res);
-    if (displayBy === "courses" && !team && !courseSlug)
-      return allOverviewController.getOverviewByCourses(req, res);
 
-    /**
-     * If team, courseSlug ARE provided, but courseSlugData from req.session IS NOT, then user approached directly from URL, without sending req.session data. Then get courseSlugData separately.
-     * Once courseSlugData is provided, then continue to render team-course overview page /progress-overview/:team/:courseSlug.
-     */
-    if (team && courseSlug) {
-      if (!courseSlugData || courseSlugData === "") {
-        const teamCoursesPromises = await getAllCoursesData(team, req);
-        await Promise.all(teamCoursesPromises);
-        const courseSlugDataRequested = teamCoursesPromises.find(
-          (course) => course.courseSlug === courseSlug,
-        );
-        /* If courseSlugDataRequested is not found, then user accessed /('/progress-overview/:team/:courseSlug with invalid team or courseSlug params. Route back to 7progress-overview page.
-         * Else save courseSlugDataRequested to courseSlugData and load /progress-overview/:team/:courseSlug page.
-         */
-        if (!courseSlugDataRequested) return res.redirect("/progress-overview");
-        courseSlugData = courseSlugDataRequested;
+    const { courseId } = req.params;
+
+    if (courseId) {
+      const course = await apiRequests.getCourseById(courseId);
+      const courseConfig = await getCourseData(course, 'master');
+      course.config = courseConfig.config;
+      let courseBranchComponentsUUIDs = courseConfig.config.practices
+        ? courseConfig.config.practices
+        : [];
+      const done = await markedAsDone(courseId);
+
+      course.students = course.students.map((user) => {
+        let uuids = done.filter(
+          courses => courses.githubID === user.id.toString())[0]?.uuid || [];
+        //uuids = uuids.map(
+        //  u => courseBranchComponentsUUIDs.find(c => c.uuid === u).name);
+        const displayName = user.firstName + ' ' + user.lastName;
+
+        return { userId: user.id, uuids, displayName };
+      });
+
+      course.courseBranchComponentsUUIDs = await getComponentsUUIDs(
+        course.repository);
+
+      course.components = courseBranchComponentsUUIDs.map(c => c.name);
+      return res.render('overview-stats', {
+        user: req.user, courseData: course
+      });
+    } else {
+      // 1. leia kõik õpetaja kursused
+      let allCourses = await getAllCoursesData(req);
+
+      allCourses = allCourses.filter(
+        (course) => course.teachers.some(t => t.id === req.user.userId));
+
+      // 2. leia kõik mida saab märkida tehtuks
+      const withComponentsUUIDs = await allCoursesController.allCoursesActiveWithComponentsUUIDs(
+        allCourses);
+
+      /* 3. leia summaarne tehtud % selle kuruse kohta, selleks:
+       3.1 - mitu õpilast meil kuulab kursust? (S)
+       3.2 - mitu ComponentsUUID meil on (U)
+       3.3 - 100% = S x U
+       3.4 - palju reaalselt on märkinud tehtuks? SELECT count(githubID) as done FROM users_progress WHERE courseCode = ?; => D
+       3.5 - leia keskmine K = D * 100 / (S  * U)
+       */
+      async function addTTLMarkedAsDone(course) {
+        const result = await ttlMarkedAsDone(course.id);
+        const UUIDLength = course.courseBranchComponentsUUIDs.length *
+          (course.students ? course.students.length : 0);
+        return {
+          ...course,
+          ttlMarkedAsDoneCount: result,
+          studentCount: course.students.length,
+          UUIDLength,
+          donePercentage: result * 100 / UUIDLength
+        };
       }
+
+      async function updateArray(array) {
+        return await Promise.all(array.map(addTTLMarkedAsDone));
+      }
+
+      allCourses = await updateArray(withComponentsUUIDs);
+
+      return res.render('overview-courses', {
+        user: req.user, coursesWithTeams: allCourses
+      });
     }
-    res.locals = { team, courseSlug, courseSlugData };
-
-    return allOverviewController.showProgress(req, res);
-  },
-  getOverviewByTeams: async (req, res) => {
-    const { displayBy } = res.locals;
-    const { teams } = await teamsController
-      .getAllValidTeams()
-      .catch((error) => {
-        console.error(error);
-        return res.redirect("/notfound");
-      });
-
-    if (!teams) return res.redirect("/notfound");
-
-    /** Remove teachers team from teams array. Teachers team's courses shouldn't be displayed on app.
-     * However, you still need to keep teams array with teachers to get teachers names for rendering.
-     */
-
-    const teamsExclTeachers = teams.filter((team) => team.slug !== "teachers");
-    teamsExclTeachers.sort((a, b) => a.slug.localeCompare(b.slug));
-
-    const teamsCourses = {};
-
-    const teamsCoursesPromises = teamsExclTeachers.map(async (team) => {
-      const coursesData = await getAllCoursesData(team.slug, req);
-      teamsCourses[team.slug] = coursesData;
-    });
-
-    await Promise.all(teamsCoursesPromises);
-    const teamsCoursesSorted = Object.keys(teamsCourses)
-      .sort()
-      .reduce((acc, team) => {
-        if (teamsCourses[team].length > 0)
-          acc[team] = teamsCourses[team].sort((a, b) =>
-            a.courseName.localeCompare(b.courseName),
-          );
-        return acc;
-      }, {});
-
-    /**
-     * Get all users in each team
-     * Use teams array where teachers team is included.
-     * Save all teachers in a variable, needed for rendering
-     */
-    const teamsUsers = {};
-    const start4 = performance.now();
-    const teamsUsersPromises = teams.map(async (team) => {
-      const usersData = await teamsController.getUsersInTeam(team.slug);
-      teamsUsers[team.slug] = usersData;
-    });
-
-    await Promise.all(teamsUsersPromises);
-    const end4 = performance.now();
-    console.log(`Execution time teamsUsers: ${end4 - start4} ms`);
-
-    const teamsUsersSorted = Object.keys(teamsUsers)
-      .sort()
-      .reduce((acc, team) => {
-        acc[team] = teamsUsers[team].sort((a, b) =>
-          a.displayName.localeCompare(b.displayName),
-        );
-        return acc;
-      }, {});
-
-    return res.render("overview-teams", {
-      user: req.user,
-      displayBy,
-      teams: teamsExclTeachers,
-      teamsCourses: teamsCoursesSorted,
-      teamsUsers: teamsUsersSorted,
-      teachers: teamsUsersSorted.teachers,
-    });
-  },
-
-  getOverviewByCourses: async (req, res) => {
-    const { displayBy } = res.locals;
-    const { teams } = await teamsController
-      .getAllValidTeams()
-      .catch((error) => {
-        console.error(error);
-        return res.redirect("/notfound");
-      });
-
-    if (!teams) return res.redirect("/notfound");
-
-    /** Remove teachers team from teams array. Teachers team's courses shouldn't be displayed on app.
-     * However, you still need to keep teams array with teachers to get teachers names for rendering.
-     */
-    const teamsExclTeachers = teams.filter((team) => team.slug !== "teachers");
-    teamsExclTeachers.sort((a, b) => a.slug.localeCompare(b.slug));
-
-    const teamsCourses = {};
-
-    const teamsCoursesPromises = teamsExclTeachers.map(async (team) => {
-      const coursesData = await getAllCoursesData(team.slug, req);
-      teamsCourses[team.slug] = coursesData;
-    });
-
-    await Promise.all(teamsCoursesPromises);
-    const teamsCoursesSorted = Object.keys(teamsCourses)
-      .sort()
-      .reduce((acc, team) => {
-        acc[team] = teamsCourses[team].sort((a, b) =>
-          a.courseName.localeCompare(b.courseName),
-        );
-        return acc;
-      }, {});
-
-    console.log("teamsCoursesSorted3:", teamsCoursesSorted);
-
-    const coursesWithTeams = [];
-
-    Object.keys(teamsCoursesSorted).forEach((team) => {
-      teamsCoursesSorted[team].forEach((course) => {
-        const existingCourse = coursesWithTeams.find(
-          (c) => c.courseUrl === course.courseUrl,
-        );
-        if (existingCourse) {
-          existingCourse.courseConfigByTeam[team] = course;
-        } else {
-          coursesWithTeams.push({
-            courseUrl: course.courseUrl,
-            courseName: course.courseName,
-            courseCode: course.courseCode,
-            courseSlug: course.courseSlug,
-            courseConfigByTeam: { [team]: course },
-          });
-        }
-      });
-    });
-
-    coursesWithTeams.sort((a, b) => a.courseName.localeCompare(b.courseName));
-
-    console.log(coursesWithTeams);
-    console.log("coursesWithTeams3:", coursesWithTeams);
-
-    /**
-     *  Get all users in each team.
-     * Use teams array where teachers team is included.
-     * Save all teachers in a variable, needed for rendering
-     */
-    const teamsUsers = {};
-    const start4 = performance.now();
-    const teamsUsersPromises = teams.map(async (team) => {
-      const usersData = await teamsController.getUsersInTeam(team.slug);
-      teamsUsers[team.slug] = usersData;
-    });
-
-    await Promise.all(teamsUsersPromises);
-    const end4 = performance.now();
-    console.log(`Execution time teamsUsers: ${end4 - start4} ms`);
-
-    const teamsUsersSorted = Object.keys(teamsUsers)
-      .sort()
-      .reduce((acc, team) => {
-        acc[team] = teamsUsers[team].sort((a, b) =>
-          a.displayName.localeCompare(b.displayName),
-        );
-        return acc;
-      }, {});
-
-    return res.render("overview-courses", {
-      user: req.user,
-      displayBy,
-      teams: teamsExclTeachers,
-      coursesWithTeams,
-      teamsUsers: teamsUsersSorted,
-      teachers: teamsUsersSorted.teachers,
-    });
-  },
-  showProgress: async (req, res) => {
-    const { team, courseSlug, courseSlugData } = res.locals;
-    console.log("courseSlugData5:", courseSlugData);
-
-    const usersInTeam = await teamsController.getUsersInTeam(team);
-    const usersInTeachersTeam =
-      await teamsController.getUsersInTeam("teachers");
-
-    const usersInTeamAndNotInTeachers = usersInTeam.filter(
-      (user) =>
-        !usersInTeachersTeam.some((user2) => user.login === user2.login),
-    );
-    const usersGithubIDsArray = usersInTeamAndNotInTeachers.map(
-      (user) => `${user.id}`,
-    );
-
-    let usersDataPromises;
-    if (courseSlug && usersGithubIDsArray.length > 0) {
-      usersDataPromises = usersInTeamAndNotInTeachers.map(
-        async (user, index) => {
-          // Connects to DB again for each user
-          const markedAsDoneComponents = await getMarkedAsDoneComponents(
-            user.id,
-            courseSlug,
-          );
-          usersInTeamAndNotInTeachers[index].markedAsDoneComponents =
-            markedAsDoneComponents;
-          return usersInTeamAndNotInTeachers[index];
-        },
-      );
-    }
-
-    let usersData;
-    if (usersDataPromises && usersDataPromises[0])
-      usersData = await Promise.all(usersDataPromises);
-
-    /* Sort users by displayName */
-    usersData.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-    return res.render("overview-stats", {
-      user: req.user,
-      courseData: courseSlugData,
-      team,
-      usersData,
-      teachers: usersInTeachersTeam,
-    });
-  },
+  }
 };
 
 export default allOverviewController;

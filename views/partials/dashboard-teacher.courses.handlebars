@@ -69,6 +69,12 @@
         </div>
     </div>
 </div>
+<div id="loading" class="hidden fixed top-0 left-0 w-full h-full items-center justify-center custom-backdrop">
+    <div class="card p-8 rounded shadow-md custom-modal-content">
+        <p class="mb-4 text-lg">Palun oota...</p>
+    </div>
+</div>
+
 <script>
     function showModal(message) {
         document.getElementById('errorMsg').innerHTML = message;
@@ -81,7 +87,7 @@
 
     function confirmAction() {
         // Handle the OK button action
-        window.location.href = "http://localhost:3000/course-edit/" + courseCode + "/about?ref=master"
+        window.location.href = window.location.origin + '/course-edit/' + courseId + '/about?ref=master';
         hideModal();
     }
 
@@ -90,41 +96,46 @@
         hideModal();
     }
 
-    let newCourseForm = document.getElementById("newCourseForm");
-    let courseCode = "";
+    let newCourseForm = document.getElementById('newCourseForm');
+    let courseId = '';
 
-    newCourseForm.addEventListener("submit", (e) => {
+    newCourseForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        document.getElementById("submitForm").disabled = true;
+        document.getElementById('submitForm').disabled = true;
+        const loadingModal = document.getElementById('loading');
+        loadingModal.style.display = 'flex';
         // handle submit
-        fetch("http://localhost:3000/add-course", {
+        fetch(window.location.origin + '/add-course', {
             method: 'post',
-            body: JSON.stringify({oisUrl: document.getElementById("oisUrl").value}),
+            body: JSON.stringify({ oisUrl: document.getElementById('oisUrl').value }),
             headers: {
-                "Content-Type": "application/json",
-            },
+                'Content-Type': 'application/json'
+            }
         }).then((res) => {
-            document.getElementById("submitForm").disabled = false;
+            loadingModal.style.display = 'none';
+            document.getElementById('submitForm').disabled = false;
             if (res.ok) {
                 return res.json();
             }
             return Promise.reject(res); // 2. reject instead of throw
         }).then((res) => {
-            if (res.status === 201) {
-                console.log("Post successfully created!")
-            }
+            document.querySelector('#loading p').textContent = res.msg;
+            loadingModal.style.display = 'flex';
+            setTimeout(() => {
+                const { origin } = window.location;
+                window.location.href = `${ origin }/dashboard`;
+            }, 2000);
         }).catch((response) => {
-            //console.log(response.status, response.statusText)
             response.json().then((json) => {
-                if (json.msg === "duplicate") {
-                    document.getElementById("confirmBtn").classList.replace("hidden", "block");
-                    showModal("Sellise koodiga kursus on juba olemas!<br>Kas soovid seda muuta?");
-                    courseCode = json.courseCode;
+                if (json.msg === 'duplicate') {
+                    document.getElementById('confirmBtn').classList.replace('hidden', 'block');
+                    showModal('Sellise koodiga kursus on juba olemas!<br>Kas soovid seda muuta?');
+                    courseId = json.courseId;
                 } else {
-                    document.getElementById("confirmBtn").classList.replace("block", "hidden")
-                    showModal(json.msg)
+                    document.getElementById('confirmBtn').classList.replace('block', 'hidden');
+                    showModal(json.msg);
                 }
-            })
+            });
         });
     });
 </script>

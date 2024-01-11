@@ -1,105 +1,109 @@
 .btn {
-  @apply cursor-pointer h-auto px-6 py-3 rounded-full flex items-center gap-2 justify-center min-w-[3.25rem] min-h-[3.25rem];
+    @apply cursor-pointer h-auto px-6 py-3 rounded-full flex items-center gap-2 justify-center min-w-[3.25rem] min-h-[3.25rem];
 }
+
 .btn-primary {
-  @apply text-system-white bg-button-default hover:bg-button-hover active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    @apply text-system-white bg-button-default hover:bg-button-hover active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
 }
+
 .btn-secondary {
-  @apply text-button-secondary-label-default hover:bg-button-secondary-fill-hover active:bg-button-secondary-fill-active hover:text-button-secondary-hover border-2 border-button-secondary-default hover:border-button-secondary-hover active:border-button-secondary-active active:text-button-secondary-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    @apply text-button-secondary-label-default hover:bg-button-secondary-fill-hover active:bg-button-secondary-fill-active hover:text-button-secondary-hover border-2 border-button-secondary-default hover:border-button-secondary-hover active:border-button-secondary-active active:text-button-secondary-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
 }
+
 .btn-link {
-  @apply mb-4 font-bold rounded-sm flex items-center gap-1 text-button-link hover:text-button-link-hover active:text-button-link-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    @apply mb-4 font-bold rounded-sm flex items-center gap-1 text-button-link hover:text-button-link-hover active:text-button-link-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
 }
+
 /* there is inputs with usual inputs and inputs with buttons */
 .input-single {
-  @apply w-full px-6 h-[3.25rem] relative rounded-full border-solid border-2 border-system-primary focus-visible:outline-system-focus  focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 text-primary-900;
+    @apply w-full px-6 h-[3.25rem] relative rounded-full border-solid border-2 border-system-primary focus-visible:outline-system-focus  focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 text-primary-900;
 }
+
 /* next two are for positioning the button into input */
 .input-w-button {
-  @apply flex relative items-center;
+    @apply flex relative items-center;
 }
+
 .input-w-button .btn {
-  @apply absolute right-0;
+    @apply absolute right-0;
 }
 
 /* Radio Button Container */
 .radio {
-  position: relative;
-  cursor: pointer;
+    position: relative;
+    cursor: pointer;
 }
 
 /* Hide default radio button */
 .radio input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
 /* Radio Button Indicator */
 .radio .radio-check {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 1.5rem;
-  width: 1.5rem;
-  border-radius: 50%;
-  border: 2px solid #80609f;
-  background-color: #e6dfec;
-  box-shadow: inset var(--radio-shadow-x) var(--radio-shadow-y)
-    var(--radio-shadow-blur) var(--radio-shadow-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 50%;
+    border: 2px solid #80609f;
+    background-color: #e6dfec;
+    box-shadow: inset var(--radio-shadow-x) var(--radio-shadow-y) var(--radio-shadow-blur) var(--radio-shadow-color);
 }
 
 /* Radio Button Indicator - Checked */
 .radio input:checked ~ .radio-check {
-  background-color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Radio Button Indicator - Checked (Inner dot) */
 .radio input:checked ~ .radio-check:after {
-  display: block;
+    display: block;
 }
 
 /* Styling the inner dot */
 .radio .radio-check:after {
-  content: '';
-  box-shadow: inset var(--radio-shadow-x) var(--radio-shadow-y)
-    var(--radio-shadow-blur) var(--radio-shadow-color);
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 50%;
-  background: #80609f;
-  display: none;
+    content: "";
+    box-shadow: inset var(--radio-shadow-x) var(--radio-shadow-y) var(--radio-shadow-blur) var(--radio-shadow-color);
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 50%;
+    background: #80609f;
+    display: none;
 }
 
 /* Radio Button Label */
 .radio .radio-label {
-  margin-left: 2rem;
-  height: 1.6rem;
-  display: flex;
-  align-items: center;
+    margin-left: 2rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
 }
 
 /* Hover effect */
 .radio:hover input ~ .radio-check {
-  box-shadow: var(--radio-shadow-hover-x) var(--radio-shadow-hover-y)
-    var(--radio-shadow-hover-blur) var(--radio-shadow-hover-color);
+    box-shadow: var(--radio-shadow-hover-x) var(--radio-shadow-hover-y) var(--radio-shadow-hover-blur) var(--radio-shadow-hover-color);
 }
 
 /* Radio Button Label - Hover effect */
 .radio:hover .radio-label {
-  color: #555;
+    color: #555;
 }
 
 /* progressbar */
 .progress {
-  @apply border-primary-600 bg-primary-100 border-2 rounded-full h-5;
+    @apply border-primary-600 bg-primary-100 border-2 rounded-full h-5;
 }
+
 .progress-inner {
-  @apply bg-primary-600 rounded-full h-full;
+    @apply bg-primary-600 rounded-full h-full;
 }
