@@ -1959,6 +1959,9 @@ input:checked ~ .tab-content {
 .mt-4{
   margin-top: 1rem;
 }
+.mt-6{
+  margin-top: 1.5rem;
+}
 .mt-8{
   margin-top: 2rem;
 }
@@ -2027,6 +2030,9 @@ input:checked ~ .tab-content {
 .w-40{
   width: 10rem;
 }
+.w-52{
+  width: 13rem;
+}
 .w-56{
   width: 14rem;
 }
@@ -2088,6 +2094,18 @@ input:checked ~ .tab-content {
 .basis-\[calc\(75\%-1rem\)\]{
   flex-basis: calc(75% - 1rem);
 }
+.-translate-x-full{
+  --tw-translate-x: -100%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.translate-x-0{
+  --tw-translate-x: 0px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.rotate-180{
+  --tw-rotate: 180deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
 .transform{
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
@@ -2096,6 +2114,9 @@ input:checked ~ .tab-content {
 }
 .resize{
   resize: both;
+}
+.list-decimal{
+  list-style-type: decimal;
 }
 .list-none{
   list-style-type: none;
@@ -2167,15 +2188,35 @@ input:checked ~ .tab-content {
 .gap-y-0{
   row-gap: 0px;
 }
+.space-x-14 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-x-reverse: 0;
+  margin-right: calc(3.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(3.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
 .space-x-2 > :not([hidden]) ~ :not([hidden]){
   --tw-space-x-reverse: 0;
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
   margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
+.space-x-6 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-x-reverse: 0;
+  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
 .space-y-1 > :not([hidden]) ~ :not([hidden]){
   --tw-space-y-reverse: 0;
   margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+.space-y-3 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+}
+.space-y-32 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-y-reverse: 0;
+  margin-top: calc(8rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(8rem * var(--tw-space-y-reverse));
 }
 .divide-y > :not([hidden]) ~ :not([hidden]){
   --tw-divide-y-reverse: 0;
@@ -2285,6 +2326,10 @@ input:checked ~ .tab-content {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+.px-3{
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
 .px-4{
   padding-left: 1rem;
   padding-right: 1rem;
@@ -2292,6 +2337,10 @@ input:checked ~ .tab-content {
 .px-5{
   padding-left: 1.25rem;
   padding-right: 1.25rem;
+}
+.px-6{
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 .px-8{
   padding-left: 2rem;
@@ -2321,6 +2370,10 @@ input:checked ~ .tab-content {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
+.py-5{
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
 .py-8{
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -2328,11 +2381,20 @@ input:checked ~ .tab-content {
 .\!pt-\[0\.1px\]{
   padding-top: 0.1px !important;
 }
+.pb-1{
+  padding-bottom: 0.25rem;
+}
 .pb-2{
   padding-bottom: 0.5rem;
 }
 .pb-4{
   padding-bottom: 1rem;
+}
+.pb-5{
+  padding-bottom: 1.25rem;
+}
+.pb-6{
+  padding-bottom: 1.5rem;
 }
 .pb-8{
   padding-bottom: 2rem;
@@ -2438,6 +2500,12 @@ input:checked ~ .tab-content {
 }
 .not-italic{
   font-style: normal;
+}
+.leading-4{
+  line-height: 1rem;
+}
+.leading-5{
+  line-height: 1.25rem;
 }
 .leading-6{
   line-height: 1.5rem;
@@ -2696,6 +2764,9 @@ input:checked ~ .tab-content {
   }
   .md\:h-screen{
     height: 100vh;
+  }
+  .md\:w-52{
+    width: 13rem;
   }
   .md\:w-\[41rem\]{
     width: 41rem;

@@ -58,7 +58,10 @@ async function getFolder(owner, repo, path, ref = null) {
       }
     }
   ).catch((err) => {
-    console.log(err);
+    console.log(
+      `FAILED: GET /repos/${ owner }/${ repo }/contents/${ path }${ ref
+        ? '?ref=' + ref
+        : '' }`);
   });
 
   if (content && content.status === 200) {
@@ -70,7 +73,7 @@ async function getFolder(owner, repo, path, ref = null) {
         };
       });
   }
-  return false;
+  return [];
 }
 
 async function getTree(repo, branch = 'master') {

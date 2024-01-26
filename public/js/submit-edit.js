@@ -46,9 +46,10 @@ function submitInput(input) {
   const formData = new FormData();
   formData.append('courseId', courseId);
   // Append the changed field to the FormData
-  if (input.files && input.files[0])
-    formData.append(input.name, input.files[0], input.value);
-  else formData.append(input.name, input.value);
+  //if (input.files && input.files[0])
+  //  formData.append(input.name, input.files[0], input.value);
+  //else
+  formData.append(input.name, input.value);
 
   // Submit the form with only the changed field
   // todo save indicator

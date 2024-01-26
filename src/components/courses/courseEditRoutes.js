@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  allCoursesController, renderEditPage,
+  allCoursesController, fileUpload, renderEditPage,
   responseAction
 } from './coursesController.js';
 import validateTeacher from '../../middleware/validateTeacher.js';
@@ -32,6 +32,11 @@ router.get(
   allCoursesController.getSpecificCourse,
   responseAction,
   renderEditPage
+);
+
+router.post(
+  '/upload',
+  fileUpload
 );
 
 router.post(

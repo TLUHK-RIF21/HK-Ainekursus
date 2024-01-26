@@ -219,16 +219,15 @@ const renderEditPage = async (req, res) => {
   const {
     config,
     path,
-    allCourses,
     coursePathInGithub,
     teachers,
     branches,
     selectedVersion,
-    allTeams,
+    //allTeams,
     resComponents, resFiles, resSources, refBranch
   } = res.locals;
 
-  //console.log(res.locals);
+  console.log(res.locals);
   /** Sisulehe sisu lugemine */
   const resComponentsContent = resComponents.data.content;
   const componentDecoded = base64.decode(resComponentsContent);
@@ -266,8 +265,8 @@ const renderEditPage = async (req, res) => {
   }
 
   // used for adding new branch
-  const curYear = new Date().getFullYear();
-  const years = [curYear, curYear + 1, curYear + 2];
+  //const curYear = new Date().getFullYear();
+  //const years = [curYear, curYear + 1, curYear + 2];
 
   // get docs/lisamaterjalid.md
   const repoPath = coursePathInGithub.split('/').pop();
@@ -291,18 +290,21 @@ const renderEditPage = async (req, res) => {
     // console.log(material);
   }
 
-  const allConcepts = await allCoursesController.getAllConcepts(
-    allCourses,
-    refBranch
-  );
+  //get all courses and all concepts for every course
+  //const allCourses = await getAllCoursesData(req);
+  // get concepts from master branches
+  //const allConcepts = await allCoursesController.getAllConcepts(
+  //  allCourses, 'master');
+  //console.log(allCourses);
+  //return 'ok';
 
   // replace each lesson.component slug with object
-  config.config.lessons.map((l) => {
-    l.components.map((slug) => {
-      const def = allConcepts.find((concept) => concept.slug === slug);
-      return def || null;
-    });
-  });
+  /*config.config.lessons.map((l) => {
+   l.components.map((slug) => {
+   const def = allConcepts.find((concept) => concept.slug === slug);
+   return def || null;
+   });
+   });*/
 
   /** Finally you can render the course view with all correct information you've collected from GitHub, and with all correctly rendered Markdown content! */
   const viewVars = {
@@ -314,7 +316,7 @@ const renderEditPage = async (req, res) => {
     lessons: config.config.lessons,
     sources: sourcesJSON,
     path,
-    courses: allCourses,
+    //courses: allCourses,
     config: config.config,
     files: resFiles,
     user: req.user,
@@ -322,10 +324,10 @@ const renderEditPage = async (req, res) => {
     branches,
     selectedVersion,
     refBranch,
-    currentPath: req.body.currentPath,
+    currentPath: req.body.currentPath
     //allTeams,
     //years,
-    allConcepts
+    //allConcepts
   };
 
   res.render('course-edit', viewVars);
@@ -677,7 +679,6 @@ const allCoursesController = {
       courseId, contentSlug, componentSlug
     } = req.params;
 
-    //return res.send(`${ courseId }, ${ contentSlug }, ${ componentSlug }`);
     res.locals.user = req.user;
     const { ref } = req.query;
     const isTeacher = req.user.roles.includes('teacher');
@@ -1146,10 +1147,12 @@ const allCoursesController = {
     console.log('❌❌ concepts IS NOT from cache');
     const allConcepts = [];
     await Promise.all(courses.map(async (course) => {
-      const folderContent = await getFolder(process.env.REPO_ORG_NAME,
-        course.courseSlugInGithub, 'concepts', refBranch
-      );
-      course.config.concepts.forEach((concept) => {
+      // repository: 'https://github.com/tluhk/HK_Sissejuhatus-informaatikasse',
+      const [owner, repo] = course.repository.replace('https://github.com/', '')
+        .split('/');
+      const folderContent = await getFolder(owner, repo, 'concepts', refBranch);
+      console.log(folderContent);
+      course.config?.concepts?.forEach((concept) => {
         // find where is concept defined
         if (folderContent.filter((f) => f.name === concept.slug).length) {
           concept.course = course.courseSlugInGithub;
@@ -1379,10 +1382,17 @@ const allCoursesController = {
     return false;
   }
 };
+
+const fileUpload = async (req, res) => {
+  console.log(req.body);
+  return res.send('OK');
+};
+
 export {
   allCoursesController,
   responseAction,
   renderPage,
   renderEditPage,
-  getMarkedAsDoneComponents
+  getMarkedAsDoneComponents,
+  fileUpload
 };
