@@ -39,7 +39,7 @@ const commandBar1 = new TinyMDE.CommandBar(
   { element: 'tinymde_commandbar', editor: tinyMDE1 });
 
 const tinyMDE2 = new TinyMDE.Editor(
-  { textarea: 'additionalMaterials[content]' }).addEventListener(
+  { textarea: 'concept_content' }).addEventListener(
   'change', debounce((eventData, xxx) => {
     handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
   }, 1000));
@@ -47,31 +47,33 @@ const tinyMDE2 = new TinyMDE.Editor(
 const commandBar2 = new TinyMDE.CommandBar(
   { element: 'tinymde_commandbar2', editor: tinyMDE2 });
 
-const lessons = document.querySelectorAll('.lesson');
+/*
+ const lessons = document.querySelectorAll('.lesson');
 
-lessons.forEach((title, index) => {
-  title.addEventListener('click', () => {
-    const content = title.nextElementSibling;
-    content.classList.toggle('hidden');
-  });
-  const tinyMDE = new TinyMDE.Editor(
-    { textarea: 'lessons_content_' + index }).addEventListener(
-    'change', debounce((eventData, xxx) => {
-      handleMDChange(
-        eventData.content,
-        'lessons/loeng_' + (index + 1).toString().padStart(2, '0') +
-        '/README.md'
-      );
-    }, 1000));
-  const cm = new TinyMDE.CommandBar({
-    element: 'tinymde_commandbar_lessons_content_' + index, editor: tinyMDE
-  });
+ lessons.forEach((title, index) => {
+ title.addEventListener('click', () => {
+ const content = title.nextElementSibling;
+ content.classList.toggle('hidden');
+ });
+ const tinyMDE = new TinyMDE.Editor(
+ { textarea: 'lessons_content_' + index }).addEventListener(
+ 'change', debounce((eventData, xxx) => {
+ handleMDChange(
+ eventData.content,
+ 'lessons/loeng_' + (index + 1).toString().padStart(2, '0') +
+ '/README.md'
+ );
+ }, 1000));
+ const cm = new TinyMDE.CommandBar({
+ element: 'tinymde_commandbar_lessons_content_' + index, editor: tinyMDE
+ });
 
-  const tinyMDE2 = new TinyMDE.Editor(
-    { textarea: 'lessons_add_' + index }).addEventListener(
-    'change', debounce((eventData, xxx) => {
-      handleMDChange(eventData.content, 'lessons_add_' + index);
-    }, 1000));
-  const cm2 = new TinyMDE.CommandBar(
-    { element: 'tinymde_commandbar_lessons_add_' + index, editor: tinyMDE2 });
-});
+ const tinyMDE2 = new TinyMDE.Editor(
+ { textarea: 'lessons_add_' + index }).addEventListener(
+ 'change', debounce((eventData, xxx) => {
+ handleMDChange(eventData.content, 'lessons_add_' + index);
+ }, 1000));
+ const cm2 = new TinyMDE.CommandBar(
+ { element: 'tinymde_commandbar_lessons_add_' + index, editor: tinyMDE2 });
+ });
+ */

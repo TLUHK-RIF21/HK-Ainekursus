@@ -1,10 +1,9 @@
 import express from 'express';
-import {
-  allCoursesController, fileUpload, renderEditPage,
-  responseAction
-} from './coursesController.js';
 import validateTeacher from '../../middleware/validateTeacher.js';
 import apiRequests from './coursesService.js';
+import {
+  courseEditController, fileUpload, renderEditPage
+} from './courseEditController.js';
 
 const router = express.Router();
 
@@ -27,21 +26,46 @@ router.get(
 );
 
 router.get(
-  '/:courseId/:contentSlug?/:componentSlug?',
+  '/:courseId',
   validateTeacher,
-  allCoursesController.getSpecificCourse,
-  responseAction,
+  courseEditController.getSpecificCourse, // general data
+  courseEditController.getGeneral,
   renderEditPage
 );
+
+router.get(
+  '/:courseId/concept/:slug',
+  validateTeacher,
+  courseEditController.getSpecificCourse,
+  courseEditController.getConcept,
+  renderEditPage
+);
+
+router.post('/:courseId', (req, res) => {
+  // Handle POST request for /:courseId
+  // You can access the request body with req.body
+  //allCoursesController.updateCourseData
+});
+
+router.post('/:courseId/concept/:slug', (req, res) => {
+  // Handle POST request for /:courseId/concept/:slug
+  // You can access the request body with req.body
+});
+
+router.delete('/:courseId/concept/:slug', (req, res) => {
+  // Handle DELETE request for /:courseId/concept/:slug
+  // You can access the id and slug parameters with req.params.id and
+  // req.params.slug
+});
 
 router.post(
   '/upload',
   fileUpload
 );
 
-router.post(
-  '/',
-  allCoursesController.updateCourseData
-);
+/*router.post(
+ '/',
+ allCoursesController.updateCourseData
+ );*/
 
 export default router;

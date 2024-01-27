@@ -227,7 +227,7 @@ const renderEditPage = async (req, res) => {
     resComponents, resFiles, resSources, refBranch
   } = res.locals;
 
-  console.log(res.locals);
+  //console.log(res.locals);
   /** Sisulehe sisu lugemine */
   const resComponentsContent = resComponents.data.content;
   const componentDecoded = base64.decode(resComponentsContent);
@@ -315,8 +315,6 @@ const renderEditPage = async (req, res) => {
     practices: config.config.practices,
     lessons: config.config.lessons,
     sources: sourcesJSON,
-    path,
-    //courses: allCourses,
     config: config.config,
     files: resFiles,
     user: req.user,
@@ -324,10 +322,8 @@ const renderEditPage = async (req, res) => {
     branches,
     selectedVersion,
     refBranch,
-    currentPath: req.body.currentPath
-    //allTeams,
-    //years,
-    //allConcepts
+    currentPath: req.body.currentPath,
+    partial: 'course-edit.general'
   };
 
   res.render('course-edit', viewVars);
@@ -1151,7 +1147,7 @@ const allCoursesController = {
       const [owner, repo] = course.repository.replace('https://github.com/', '')
         .split('/');
       const folderContent = await getFolder(owner, repo, 'concepts', refBranch);
-      console.log(folderContent);
+      //console.log(folderContent);
       course.config?.concepts?.forEach((concept) => {
         // find where is concept defined
         if (folderContent.filter((f) => f.name === concept.slug).length) {
@@ -1344,48 +1340,7 @@ const allCoursesController = {
       return res.json(response);
     }
     return res.status(500).send('error');
-  },
-  /*
-   Kursuse muutmine:
-   concepts = [
-   {
-   "slug": "naidis-sisuteema",
-   "name": "Näidis Sisuteema",
-   "uuid": "7cc19837-3dfe-4da7-ac2e-b4f7132fb3a4"
-   }, {
-   "slug": "sisu-loomise-juhend",
-   "name": "Sisu loomise juhend",
-   "uuid": "49b640ef-5c58-41e2-9392-4514f49a9c17"
-   }],
-
-   kasutaja peab saama "linkida" teistest repodest.
-   Link tähendab, et config.json concepts osas on objekt, mis kuulub tegelikult teise reposse.
-   Kasutaja peab saama otsida concepte (esialgu nime järgi, aga ka sisu järgi),
-   kasutaja peab nägema eelvaadet,
-   kasutaja peab saama muuta concepti - kui on lingitud sisu, siis näeb, kus veel on kasutatud,
-   kui hakkab sisu muutma, siis peaks saama valida, kas muudab originaali kõikjal, või luuakse orig põhjal uus sisu
-
-   Äkki võiks sama loogika olla ka teiste plokkide kohta (lessons, praktikumid)
-
-   */
-  async publishCourse(course) {
-    const mergeResponse = await apiRequests.mergeMasterWithDraft(
-      course.repository.replace('https://github.com/', ''),
-      'Shipped cool_feature!'
-    );
-    if (mergeResponse.status === 204 || mergeResponse.status === 201) { // delete draft branch
-      return await apiRequests.deleteBranch(
-        course.repository.replace('https://github.com/', ''),
-        'draft'
-      );
-    }
-    return false;
   }
-};
-
-const fileUpload = async (req, res) => {
-  console.log(req.body);
-  return res.send('OK');
 };
 
 export {
@@ -1393,6 +1348,5 @@ export {
   responseAction,
   renderPage,
   renderEditPage,
-  getMarkedAsDoneComponents,
-  fileUpload
+  getMarkedAsDoneComponents
 };

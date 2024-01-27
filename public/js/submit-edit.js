@@ -88,19 +88,19 @@ function submitInput(input) {
  * @return {void}
  */
 function handleInputChange(input) {
-  input.dataset.initialValue = input.value;
-  input.addEventListener('input', debounce(function () {
-    // Check if the input value has changed
-    if (this.value !== this.dataset.initialValue) {
-      submitInput(input);
-    }
-  }, 500)); // 500ms debounce
+  /*input.dataset.initialValue = input.value;
+   input.addEventListener('input', debounce(function () {
+   // Check if the input value has changed
+   if (this.value !== this.dataset.initialValue) {
+   submitInput(input);
+   }
+   }, 500)); // 500ms debounce*/
 }
 
 // Select all input elements in the form
-document.querySelectorAll('form input, form input[type="file"]')
-  .forEach(input => {
-    // Store the initial value of the input
-    handleInputChange(input);
-  });
+/*document.querySelectorAll('form input, form input[type="file"]')
+ .forEach(input => {
+ // Store the initial value of the input
+ handleInputChange(input);
+ });*/
 

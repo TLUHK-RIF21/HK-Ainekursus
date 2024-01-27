@@ -20,11 +20,17 @@
         {{> sidebar-left.course-edit }}
     </aside>
 
-    <main id="main-content" class="main px-4 py-4">
-        <!-- Refers to content.handlebars fail in /partials folder -->
-        {{> content.course-edit }}
+    <main id="main-content" class="main px-4 py-4 mt-10">
+        <!-- Renders dynamic partial set by controller -->
+        {{> (whichPartial partial) }}
     </main>
     <aside class="right-side-menu p-2">
         {{> sidebar-right.course-edit }}
     </aside>
 </div>
+
+<script type="application/javascript" src="/js/submit-edit.js"></script>
+<!--script type="application/javascript" src="/js/editor-tabs.js"></script!-->
+<!--script type="application/javascript" src="/js/md-editors.js"></script!-->
+<script type="application/javascript" src="/js/sync-ois.js"></script>
+<script type="application/javascript" src="/js/fileupload.js"></script>

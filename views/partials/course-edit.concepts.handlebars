@@ -1,68 +1,84 @@
-<div class="tab-pane">
-
-    {{#each concepts}}
-        <div class="card mb-2">
-            <div class="card-title p-2 flex items-center justify-between cursor-pointer lesson">
-                <div class="flex gap-2">
-                    {{log this}}
-                    {{this.name}}
-                </div>
-                <button class="btn btn-primary" title="Kustuta loeng">
-                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                </button>
-            </div>
-            <div class="p-2 hidden transition">
-                <label for="lessons[{{@index}}][name]">Loengu nimetus:</label>
-                <input type="text" name="lessons[{{@index}}][name]" id="lessons[{{@index}}][name]" value="{{this.name}}"
-                       class="input-single" required>
-                <input type="hidden" name="lessons[{{@index}}][content][sha]" value="{{this.content.sha}}">
-                <input type="hidden" name="lessons[{{@index}}][additionalMaterials][sha]"
-                       value="{{this.additionalMaterials.sha}}">
-                <div class="block my-4">
-                    <label for="tinymde_commandbar_lessons_content_{{@index}}">Loengu kirjeldus:</label>
-                    <div id="tinymde_commandbar_lessons_content_{{@index}}"></div>
-                    <div class="txtcontainer w-full">
-                        <textarea id="lessons_content_{{@index}}" cols="30" rows="30"
-                                  name="lessons[{{@index}}][content][content]">{{this.content.content}}</textarea>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    {{/each}}
+<div class="tab-pane mt-8">
     <div class="card mb-2">
-        <div class="card-title p-2 flex items-center gap-2 cursor-pointer lesson">
-            <i class="material-symbols-outlined text-xxxl mr-4" aria-hidden="true">sticky_note_2</i>Lisa uus sisuteema
+        <div class="card-title p-2 flex items-center justify-between cursor-pointer lesson">
+            <div class="flex gap-2">
+                <h4>Sisuteema muutmine</h4>
+            </div>
+            <button class="btn btn-primary" title="Kustuta sisuteema">
+                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+            </button>
         </div>
-        <div class="p-2 hidden transition">
-            <label for="lessons[{{lessons.length}}][name]">Loengu nimetus:</label>
-            <input type="text" name="lessons[{{lessons.length}}][name]" id="lessons[{{lessons.length}}][name]"
-                   class="input-single">
-            <input type="hidden" name="lessons[{{lessons.length}}][additionalMaterials][sha]">
+        <div class="p-2">
+            <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
+            <label for="concept[name]">Sisuteema nimetus</label>
+            <input type="text" name="concept[name]" id="concept[name]" value="{{readme.data.name}}"
+                   class="input-single" required>
+            <label for="concept[slug]">Sisuteema kaust</label>
+            <input type="text" name="concept[slug]" id="concept[slug]" value="{{readme.data.slug}}"
+                   class="input-single" required>
+
+            <div class="block my-4 border-b">
+                <label for="tinymde_commandbar_concept_content">Sisuteema kirjeldus:</label>
+                <div id="tinymde_commandbar_concept_content"></div>
+                <div class="txtcontainer w-full mb-4">
+                        <textarea id="concept_content" cols="30" rows="30"
+                                  name="concept[content]">{{readme.content}}</textarea>
+                </div>
+            </div>
             <div class="block my-4">
-                <label for="tinymde_commandbar_lessons_content_{{lessons.length}}">Loengu kirjeldus:</label>
-                <div id="tinymde_commandbar_lessons_content_{{lessons.length}}"></div>
-                <div class="txtcontainer w-full">
-                        <textarea id="lessons_content_{{lessons.length}}" cols="30" rows="30"
-                                  name="lessons[{{lessons.length}}][content][content]"></textarea>
-                </div>
-            </div>
-
-            <div class="block mb-4">
-                <label for="tinymde_commandbar_lessons_add_{{lessons.length}}">Lisamaterjalid:</label>
-                <div id="tinymde_commandbar_lessons_add_{{lessons.length}}"></div>
-                <div class="txtcontainer w-full">
-                        <textarea id="lessons_add_{{lessons.length}}" cols="30" rows="30"
-                                  name="lessons[{{lessons.length}}][additionalMaterials][content]"></textarea>
-                </div>
-            </div>
-
-            <div class="block mb-4">
-                Loengu sisuteemad:
+                <input type="hidden" name="concept[additionalMaterials][sha]"
+                       value="{{sources.sha}}">
+                <h4>Aine lisamaterjalid:</h4>
                 <ul>
+                    {{#each sources.content}}
+                        <li class="pb-4 mb-4 flex items-center justify-between border-b">
+                            <div>
+                                <label for="sources[{{@index}}][description]">Nimetus</label>
+                                <input type="text" id="sources[{{@index}}][description]" class="input-single"
+                                       name="sources[{{@index}}][description]" value="{{this.description}}">
+                            </div>
+                            <div>
+                                <label for="sources[{{@index}}][url]">Aadress</label>
+                                <input type="text" id="sources[{{@index}}][url]" class="input-single"
+                                       name="sources[{{@index}}][url]"
+                                       value="{{this.url}}">
+                            </div>
+                            <button class="btn btn-primary" title="Kustuta lisamaterjal">
+                                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+                            </button>
+                        </li>
+                    {{/each}}
+                    <li class="mb-4">
+                        <h6>Lisa uus materjal</h6>
+                        <div class="mt-4 flex items-center justify-between">
+                            <div>
+                                <label for="sources[new][description]">Nimetus</label>
+                                <input type="text" id="sources[new][description]" class="input-single"
+                                       name="sources[new][description]">
+                            </div>
+                            <div>
+                                <label for="sources[new][url]">Aadress</label>
+                                <input type="text" id="sources[new][url]" class="input-single"
+                                       name="sources[new][url]">
+                            </div>
+                            <button class="btn btn-primary" title="Lisa uus">
+                                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
+                            </button>
+                        </div>
+                    </li>
                 </ul>
             </div>
-
         </div>
     </div>
 </div>
+<script>
+    const tinyMDE2 = new TinyMDE.Editor(
+            { textarea: 'concept_content' }).addEventListener(
+            'change', debounce((eventData) => {
+                handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
+            }, 1000));
+
+    const commandBar2 = new TinyMDE.CommandBar(
+            { element: 'tinymde_commandbar2', editor: tinyMDE2 });
+
+</script>

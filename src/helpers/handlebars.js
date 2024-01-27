@@ -267,7 +267,10 @@ export default function hbsHelpers(hbs) {
           return 0;
         }
       },
-      jsonStringify: (context) => JSON.stringify(context)
+      jsonStringify: (context) => JSON.stringify(context),
+      whichPartial: (partial) => {
+        return partial;
+      }
     }
   });
 }

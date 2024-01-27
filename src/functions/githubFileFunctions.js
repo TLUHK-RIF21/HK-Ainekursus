@@ -47,7 +47,7 @@ async function getFile(owner, repo, path, ref = null) {
   return false;
 }
 
-async function getFolder(owner, repo, path, ref = null) {
+async function getFolder(owner, repo, path, ref = null, files = false) {
   const content = await octokit.request(
     `GET /repos/${ owner }/${ repo }/contents/${ path }${ ref
       ? '?ref=' + ref

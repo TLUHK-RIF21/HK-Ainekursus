@@ -2,7 +2,7 @@
 <nav class="sidebar h-fit relative md:sticky top-36 md:top-52 lg:top-36" id="sidebar">
     <div class="card flex justify-start items-start h-full w-full flex-col">
         <div class="flex flex-col justify-start items-center w-full">
-            <a href="/course-edit/{{path.courseId}}/about?ref=draft"
+            <a href="/course-edit/{{course.id}}"
                class="focus:outline-none focus:text-indigo-400 text-left  text-white flex justify-between items-center w-full py-5">
                 <span class="leading-4">Üldised andmed</span>
             </a>
@@ -12,8 +12,8 @@
                 <i class="material-symbols-outlined mr-2" id="icon1">expand_more</i>
             </button>
             <div id="menu1" class="hidden justify-start flex-col w-full md:w-auto items-start pb-1 ">
-                {{#each concepts}}
-                    <a href="/course-edit/{{../path.courseId}}/concept/{{this.slug}}"
+                {{#each config.config.concepts}}
+                    <a href="/course-edit/{{../course.id}}/concept/{{this.slug}}"
                        class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 rounded px-3 py-2 w-full">
                         <i class="material-symbols-outlined mr-2">sticky_note_2</i>
                         <span class="leading-4">{{this.name}}</span>

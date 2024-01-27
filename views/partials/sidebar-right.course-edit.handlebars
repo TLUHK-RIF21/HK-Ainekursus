@@ -1,37 +1,9 @@
 <!-- sidebar-right.anchor.handlebars -->
 <nav class="card !p-6 lg:!p-6 top-36 md:top-[13.5rem] lg:top-[9.5rem] h-fit relative md:sticky"
      id="sidebar-course-anchor">
-
-    <!-- Branch (version) selection menu. Only visible to 'teachers' team -->
-
-    {{#if_equal path.refBranch 'master'}}
-        {{#unless (isTeacher user)}}
-            <div class="card-header m-0">Ainekursuse versioonid:</div>
-            <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
-                <!-- Radio buttons -->
-                {{#each ../../branches }}
-
-                    <ul class=" flex items-center">
-                        <li class="w-full ml-2 text-sm font-medium"> {{this }}</li>
-                    </ul>
-
-                {{/each }}
-                <!--hr class="my-4">
-                <form action="/add-version" method="post">
-                    <input type="hidden" name="parentBranch" id="currentPath" value="{{../refBranch}}"/>
-                    <input type="hidden" name="courseSlug" id="courseSlug" value="{{../path.courseSlug}}"/>
-
-                    <input type="text" name="version" id="version" class="input-single h-8" required
-                           placeholder="arhiivi nimi"/>
-                    <button type="submit" class="btn btn-primary w-full mt-2 min-h-min">Arhiveeri</button>
-                </form!-->
-                <hr class="my-4">
-            </div>
-            <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
-                <a href="/course-edit/publish/{{../../path.courseId}}"
-                   class="btn btn-primary my-4 text-white">Avalda</a>
-                <button class="btn btn-primary my-4">Salvesta</button>
-            </div>
-        {{/unless}}
-    {{/if_equal}}
+    <div class="pl-2 pb-4 mt-4 space-y-1 text-sm flex flex-col gap-2">
+        <a href="/course-edit/publish/{{course.id}}"
+           class="btn btn-primary my-4 text-white">Avalda</a>
+        <button class="btn btn-primary my-4">Salvesta</button>
+    </div>
 </nav>
