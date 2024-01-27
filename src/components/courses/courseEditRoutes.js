@@ -17,7 +17,7 @@ router.get(
       if (!course) {
         return res.redirect('/notfound');
       }
-      await allCoursesController.publishCourse(course);
+      await courseEditController.publishCourse(course);
       return res.redirect(`/course/${ courseId }/about?ref=master`);
     } catch (error) {
       next(error);

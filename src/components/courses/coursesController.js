@@ -215,119 +215,6 @@ const renderPage = async (req, res) => {
   });
 };
 
-const renderEditPage = async (req, res) => {
-  const {
-    config,
-    path,
-    coursePathInGithub,
-    teachers,
-    branches,
-    selectedVersion,
-    //allTeams,
-    resComponents, resFiles, resSources, refBranch
-  } = res.locals;
-
-  //console.log(res.locals);
-  /** Sisulehe sisu lugemine */
-  const resComponentsContent = resComponents.data.content;
-  const componentDecoded = base64.decode(resComponentsContent);
-  const componentDecodedUtf8 = utf8.decode(componentDecoded);
-
-  /**  Sisulehe piltide kuvamine
-   * - functions: https://stackoverflow.com/a/58542933
-   * - changing img src:
-   * https://www.npmjs.com/package/modify-image-url-md?activeTab=explore
-   */
-  const start1 = performance.now();
-  const markdownWithModifiedImgSources = await function1(coursePathInGithub,
-    path, componentDecodedUtf8, refBranch
-  );
-  const end1 = performance.now();
-  console.log(
-    `Execution time markdownWithModifiedImgSources: ${ end1 - start1 } ms`);
-
-  /** Each sisuleht (concepts, practices) has a sources reference which is stored in sources.json file in GitHub. */
-    // define sources as NULL by default.
-  let sourcesJSON = null;
-
-  // NB! Sources are sent only with "Teemade endpointid" axios call. If
-  // sourcesJSON stays NULL (is false), then content.handlebars does not
-  // display "Allikad" div. If sourcesJSON gets filled (is true), then
-  // "Allikad" div is displayed.
-  if (resSources && resSources.data && resSources.data.content &&
-    resSources.data.content !== '') {
-    const sources = resSources.data;
-    const sourcesDecoded = base64.decode(sources.content);
-    const sourcesDecodedUtf8 = utf8.decode(sourcesDecoded);
-    if (sourcesDecodedUtf8) {
-      sourcesJSON = JSON.parse(sourcesDecodedUtf8);
-    }
-  }
-
-  // used for adding new branch
-  //const curYear = new Date().getFullYear();
-  //const years = [curYear, curYear + 1, curYear + 2];
-
-  // get docs/lisamaterjalid.md
-  const repoPath = coursePathInGithub.split('/').pop();
-
-  const additionalMaterials = await getFile(process.env.REPO_ORG_NAME, repoPath,
-    'docs/lisamaterjalid.md', refBranch
-  );
-
-  // for each lessons get README and lisamaterjalid.md
-  for await (const _m of config.config.lessons.map((lesson) => {
-    getFile(process.env.REPO_ORG_NAME, repoPath,
-      `lessons/${ lesson.slug }/lisamaterjalid.md`, refBranch
-    ).then((material) => (lesson.additionalMaterials = material));
-  })) {
-    // console.log(material);
-  }
-  for await (const about of config.config.lessons.map(
-    (lesson) => getFile(process.env.REPO_ORG_NAME, repoPath,
-      `lessons/${ lesson.slug }/README.md`, refBranch
-    ).then((about) => (lesson.content = about)))) {
-    // console.log(material);
-  }
-
-  //get all courses and all concepts for every course
-  //const allCourses = await getAllCoursesData(req);
-  // get concepts from master branches
-  //const allConcepts = await allCoursesController.getAllConcepts(
-  //  allCourses, 'master');
-  //console.log(allCourses);
-  //return 'ok';
-
-  // replace each lesson.component slug with object
-  /*config.config.lessons.map((l) => {
-   l.components.map((slug) => {
-   const def = allConcepts.find((concept) => concept.slug === slug);
-   return def || null;
-   });
-   });*/
-
-  /** Finally you can render the course view with all correct information you've collected from GitHub, and with all correctly rendered Markdown content! */
-  const viewVars = {
-    component: markdownWithModifiedImgSources,
-    docs: config.config.docs,
-    additionalMaterials: additionalMaterials,
-    concepts: config.config.concepts,
-    practices: config.config.practices,
-    lessons: config.config.lessons,
-    sources: sourcesJSON,
-    config: config.config,
-    files: resFiles,
-    user: req.user,
-    teachers,
-    branches,
-    selectedVersion,
-    refBranch,
-    currentPath: req.body.currentPath,
-    partial: 'course-edit.general'
-  };
-
-  res.render('course-edit', viewVars);
-};
 const allCoursesController = {
   /** For '/dashboard' route: */
   getAllCourses: async (req, res) => {
@@ -1287,59 +1174,6 @@ const allCoursesController = {
     }));
     cacheLessons.set('lessons', allLessons);
     return allLessons;
-  },
-  updateCourseData: async (req, res) => {
-    const body = req.body;
-    const keys = Object.keys(body);
-    const values = Object.values(body);
-    const response = {};
-    const courseId = req.body.courseId;
-    if (courseId) {
-      const course = await apiRequests.getCourseById(courseId);
-      const repoName = course.repository.replace('https://github.com/', '');
-      const [owner, repo] = repoName.split('/');
-
-      // handle file uploads
-      if (req.files) {
-        const fileKey = Object.keys(req.files)[0];
-        const path = fileKey + req.files[fileKey].name;
-        const content = req.files[fileKey].data.toString('base64');
-        await uploadFile(
-          owner, repo, path, content, 'file added: ' + path,
-          'draft',
-          true
-        );
-        // todo update files data
-      }
-      // courseId is always there, so we start from index 1
-      for (let i = 1; i < keys.length; i++) {
-        response[keys[i]] = values[i];
-        console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-        if (keys[i].startsWith('config/')) { // update config file
-          // key = config/courseName
-          const config = await getConfig(repoName, 'draft');
-          const updatedConfig = updateConfigFile(keys[i], values[i], config);
-          await updateFile(
-            owner, repo, 'config.json',
-            { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
-            'course edit', 'draft'
-          );
-          cacheConfig.set(`getConfig:${ repoName }+draft`, updatedConfig);
-        } else if (keys[i].endsWith('.md')) { // update file in folder
-          // get file sha
-          const oldFile = await getFile(owner, repo, keys[i], 'draft');
-          await updateFile(
-            owner, repo, keys[i],
-            { content: values[i], sha: oldFile.sha },
-            'file edit: ' + keys[i], 'draft'
-          );
-        } else {
-          console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-        }
-      }
-      return res.json(response);
-    }
-    return res.status(500).send('error');
   }
 };
 
@@ -1347,6 +1181,5 @@ export {
   allCoursesController,
   responseAction,
   renderPage,
-  renderEditPage,
   getMarkedAsDoneComponents
 };

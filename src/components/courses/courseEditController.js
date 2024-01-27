@@ -1,6 +1,13 @@
-import { getFile } from '../../functions/githubFileFunctions.js';
+import {
+  getFile,
+  updateFile,
+  uploadFile
+} from '../../functions/githubFileFunctions.js';
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
+import { getConfig } from '../../functions/getConfigFuncs.js';
+import { updateConfigFile } from './courseEditService.js';
+import { cacheConfig } from '../../setup/setupCache.js';
 
 const courseEditController = {
   getSpecificCourse: async (req, res, next) => {
@@ -153,8 +160,10 @@ const courseEditController = {
     }
     res.locals.sources = sources;
     res.locals.partial = 'course-edit.concepts';
+    res.locals.conceptUsage = await apiRequests.conceptUsage(req);
     next();
   },
+
   getGeneral: async (req, res, next) => {
     // Get course docs/README.md, docs/lisamaterjalid.md
     const [owner, repo] = res.locals.course.repository.replace(
@@ -180,11 +189,64 @@ const courseEditController = {
       );
     }
     return false;
+  },
+  updateCourseData: async (req, res) => {
+    const body = req.body;
+    const keys = Object.keys(body);
+    const values = Object.values(body);
+    const response = {};
+    const courseId = req.body.courseId;
+    if (courseId) {
+      const course = await apiRequests.getCourseById(courseId);
+      const repoName = course.repository.replace('https://github.com/', '');
+      const [owner, repo] = repoName.split('/');
+
+      // handle file uploads
+      if (req.files) {
+        const fileKey = Object.keys(req.files)[0];
+        const path = fileKey + req.files[fileKey].name;
+        const content = req.files[fileKey].data.toString('base64');
+        await uploadFile(
+          owner, repo, path, content, 'file added: ' + path,
+          'draft',
+          true
+        );
+        // todo update files data
+      }
+      // courseId is always there, so we start from index 1
+      for (let i = 1; i < keys.length; i++) {
+        response[keys[i]] = values[i];
+        console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
+        if (keys[i].startsWith('config/')) { // update config file
+          // key = config/courseName
+          const config = await getConfig(repoName, 'draft');
+          const updatedConfig = updateConfigFile(keys[i], values[i], config);
+          await updateFile(
+            owner, repo, 'config.json',
+            { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
+            'course edit', 'draft'
+          );
+          cacheConfig.set(`getConfig:${ repoName }+draft`, updatedConfig);
+        } else if (keys[i].endsWith('.md')) { // update file in folder
+          // get file sha
+          const oldFile = await getFile(owner, repo, keys[i], 'draft');
+          await updateFile(
+            owner, repo, keys[i],
+            { content: values[i], sha: oldFile.sha },
+            'file edit: ' + keys[i], 'draft'
+          );
+        } else {
+          console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
+        }
+      }
+      return res.json(response);
+    }
+    return res.status(500).send('error');
   }
 };
 
 const renderEditPage = async (req, res) => {
-  //console.log(JSON.stringify(res.locals.sources));
+  //console.log(JSON.stringify(res.locals.conceptUsage));
   res.render('course-edit', res.locals);
 };
 
@@ -196,96 +258,3 @@ const fileUpload = async (req, res) => {
 export {
   courseEditController, renderEditPage, fileUpload
 };
-
-const test =
-  {
-    refBranch: 'draft',
-    branches: ['2023-12', 'draft', 'master'],
-    course: {
-      id: 1,
-      name: 'Esimene kursus',
-      repository: 'https://github.com/tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus',
-      code: 'KUA6711.FK',
-      credits: 4,
-      form: 'eksam',
-      semester: '2023 sügis',
-      students: [],
-      teachers: []
-    },
-    config: {
-      courseUrl: 'https://ois2.tlu.ee/tluois/aine/KUA6711.FK',
-      teacherUsername: 'kaiusk',
-      courseIsActive: true,
-      courseName: 'Fotograafia ja digitaalne pilditöötlused',
-      courseSlug: 'KUA6711.FK',
-      courseCode: 'KUA6711.FK',
-      courseSemester: '',
-      courseSlugInGithub: 'Esimene kursus',
-      coursePathInGithub: 'Esimene kursus',
-      courseEAP: 3,
-      courseGrading: 'eksam',
-      refBranch: 'draft',
-      courseBranchComponentsUUIDs: [
-        '6ed7f7ff-876d-4f05-81ac-170cca19c9d3',
-        'bf4f5592-aedc-4c44-a18b-9504123c0c74',
-        'eb040d98-f24a-43f6-92bb-12af08d2d32c'
-      ],
-      courseAllActiveBranches: undefined,
-      config: {
-        courseName: 'Fotograafia ja digitaalne pilditöötlused',
-        courseUrl: 'https://ois2.tlu.ee/tluois/aine/KUA6711.FK',
-        teacherUsername: 'kaiusk',
-        active: true,
-        semester: '',
-        docs: [],
-        additionalMaterials: [],
-        lessons: [],
-        concepts: [],
-        practices: [],
-        sha: '5acbf3e4d01d85012ff14a4d591fd0f8dd33bb3c'
-      }
-    },
-    githubRequest: 'docsService',
-    coursePathInGithub: 'tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus',
-    breadcrumbNames: {
-      courseName: 'Esimene kursus',
-      contentName: 'Aine info',
-      componentName: ''
-    },
-    path: {
-      courseId: '1',
-      contentSlug: 'about',
-      refBranch: 'draft',
-      fullPath: 'about',
-      type: 'docs'
-    },
-    readme: {
-      sha: 'cb1ae6a6736c6cbd7ee2008b05ba2f0110f6656f',
-      content: '# Näidis sisuteema\n' +
-        '\n' +
-        '## Sissejuhatus\n' +
-        '\n' +
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget mauris pharetra et ultrices. Sem nulla pharetra diam sit amet. Habitant morbi tristique senectus et netus et. \n' +
-        '\n' +
-        '## Suurema teema pealkiri\n' +
-        '\n' +
-        '### Alateema\n' +
-        '\n' +
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget mauris pharetra et ultrices.\n' +
-        '\n' +
-        '### Alateema\n' +
-        '\n' +
-        'Quam quisque id diam vel quam elementum pulvinar etiam non. Condimentum lacinia quis vel eros donec ac odio tempor orci. Lacus sed turpis tincidunt id aliquet risus feugiat in. Neque vitae tempus quam pellentesque nec nam. Consectetur a erat nam at lectus urna duis convallis.\n' +
-        '\n' +
-        '## Suurema teema pealkiri\n' +
-        '\n' +
-        '### Alateema\n' +
-        '\n' +
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget mauris pharetra et ultrices.\n'
-    },
-    sources: {
-      sha: '336de955fa911beb2e6f264d7476642dbd8a2e68',
-      content: [[], [], []]
-    }
-  };
-

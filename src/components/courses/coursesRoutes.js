@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  allCoursesController, renderEditPage,
+  allCoursesController,
   renderPage,
   responseAction
 } from './coursesController.js';
