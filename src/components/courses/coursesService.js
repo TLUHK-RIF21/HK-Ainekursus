@@ -95,7 +95,8 @@ const apiRequests = {
     if (!cachePageContent.has(coursePathInGithub)) {
       console.log(
         `❌❌ docs components IS NOT from cache: ${ coursePathInGithub }`);
-      components = await axios.get(requestDocs(coursePathInGithub, refBranch),
+      components = await axios.get(
+        requestDocs(coursePathInGithub, refBranch),
         authToken
       ).catch((err) => {
         console.log(`❌❌ get docs failed: ${ coursePathInGithub }`, err);
@@ -374,24 +375,30 @@ const apiRequests = {
           'X-GitHub-Api-Version': '2022-11-28'
         }
       });
-  }, conceptUsage: async (req) => {
-    const allCourses = await getAllCoursesData(req);
-
+  }, conceptUsage: async (req, uuid) => {
     const usages = [];
+
+    const allCourses = await getAllCoursesData(req);
     for await (const contents of allCourses.map(async course => {
+      // get config from draft (this course) or from master (other courses)
       const courseConfig = await getCourseData(
-        course, course.id === req.params.courseId ? 'draft' : 'master');
+        course, parseInt(course.id) === parseInt(req.params.courseId)
+          ? 'draft'
+          : 'master');
       if (courseConfig) {
+        // find matches by slug (this course) or by uuid (other courses)
+        const match = parseInt(course.id) === parseInt(req.params.courseId)
+          ? req.params.slug
+          : uuid;
         usages.push({
           course: course,
           lessons: courseConfig.config.lessons.filter(
-            lesson => lesson.components.includes(req.params.slug))
+            lesson => lesson.components.includes(match))
         });
       }
     })) {
       //console.log(usages);
     }
-
     return usages;
   }
 };

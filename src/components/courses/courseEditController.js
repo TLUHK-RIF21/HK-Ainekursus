@@ -160,7 +160,8 @@ const courseEditController = {
     }
     res.locals.sources = sources;
     res.locals.partial = 'course-edit.concepts';
-    res.locals.conceptUsage = await apiRequests.conceptUsage(req);
+    res.locals.conceptUsage = await apiRequests.conceptUsage(
+      req, res.locals.readme.data.uuid);
     next();
   },
 
