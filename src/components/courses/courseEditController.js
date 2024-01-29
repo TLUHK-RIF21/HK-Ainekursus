@@ -4,9 +4,11 @@ import {
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getConfig } from '../../functions/getConfigFuncs.js';
-import { updateConfigFile } from './courseEditService.js';
+import {
+  handleCourseAndConceptFiles,
+  updateConfigFile
+} from './courseEditService.js';
 import { cacheConfig } from '../../setup/setupCache.js';
-import slugify from 'slugify';
 
 const courseEditController = {
   getSpecificCourse: async (req, res, next) => {
@@ -131,7 +133,9 @@ const courseEditController = {
     }
     next();
 
-  }, getConcept: async (req, res, next) => {
+  },
+
+  getConcept: async (req, res, next) => {
     // Get one concept data based on req.params.courseId and req.params.slug
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
@@ -149,7 +153,7 @@ const courseEditController = {
       }
       res.locals.sources = sources;
       res.locals.conceptUsage = await apiRequests.conceptUsage(
-        req, res.locals.readme.data.uuid);
+        req, res.locals.readme.data?.uuid);
     } else { // create new
       res.locals.readme = {
         slug: 'new', data: {}, sources: {}
@@ -229,40 +233,16 @@ const courseEditController = {
       return res.json(response);
     }
     return res.status(500).send('error');
-  }, updateConcept: async (req, res) => {
-    /*
-     1- update readme.md content
-     2- create new folder with files
-     3- rename folder - move to new folder???
-     */
+  },
+
+  updateConcept: async (req, res) => {
     const { concept, courseId } = req.body;
-    if (concept && courseId) {
-      const course = await apiRequests.getCourseById(courseId);
-      if (course) {
-        const [owner, repo] = course.repository.replace(
-          'https://github.com/', '')
-          .split('/');
-        if (concept.sha) { // existing file, change content
-          await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,
-            { content: concept.content, sha: concept.sha },
-            `edit concept: ${ concept.name }`, 'draft'
-          );
-          return res.redirect('back');
-        } else { // new file, create content
-          const slug = slugify(concept.name.toLowerCase());
-          await uploadFile(owner, repo, `concepts/${ slug }/README.md`,
-            concept.content, `created concept: ${ concept.name }`, 'draft'
-          );
-          await uploadFile(owner, repo, `concepts/${ slug }/sources.json`, '[]',
-            `created concept: ${ concept.name }`, 'draft'
-          );
-          // todo update main config.json
-          // edit created content
-          return res.redirect(`/course-edit/${ courseId }/concept/${ slug }`);
-        }
-      }
+    if (!(concept && courseId)) {
+      return res.redirect('back');
+    } else {
+      const url = await handleCourseAndConceptFiles(courseId, concept);
+      return res.redirect(url);
     }
-    return res.redirect('back');
   }
 };
 
