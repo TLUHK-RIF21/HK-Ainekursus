@@ -390,15 +390,19 @@ const apiRequests = {
         const match = parseInt(course.id) === parseInt(req.params.courseId)
           ? req.params.slug
           : uuid;
-        usages.push({
-          course: course,
-          lessons: courseConfig.config.lessons.filter(
-            lesson => lesson.components.includes(match))
-        });
+        const lessons = courseConfig.config.lessons.filter(
+          lesson => lesson.components.includes(match));
+        if (lessons.length) {
+          usages.push({
+            course: course,
+            lessons: lessons
+          });
+        }
       }
     })) {
       //console.log(usages);
     }
+
     return usages;
   }
 };

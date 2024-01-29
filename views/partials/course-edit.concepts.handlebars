@@ -16,9 +16,9 @@
         </div>
         <div>
             {{#if conceptUsage.length}}
-                <p class="p-2 my-0 cursor-pointer flex items-center"
+                <p class="p-2 my-0 cursor-pointer flex items-center text-system-red-tlu"
                    onclick="document.getElementById('showUsage').classList.toggle('hidden')">
-                    Antud sisuteema on kasutuses ({{conceptUsage.length}})
+                    NB! Antud sisuteema on kasutuses ({{conceptUsage.length}})
                     <i class="material-symbols-outlined ml-2">expand_more</i>
                 </p>
                 <ul class="hidden transition" id="showUsage">
@@ -40,10 +40,13 @@
         </div>
     </div>
     <div class="card mb-2">
-        <div class="p-2">
-            <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="conceptForm">
+        <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="conceptForm">
+            <div class="p-2">
                 <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
+                <input type="hidden" name="concept[slug]" value="{{readme.slug}}">
                 <input type="hidden" name="courseId" value="{{course.id}}">
+                <input type="hidden" name="concept[additionalMaterials][sha]"
+                       value="{{sources.sha}}">
                 <label for="concept[name]">Sisuteema nimetus</label>
                 <input type="text" name="concept[name]" id="concept[name]" value="{{readme.data.name}}"
                        class="input-single" required>
@@ -59,13 +62,11 @@
                                   name="concept[content]">{{readme.content}}</textarea>
                     </div>
                 </div>
-            </form>
-            <div class="block my-4">
-                <h4>Aine lisamaterjalid:</h4>
-                {{#if readme.data.slug }}
-                    <input type="hidden" name="concept[additionalMaterials][sha]"
-                           value="{{sources.sha}}">
-                    <ul>
+
+                <div class="block my-4">
+                    <h4>Aine lisamaterjalid:</h4>
+
+                    <ul id="sources">
                         {{#each sources.content}}
                             <li class="pb-4 mb-4 flex items-center justify-between border-b">
                                 <div class="grow">
@@ -79,7 +80,8 @@
                                            name="sources[{{@index}}][url]"
                                            value="{{this.url}}">
                                 </div>
-                                <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal">
+                                <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal"
+                                        type="button" onclick="deleteSource(this)">
                                     <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
                                 </button>
                             </li>
@@ -88,26 +90,23 @@
                             <h6>Lisa uus materjal</h6>
                             <div class="mt-4 flex items-center justify-between">
                                 <div class="grow">
-                                    <label for="sources[new][description]">Nimetus</label>
-                                    <input type="text" id="sources[new][description]" class="input-single"
-                                           name="sources[new][description]">
+                                    <label for="newDescription">Nimetus</label>
+                                    <input type="text" id="newDescription" class="input-single" name="newDescription">
                                 </div>
                                 <div class="grow">
-                                    <label for="sources[new][url]">Lingi aadress</label>
-                                    <input type="text" id="sources[new][url]" class="input-single"
-                                           name="sources[new][url]">
+                                    <label for="newUrl">Lingi aadress</label>
+                                    <input type="text" id="newUrl" class="input-single" name="newUrl">
                                 </div>
-                                <button class="btn btn-primary ml-2 self-end" title="Lisa uus">
+                                <button class="btn btn-primary ml-2 self-end" title="Lisa uus" type="button"
+                                        onclick="addSource()">
                                     <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
                                 </button>
                             </div>
                         </li>
                     </ul>
-                {{else}}
-                    <p>salvesta sisuteema....</p>
-                {{/if}}
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 <script>
@@ -119,5 +118,39 @@
 
     const commandBar2 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar2', editor: tinyMDE2 });
+
+    function deleteSource(el) {
+        el.closest('li').remove();
+    }
+
+    function addSource() {
+        const ul = document.getElementById('sources');
+        const penultimateLi = ul.lastChild.previousSibling;
+        const index = ul.getElementsByTagName('li').length - 1;
+        const newLi = document.createElement('li');
+        newLi.classList.add('pb-4', 'mb-4', 'flex', 'items-center', 'justify-between', 'border-b');
+        newLi.innerHTML = `
+        <div class="grow">
+            <label for="sources[${ index }][description]">Nimetus</label>
+            <input type="text" id="sources[${ index }][description]" class="input-single"
+                   name="sources[${ index }][description]" value="${ document.getElementById('newDescription').value }">
+        </div>
+        <div class="grow">
+            <label for="sources[${ index }][url]">Lingi aadress</label>
+            <input type="text" id="sources[${ index }][url]" class="input-single"
+                   name="sources[${ index }][url]"
+                   value="${ document.getElementById('newUrl').value }">
+        </div>
+        <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal"
+                onclick="deleteSource(this)">
+            <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+        </button>
+        `;
+
+        // insert new li before last li element
+        ul.insertBefore(newLi, penultimateLi);
+        document.getElementById('newUrl').value = '';
+        document.getElementById('newDescription').value = '';
+    }
 
 </script>

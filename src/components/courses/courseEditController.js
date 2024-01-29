@@ -156,7 +156,7 @@ const courseEditController = {
         req, res.locals.readme.data?.uuid);
     } else { // create new
       res.locals.readme = {
-        slug: 'new', data: {}, sources: {}
+        slug: '', data: {}, sources: {}
       };
     }
     res.locals.partial = 'course-edit.concepts';
@@ -236,18 +236,21 @@ const courseEditController = {
   },
 
   updateConcept: async (req, res) => {
-    const { concept, courseId } = req.body;
+    const { concept, courseId, sources } = req.body;
+    //console.log(req.body);
+    //return res.redirect('back');
     if (!(concept && courseId)) {
       return res.redirect('back');
     } else {
-      const url = await handleCourseAndConceptFiles(courseId, concept);
+      const url = await handleCourseAndConceptFiles(courseId, concept, sources);
       return res.redirect(url);
     }
   }
 };
 
 const renderEditPage = async (req, res) => {
-  // console.log(JSON.stringify(res.locals.conceptUsage));
+  res.locals.user = req.user;
+  //console.log(JSON.stringify(res.locals.conceptUsage));
   res.render('course-edit', res.locals);
 };
 

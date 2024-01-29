@@ -54,14 +54,9 @@ function makeUniqueSlug(slug, array) {
   }
 }
 
-async function changeFileContent(
-  owner, repo, filePath, fileData, commitMessage, branch) {
-  await updateFile(owner, repo, filePath, fileData, commitMessage, branch);
-  return 'back';
-}
-
 // Looge funktsioon, mis loob uue faili sisu
-async function createFileContent(owner, repo, concept, course, branch) {
+async function createFileContent(
+  owner, repo, concept, course, sources, branch) {
   // create unique slug from name
   const slug = makeUniqueSlug(
     slugify(concept.name.toLowerCase()), course.config.concepts);
@@ -72,45 +67,58 @@ async function createFileContent(owner, repo, concept, course, branch) {
   );
 
   // add empty sources.json fail
-  await uploadFile(owner, repo, `concepts/${ slug }/sources.json`, '[]',
+  await uploadFile(owner, repo, `concepts/${ slug }/sources.json`,
+    JSON.stringify(sources),
     `created concept: ${ concept.name }`, branch
   );
 
   // update config.json
   course.config.concepts.push({
     name: concept.name,
-    slug: concept.slug,
+    slug: slug,
     uuid: uuidv4(),
     repo: slugify(course.courseName)
   });
-  await uploadFile(owner, repo, 'config.json',
-    JSON.stringify(course.config), 'concept added to the config.json', branch
+  await updateFile(owner, repo, 'config.json',
+    {
+      content: JSON.stringify(course.config),
+      sha: course.config.sha
+    }, 'concept added to the config.json', branch
   );
 
   // return redirect url
-  return `/course-edit/${ courseId }/concept/${ slug }`;
+  return `/course-edit/${ course.id }/concept/${ slug }`;
 }
 
 // Looge funktsioon, mis tegeleb kursuse ja kontseptsiooni failidega
-async function handleCourseAndConceptFiles(courseId, concept) {
+async function handleCourseAndConceptFiles(courseId, concept, sources) {
   // get course from API
   const course = await apiRequests.getCourseById(courseId);
   // if we have course
   if (course) {
     const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
       .split('/');
+    const courseConfig = await getCourseData(course, 'draft');
+    //console.log(courseConfig);
+    //return 'back';
     // if we have sha - update existing file
     if (concept.sha) {
-      return await changeFileContent(owner, repo,
-        `concepts/${ concept.slug }/README.md`,
+      await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,
         { content: concept.content, sha: concept.sha },
         `edit concept: ${ concept.name }`, 'draft'
       );
+      await updateFile(owner, repo, `concepts/${ concept.slug }/sources.json`,
+        {
+          content: JSON.stringify(sources),
+          sha: concept.additionalMaterials.sha
+        },
+        `edit sources: ${ concept.name }`, 'draft'
+      );
+      return 'back';
     } else { // no sha - create new content
       // get course config
-      const courseConfig = await getCourseData(course, 'draft');
       return await createFileContent(
-        owner, repo, concept, courseConfig, 'draft');
+        owner, repo, concept, courseConfig, sources, 'draft');
     }
   }
   return 'back';
