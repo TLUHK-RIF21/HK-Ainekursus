@@ -25,6 +25,7 @@ router.get(
   }
 );
 
+//edit general data
 router.get(
   '/:courseId',
   validateTeacher,
@@ -33,6 +34,7 @@ router.get(
   renderEditPage
 );
 
+//edit concept data
 router.get(
   '/:courseId/concept/:slug',
   validateTeacher,
@@ -47,10 +49,11 @@ router.post('/:courseId', (req, res) => {
   //allCoursesController.updateCourseData
 });
 
-router.post('/:courseId/concept/:slug', (req, res) => {
+router.post(
+  '/:courseId/concept/:slug',
   // Handle POST request for /:courseId/concept/:slug
-  // You can access the request body with req.body
-});
+  courseEditController.updateConcept
+);
 
 router.delete('/:courseId/concept/:slug', (req, res) => {
   // Handle DELETE request for /:courseId/concept/:slug

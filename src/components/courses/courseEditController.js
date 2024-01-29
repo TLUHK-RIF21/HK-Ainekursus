@@ -1,13 +1,12 @@
 import {
-  getFile,
-  updateFile,
-  uploadFile
+  getFile, updateFile, uploadFile
 } from '../../functions/githubFileFunctions.js';
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getConfig } from '../../functions/getConfigFuncs.js';
 import { updateConfigFile } from './courseEditService.js';
 import { cacheConfig } from '../../setup/setupCache.js';
+import slugify from 'slugify';
 
 const courseEditController = {
   getSpecificCourse: async (req, res, next) => {
@@ -125,43 +124,38 @@ const courseEditController = {
 
     if ((contentSlug && !contentName) ||
       (contentSlug && contentName && componentSlug && !componentName)) {
-      console.log(
-        'no contentName or componentName found', contentSlug, contentName,
-        componentSlug, componentName
+      console.log('no contentName or componentName found', contentSlug,
+        contentName, componentSlug, componentName
       );
       return res.redirect('/notfound');
     }
-
-    /*res.locals.githubRequest = githubRequest;
-     res.locals.coursePathInGithub = course.repository.replace(
-     'https://github.com/', '');*/
-
-    //console.log(res.locals);
     next();
 
-  },
-  getConcept: async (req, res, next) => {
+  }, getConcept: async (req, res, next) => {
     // Get one concept data based on req.params.courseId and req.params.slug
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
       .split('/');
-    /*const folderContent = await getFolder(
-     owner, repo, `concepts/${ req.params.slug }`, 'draft');
-     console.log(folderContent);*/
     res.locals.readme = await getFile(
       owner, repo, `concepts/${ req.params.slug }/README.md`, 'draft');
-    res.locals.readme.slug = req.params.slug;
-    res.locals.readme.data = res.locals.config.config.concepts.find(
-      c => c.slug === req.params.slug);
-    const sources = await getFile(
-      owner, repo, `concepts/${ req.params.slug }/sources.json`, 'draft');
-    if (sources && sources.content) {
-      sources.content = JSON.parse(sources.content);
+    if (res.locals.readme) { // existing concept
+      res.locals.readme.slug = req.params.slug;
+      res.locals.readme.data = res.locals.config.config.concepts.find(
+        c => c.slug === req.params.slug);
+      const sources = await getFile(
+        owner, repo, `concepts/${ req.params.slug }/sources.json`, 'draft');
+      if (sources && sources.content) {
+        sources.content = JSON.parse(sources.content);
+      }
+      res.locals.sources = sources;
+      res.locals.conceptUsage = await apiRequests.conceptUsage(
+        req, res.locals.readme.data.uuid);
+    } else { // create new
+      res.locals.readme = {
+        slug: 'new', data: {}, sources: {}
+      };
     }
-    res.locals.sources = sources;
     res.locals.partial = 'course-edit.concepts';
-    res.locals.conceptUsage = await apiRequests.conceptUsage(
-      req, res.locals.readme.data.uuid);
     next();
   },
 
@@ -170,8 +164,7 @@ const courseEditController = {
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
       .split('/');
-    res.locals.readme = await getFile(
-      owner, repo, `docs/README.md`, 'draft');
+    res.locals.readme = await getFile(owner, repo, `docs/README.md`, 'draft');
     res.locals.materials = await getFile(
       owner, repo, `docs/lisamaterjalid.md`, 'draft');
     res.locals.partial = 'course-edit.general';
@@ -185,13 +178,10 @@ const courseEditController = {
     );
     if (mergeResponse.status === 204 || mergeResponse.status === 201) { // delete draft branch
       return await apiRequests.deleteBranch(
-        course.repository.replace('https://github.com/', ''),
-        'draft'
-      );
+        course.repository.replace('https://github.com/', ''), 'draft');
     }
     return false;
-  },
-  updateCourseData: async (req, res) => {
+  }, updateCourseData: async (req, res) => {
     const body = req.body;
     const keys = Object.keys(body);
     const values = Object.values(body);
@@ -207,10 +197,8 @@ const courseEditController = {
         const fileKey = Object.keys(req.files)[0];
         const path = fileKey + req.files[fileKey].name;
         const content = req.files[fileKey].data.toString('base64');
-        await uploadFile(
-          owner, repo, path, content, 'file added: ' + path,
-          'draft',
-          true
+        await uploadFile(owner, repo, path, content, 'file added: ' + path,
+          'draft', true
         );
         // todo update files data
       }
@@ -222,8 +210,7 @@ const courseEditController = {
           // key = config/courseName
           const config = await getConfig(repoName, 'draft');
           const updatedConfig = updateConfigFile(keys[i], values[i], config);
-          await updateFile(
-            owner, repo, 'config.json',
+          await updateFile(owner, repo, 'config.json',
             { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
             'course edit', 'draft'
           );
@@ -231,10 +218,9 @@ const courseEditController = {
         } else if (keys[i].endsWith('.md')) { // update file in folder
           // get file sha
           const oldFile = await getFile(owner, repo, keys[i], 'draft');
-          await updateFile(
-            owner, repo, keys[i],
-            { content: values[i], sha: oldFile.sha },
-            'file edit: ' + keys[i], 'draft'
+          await updateFile(owner, repo, keys[i],
+            { content: values[i], sha: oldFile.sha }, 'file edit: ' + keys[i],
+            'draft'
           );
         } else {
           console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
@@ -243,11 +229,45 @@ const courseEditController = {
       return res.json(response);
     }
     return res.status(500).send('error');
+  }, updateConcept: async (req, res) => {
+    /*
+     1- update readme.md content
+     2- create new folder with files
+     3- rename folder - move to new folder???
+     */
+    const { concept, courseId } = req.body;
+    if (concept && courseId) {
+      const course = await apiRequests.getCourseById(courseId);
+      if (course) {
+        const [owner, repo] = course.repository.replace(
+          'https://github.com/', '')
+          .split('/');
+        if (concept.sha) { // existing file, change content
+          await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,
+            { content: concept.content, sha: concept.sha },
+            `edit concept: ${ concept.name }`, 'draft'
+          );
+          return res.redirect('back');
+        } else { // new file, create content
+          const slug = slugify(concept.name.toLowerCase());
+          await uploadFile(owner, repo, `concepts/${ slug }/README.md`,
+            concept.content, `created concept: ${ concept.name }`, 'draft'
+          );
+          await uploadFile(owner, repo, `concepts/${ slug }/sources.json`, '[]',
+            `created concept: ${ concept.name }`, 'draft'
+          );
+          // todo update main config.json
+          // edit created content
+          return res.redirect(`/course-edit/${ courseId }/concept/${ slug }`);
+        }
+      }
+    }
+    return res.redirect('back');
   }
 };
 
 const renderEditPage = async (req, res) => {
-  //console.log(JSON.stringify(res.locals.conceptUsage));
+  // console.log(JSON.stringify(res.locals.conceptUsage));
   res.render('course-edit', res.locals);
 };
 

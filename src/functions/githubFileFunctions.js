@@ -26,22 +26,19 @@ async function getFile(owner, repo, path, ref = null) {
   const content = await octokit.request(
     `GET /repos/${ owner }/${ repo }/contents/${ path }${ ref
       ? '?ref=' + ref
-      : '' }`,
-    {
+      : '' }`, {
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
-    }
-  ).catch((err) => {
+    }).catch((err) => {
     console.log('github get file error: ', path);
   });
 
   if (content && content.status === 200) {
     return {
       sha: content.data.sha,
-      content: content.data.content
-        ? utf8.decode(base64.decode(content.data.content))
-        : ''
+      content: content.data.content ? utf8.decode(
+        base64.decode(content.data.content)) : ''
     };
   }
   return false;
@@ -51,13 +48,11 @@ async function getFolder(owner, repo, path, ref = null, files = false) {
   const content = await octokit.request(
     `GET /repos/${ owner }/${ repo }/contents/${ path }${ ref
       ? '?ref=' + ref
-      : '' }`,
-    {
+      : '' }`, {
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
-    }
-  ).catch((err) => {
+    }).catch((err) => {
     console.log(
       `FAILED: GET /repos/${ owner }/${ repo }/contents/${ path }${ ref
         ? '?ref=' + ref
@@ -68,8 +63,7 @@ async function getFolder(owner, repo, path, ref = null, files = false) {
     return content.data.filter((folder) => folder.type === 'dir')
       .map((folder) => {
         return {
-          sha: folder.sha,
-          name: folder.name
+          sha: folder.sha, name: folder.name
         };
       });
   }
@@ -90,8 +84,8 @@ async function getTree(repo, branch = 'master') {
   });
 
   const tree = {};
-  content.data?.tree?.filter(
-    (t) => (t.path.includes('/') && t.type === 'blob')).forEach((item) => {
+  content.data?.tree?.filter((t) => (t.path.includes('/') && t.type === 'blob'))
+    .forEach((item) => {
       const pathParts = item.path.split('/');
       if (pathParts[1] !== '.DS_Store') {
         const contentName = pathParts[0];
@@ -101,23 +95,18 @@ async function getTree(repo, branch = 'master') {
             {
               slug: pathParts[1].endsWith('.md')
                 ? pathParts[1].slice(0, -3)
-                : pathParts[1],
-              name: pathParts[1],
-              uuid: uuidv4()
+                : pathParts[1], name: pathParts[1], uuid: uuidv4()
             }];
         }
 
         let obj = tree[contentName].find(o => o.name === pathParts[1]);
         if (!obj) {
           // todo get name from about.md or readme.md
-          tree[contentName].push(
-            {
-              slug: pathParts[1].endsWith('.md')
-                ? pathParts[1].slice(0, -3)
-                : pathParts[1],
-              name: pathParts[1],
-              uuid: uuidv4()
-            });
+          tree[contentName].push({
+            slug: pathParts[1].endsWith('.md')
+              ? pathParts[1].slice(0, -3)
+              : pathParts[1], name: pathParts[1], uuid: uuidv4()
+          });
           obj = tree[contentName].find(o => o.slug === pathParts[1]);
         }
 
@@ -129,17 +118,11 @@ async function getTree(repo, branch = 'master') {
           }
         }
       }
-    }
-  );
+    });
   return tree;
 }
 
-async function updateFile(
-  owner,
-  repo,
-  path,
-  file,
-  commitMessage,
+async function updateFile(owner, repo, path, file, commitMessage,
   branch = 'master'
 ) {
   return await octokit.request(
@@ -156,20 +139,12 @@ async function updateFile(
   });
 }
 
-async function deleteFile(
-  owner,
-  repo,
-  path,
-  sha,
-  commitMessage,
+async function deleteFile(owner, repo, path, sha, commitMessage,
   branch = 'master'
 ) {
   return await octokit.request(
     `DELETE /repos/${ owner }/${ repo }/contents/${ path }`, {
-      message: commitMessage,
-      sha: sha,
-      branch: branch,
-      headers: {
+      message: commitMessage, sha: sha, branch: branch, headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     }).catch((err) => {
@@ -177,26 +152,17 @@ async function deleteFile(
   });
 }
 
-async function uploadFile(
-  owner,
-  repo,
-  path, // folder + new filename
+async function uploadFile(owner, repo, path, // folder + new filename
   file, // req.files.file
-  commitMessage,
-  branch = 'master',
-  encoded = false
+  commitMessage, branch = 'master', encoded = false
 ) {
   const base64Content = encoded ? file : (file instanceof ArrayBuffer)
-    ? new Buffer.from(
-      file.data).toString('base64')
+    ? new Buffer.from(file.data).toString('base64')
     : bytesToBase64(file);
 
   return await octokit.request(
     `PUT /repos/${ owner }/${ repo }/contents/${ path }`, {
-      message: commitMessage,
-      content: base64Content,
-      branch: branch,
-      headers: {
+      message: commitMessage, content: base64Content, branch: branch, headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     }).catch((err) => {
@@ -218,6 +184,81 @@ async function getBranch(repo, branch = 'master') {
     return content.data;
   }
   return false;
+}
+
+async function renameFolder(owner, repo, branch, oldFolder, newFolder) {
+// Looge uus haru, kus soovite kausta ümber nimetada
+  const newBranch = 'rename-folder';
+  const branchRef = await octokit.request(
+    `GET /repos/${ owner }/${ repo }/git/ref/heads/${ branch }`, {
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    }).catch(() => {
+    console.log('get ref error');
+  });
+
+  const newBranchRef = await octokit.request(
+    `POST /repos/${ owner }/${ repo }/git/refs`, {
+      ref: newBranch, sha: branchRef.data.object.sha, headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    }).catch(() => {
+    console.log('create ref error');
+  });
+
+// Looge uus puuobjekt, mis sisaldab uue kausta nime ja selle sisu
+  const baseTree = await octokit.request(
+    `GET /repos/${ owner }/${ repo }/git/trees/${ branchRef.data.object.sha }`,
+    {
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    }
+  );
+
+  const newTree = await octokit.request(
+    `POST /repos/${ owner }/${ repo }/git/trees`, {
+      base_tree: baseTree.data.sha, tree: [
+        {
+          path: `${ newFolder }/README.md`,
+          mode: '040000',
+          type: 'tree',
+          sha: 'b827aae57a3c0c57ea01f8c62d9a0f884f8d4fcd'
+        }]
+    });
+
+// Looge uus pühendumisobjekt, mis viitab uuele puule
+  const commit = await octokit.git.createCommit({
+    owner,
+    repo,
+    message: `Rename ${ oldFolder } to ${ newFolder }`,
+    tree: newTree.data.sha,
+    parents: [branchRef.data.object.sha]
+  });
+
+// Uuendage haru viidet uuele pühendumisele
+  await octokit.git.updateRef(
+    { owner, repo, ref: `heads/${ newBranch }`, sha: commit.data.sha });
+
+// Kustutage vana kaust
+  await octokit.repos.deleteFile({
+    owner,
+    repo,
+    path: `${ oldFolder }/README.md`,
+    message: `Delete ${ oldFolder }`,
+    sha: 'b827aae57a3c0c57ea01f8c62d9a0f884f8d4fcd',
+    branch: newBranch
+  });
+
+// Esitage oma muudatused pull requestina ja ühendage need peaharuga
+  await octokit.pulls.create({
+    owner,
+    repo,
+    title: `Rename ${ oldFolder } to ${ newFolder }`,
+    head: newBranch,
+    base: branch
+  });
 }
 
 function delay(milliseconds) {

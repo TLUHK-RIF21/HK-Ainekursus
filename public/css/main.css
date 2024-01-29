@@ -1903,6 +1903,10 @@ input:checked ~ .tab-content {
   margin-left: auto;
   margin-right: auto;
 }
+.my-0{
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
 .my-1{
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
@@ -1959,9 +1963,6 @@ input:checked ~ .tab-content {
 .mt-4{
   margin-top: 1rem;
 }
-.mt-6{
-  margin-top: 1.5rem;
-}
 .mt-8{
   margin-top: 2rem;
 }
@@ -2011,6 +2012,9 @@ input:checked ~ .tab-content {
 .h-full{
   height: 100%;
 }
+.min-h-0{
+  min-height: 0px;
+}
 .min-h-min{
   min-height: -moz-min-content;
   min-height: min-content;
@@ -2029,9 +2033,6 @@ input:checked ~ .tab-content {
 }
 .w-40{
   width: 10rem;
-}
-.w-52{
-  width: 13rem;
 }
 .w-56{
   width: 14rem;
@@ -2109,14 +2110,17 @@ input:checked ~ .tab-content {
 .transform{
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
+.cursor-not-allowed{
+  cursor: not-allowed;
+}
 .cursor-pointer{
   cursor: pointer;
 }
 .resize{
   resize: both;
 }
-.list-decimal{
-  list-style-type: decimal;
+.list-disc{
+  list-style-type: disc;
 }
 .list-none{
   list-style-type: none;
@@ -2198,25 +2202,10 @@ input:checked ~ .tab-content {
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
   margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
-.space-x-6 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-x-reverse: 0;
-  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
-}
 .space-y-1 > :not([hidden]) ~ :not([hidden]){
   --tw-space-y-reverse: 0;
   margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
-}
-.space-y-3 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
-}
-.space-y-32 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-y-reverse: 0;
-  margin-top: calc(8rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(8rem * var(--tw-space-y-reverse));
 }
 .divide-y > :not([hidden]) ~ :not([hidden]){
   --tw-divide-y-reverse: 0;
@@ -2225,6 +2214,9 @@ input:checked ~ .tab-content {
 }
 .divide-stroke > :not([hidden]) ~ :not([hidden]){
   border-color: var(--stroke, #E2D9CF);
+}
+.self-end{
+  align-self: flex-end;
 }
 .overflow-x-hidden{
   overflow-x: hidden;
@@ -2338,10 +2330,6 @@ input:checked ~ .tab-content {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
 }
-.px-6{
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
 .px-8{
   padding-left: 2rem;
   padding-right: 2rem;
@@ -2389,12 +2377,6 @@ input:checked ~ .tab-content {
 }
 .pb-4{
   padding-bottom: 1rem;
-}
-.pb-5{
-  padding-bottom: 1.25rem;
-}
-.pb-6{
-  padding-bottom: 1.5rem;
 }
 .pb-8{
   padding-bottom: 2rem;
@@ -2527,6 +2509,9 @@ input:checked ~ .tab-content {
 }
 .\!no-underline{
   text-decoration-line: none !important;
+}
+.opacity-50{
+  opacity: 0.5;
 }
 .shadow-lg{
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -2764,9 +2749,6 @@ input:checked ~ .tab-content {
   }
   .md\:h-screen{
     height: 100vh;
-  }
-  .md\:w-52{
-    width: 13rem;
   }
   .md\:w-\[41rem\]{
     width: 41rem;

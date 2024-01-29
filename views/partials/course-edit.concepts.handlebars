@@ -1,72 +1,111 @@
-<div class="tab-pane mt-8">
-    <div class="card mb-2">
-        <div class="card-title p-2 flex items-center justify-between cursor-pointer lesson">
-            <div class="flex gap-2">
-                <h4>Sisuteema muutmine</h4>
+<div>
+    <div class="mb-2">
+        <div class="card-title p-2 flex items-center justify-between">
+            <h4 class="my-0">Sisuteema {{#if readme.data.slug }}muutmine{{else}}lisamine{{/if}}</h4>
+            <div class="flex">
+                <button class="btn btn-primary mr-4" onclick="document.getElementById('conceptForm').submit()">
+                    Salvesta
+                </button>
+                {{#if readme.data.slug }}
+                    <button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
+                            title="Kustuta sisuteema" {{#if conceptUsage.length}}disabled{{/if}}>
+                        <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+                    </button>
+                {{/if}}
             </div>
-            <button class="btn btn-primary" title="Kustuta sisuteema">
-                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-            </button>
         </div>
-        <div class="p-2">
-            <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
-            <label for="concept[name]">Sisuteema nimetus</label>
-            <input type="text" name="concept[name]" id="concept[name]" value="{{readme.data.name}}"
-                   class="input-single" required>
-            <label for="concept[slug]">Sisuteema kaust</label>
-            <input type="text" name="concept[slug]" id="concept[slug]" value="{{readme.data.slug}}"
-                   class="input-single" required>
-
-            <div class="block my-4 border-b">
-                <label for="tinymde_commandbar_concept_content">Sisuteema kirjeldus:</label>
-                <div id="tinymde_commandbar_concept_content"></div>
-                <div class="txtcontainer w-full mb-4">
-                        <textarea id="concept_content" cols="30" rows="30"
-                                  name="concept[content]">{{readme.content}}</textarea>
-                </div>
-            </div>
-            <div class="block my-4">
-                <input type="hidden" name="concept[additionalMaterials][sha]"
-                       value="{{sources.sha}}">
-                <h4>Aine lisamaterjalid:</h4>
-                <ul>
-                    {{#each sources.content}}
-                        <li class="pb-4 mb-4 flex items-center justify-between border-b">
-                            <div>
-                                <label for="sources[{{@index}}][description]">Nimetus</label>
-                                <input type="text" id="sources[{{@index}}][description]" class="input-single"
-                                       name="sources[{{@index}}][description]" value="{{this.description}}">
-                            </div>
-                            <div>
-                                <label for="sources[{{@index}}][url]">Aadress</label>
-                                <input type="text" id="sources[{{@index}}][url]" class="input-single"
-                                       name="sources[{{@index}}][url]"
-                                       value="{{this.url}}">
-                            </div>
-                            <button class="btn btn-primary" title="Kustuta lisamaterjal">
-                                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                            </button>
+        <div>
+            {{#if conceptUsage.length}}
+                <p class="p-2 my-0 cursor-pointer flex items-center"
+                   onclick="document.getElementById('showUsage').classList.toggle('hidden')">
+                    Antud sisuteema on kasutuses ({{conceptUsage.length}})
+                    <i class="material-symbols-outlined ml-2">expand_more</i>
+                </p>
+                <ul class="hidden transition" id="showUsage">
+                    {{#each conceptUsage}}
+                        <li><strong>{{this.course.name}}</strong> [{{this.course.code}}]:
+                            <ul class="list-disc ml-4">
+                                {{#each this.lessons}}
+                                    <li>
+                                        {{this.name}}
+                                    </li>
+                                {{/each}}
+                            </ul>
                         </li>
                     {{/each}}
-                    <li class="mb-4">
-                        <h6>Lisa uus materjal</h6>
-                        <div class="mt-4 flex items-center justify-between">
-                            <div>
-                                <label for="sources[new][description]">Nimetus</label>
-                                <input type="text" id="sources[new][description]" class="input-single"
-                                       name="sources[new][description]">
-                            </div>
-                            <div>
-                                <label for="sources[new][url]">Aadress</label>
-                                <input type="text" id="sources[new][url]" class="input-single"
-                                       name="sources[new][url]">
-                            </div>
-                            <button class="btn btn-primary" title="Lisa uus">
-                                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
-                            </button>
-                        </div>
-                    </li>
                 </ul>
+            {{else}}
+                <p class="my-0 p-2">Antud sisuteemat ei kasutata</p>
+            {{/if}}
+        </div>
+    </div>
+    <div class="card mb-2">
+        <div class="p-2">
+            <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="conceptForm">
+                <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
+                <input type="hidden" name="courseId" value="{{course.id}}">
+                <label for="concept[name]">Sisuteema nimetus</label>
+                <input type="text" name="concept[name]" id="concept[name]" value="{{readme.data.name}}"
+                       class="input-single" required>
+                <!--label for="concept[slug]">Sisuteema kaust</label>
+                <input type="text" name="concept[slug]" id="concept[slug]" value="{{readme.data.slug}}"
+                       class="input-single" required!-->
+
+                <div class="block my-4 border-b">
+                    <label for="tinymde_commandbar_concept_content">Sisuteema kirjeldus:</label>
+                    <div id="tinymde_commandbar_concept_content"></div>
+                    <div class="txtcontainer w-full mb-4">
+                        <textarea id="concept_content" cols="30" rows="30"
+                                  name="concept[content]">{{readme.content}}</textarea>
+                    </div>
+                </div>
+            </form>
+            <div class="block my-4">
+                <h4>Aine lisamaterjalid:</h4>
+                {{#if readme.data.slug }}
+                    <input type="hidden" name="concept[additionalMaterials][sha]"
+                           value="{{sources.sha}}">
+                    <ul>
+                        {{#each sources.content}}
+                            <li class="pb-4 mb-4 flex items-center justify-between border-b">
+                                <div class="grow">
+                                    <label for="sources[{{@index}}][description]">Nimetus</label>
+                                    <input type="text" id="sources[{{@index}}][description]" class="input-single"
+                                           name="sources[{{@index}}][description]" value="{{this.description}}">
+                                </div>
+                                <div class="grow">
+                                    <label for="sources[{{@index}}][url]">Lingi aadress</label>
+                                    <input type="text" id="sources[{{@index}}][url]" class="input-single"
+                                           name="sources[{{@index}}][url]"
+                                           value="{{this.url}}">
+                                </div>
+                                <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal">
+                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+                                </button>
+                            </li>
+                        {{/each}}
+                        <li class="mb-4">
+                            <h6>Lisa uus materjal</h6>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="grow">
+                                    <label for="sources[new][description]">Nimetus</label>
+                                    <input type="text" id="sources[new][description]" class="input-single"
+                                           name="sources[new][description]">
+                                </div>
+                                <div class="grow">
+                                    <label for="sources[new][url]">Lingi aadress</label>
+                                    <input type="text" id="sources[new][url]" class="input-single"
+                                           name="sources[new][url]">
+                                </div>
+                                <button class="btn btn-primary ml-2 self-end" title="Lisa uus">
+                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                {{else}}
+                    <p>salvesta sisuteema....</p>
+                {{/if}}
             </div>
         </div>
     </div>
