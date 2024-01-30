@@ -1,12 +1,11 @@
 import {
-  getFile, updateFile, uploadFile
+  deleteFolder, getFile, updateFile, uploadFile
 } from '../../functions/githubFileFunctions.js';
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getConfig } from '../../functions/getConfigFuncs.js';
 import {
-  handleCourseAndConceptFiles,
-  updateConfigFile
+  handleCourseAndConceptFiles, updateConfigFile
 } from './courseEditService.js';
 import { cacheConfig } from '../../setup/setupCache.js';
 
@@ -185,7 +184,9 @@ const courseEditController = {
         course.repository.replace('https://github.com/', ''), 'draft');
     }
     return false;
-  }, updateCourseData: async (req, res) => {
+  },
+
+  updateCourseData: async (req, res) => {
     const body = req.body;
     const keys = Object.keys(body);
     const values = Object.values(body);
@@ -237,14 +238,33 @@ const courseEditController = {
 
   updateConcept: async (req, res) => {
     const { concept, courseId, sources } = req.body;
-    //console.log(req.body);
-    //return res.redirect('back');
     if (!(concept && courseId)) {
       return res.redirect('back');
     } else {
       const url = await handleCourseAndConceptFiles(courseId, concept, sources);
       return res.redirect(url);
     }
+  },
+
+  deleteConcept: async (req, res) => {
+    const { courseId, slug } = req.params;
+    const course = await apiRequests.getCourseById(courseId);
+
+    if (course) {
+      const [owner, repo] = course.repository.replace('https://github.com/', '')
+        .split('/');
+      await deleteFolder(owner, repo, `concepts/${ slug }`, 'draft');
+      const courseConfig = await getCourseData(course.id, 'draft');
+      if (courseConfig) {
+        course.config.concepts = course.config.concepts.filter(
+          c => c.slug !== slug);
+        await updateFile(owner, repo, 'config.json', {
+          content: JSON.stringify(course.config), sha: course.config.sha
+        }, 'concept removed from the config.json', 'draft');
+      }
+      return res.status(202).send('ok');
+    }
+    return res.status(501).send('error');
   }
 };
 

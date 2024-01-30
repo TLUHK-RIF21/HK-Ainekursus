@@ -99,8 +99,6 @@ async function handleCourseAndConceptFiles(courseId, concept, sources) {
     const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
       .split('/');
     const courseConfig = await getCourseData(course, 'draft');
-    //console.log(courseConfig);
-    //return 'back';
     // if we have sha - update existing file
     if (concept.sha) {
       await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,

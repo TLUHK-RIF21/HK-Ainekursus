@@ -35,6 +35,7 @@
   "homepage": "https://github.com/tluhk/rif20-valikpraktika-1#readme",
   "dependencies": {
     "-": "^0.0.1",
+    "@octokit/rest": "^20.0.2",
     "@peaceroad/markdown-it-renderer-image": "^0.1.9",
     "@tailwindcss/forms": "^0.5.3",
     "@toycode/markdown-it-class": "^1.2.4",

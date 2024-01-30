@@ -7,39 +7,29 @@ import {
 
 const router = express.Router();
 
-router.get(
-  '/publish/:courseId',
-  validateTeacher,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.courseId;
-      const course = await apiRequests.getCourseById(courseId);
-      if (!course) {
-        return res.redirect('/notfound');
-      }
-      await courseEditController.publishCourse(course);
-      return res.redirect(`/course/${ courseId }/about?ref=master`);
-    } catch (error) {
-      next(error);
+router.get('/publish/:courseId', validateTeacher, async (req, res, next) => {
+  try {
+    const courseId = req.params.courseId;
+    const course = await apiRequests.getCourseById(courseId);
+    if (!course) {
+      return res.redirect('/notfound');
     }
+    await courseEditController.publishCourse(course);
+    return res.redirect(`/course/${ courseId }/about?ref=master`);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 //edit general data
-router.get(
-  '/:courseId',
-  validateTeacher,
+router.get('/:courseId', validateTeacher,
   courseEditController.getSpecificCourse, // general data
-  courseEditController.getGeneral,
-  renderEditPage
+  courseEditController.getGeneral, renderEditPage
 );
 
 //edit concept data
-router.get(
-  '/:courseId/concept/:slug',
-  validateTeacher,
-  courseEditController.getSpecificCourse,
-  courseEditController.getConcept,
+router.get('/:courseId/concept/:slug', validateTeacher,
+  courseEditController.getSpecificCourse, courseEditController.getConcept,
   renderEditPage
 );
 
@@ -49,22 +39,16 @@ router.post('/:courseId', (req, res) => {
   //allCoursesController.updateCourseData
 });
 
-router.post(
+router.post('/:courseId/concept/:slug', courseEditController.updateConcept);
+
+router.delete(
   '/:courseId/concept/:slug',
-  // Handle POST request for /:courseId/concept/:slug
-  courseEditController.updateConcept
-);
-
-router.delete('/:courseId/concept/:slug', (req, res) => {
   // Handle DELETE request for /:courseId/concept/:slug
-  // You can access the id and slug parameters with req.params.id and
-  // req.params.slug
-});
-
-router.post(
-  '/upload',
-  fileUpload
+  // req.params.slug = { courseId: '1', slug: 'uus-sisuteema' }
+  courseEditController.deleteConcept
 );
+
+router.post('/upload', fileUpload);
 
 /*router.post(
  '/',

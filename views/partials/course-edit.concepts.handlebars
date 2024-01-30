@@ -7,8 +7,10 @@
                     Salvesta
                 </button>
                 {{#if readme.data.slug }}
+
                     <button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
-                            title="Kustuta sisuteema" {{#if conceptUsage.length}}disabled{{/if}}>
+                            title="Kustuta sisuteema" {{#if conceptUsage.length}}disabled{{/if}}
+                            onclick="deleteConcept({{course.id}})">
                         <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
                     </button>
                 {{/if}}
@@ -43,8 +45,8 @@
         <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="conceptForm">
             <div class="p-2">
                 <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
-                <input type="hidden" name="concept[slug]" value="{{readme.slug}}">
-                <input type="hidden" name="courseId" value="{{course.id}}">
+                <input type="hidden" name="concept[slug]" id="concept[slug]" value="{{readme.slug}}">
+                <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
                 <input type="hidden" name="concept[additionalMaterials][sha]"
                        value="{{sources.sha}}">
                 <label for="concept[name]">Sisuteema nimetus</label>
@@ -58,6 +60,7 @@
                     <label for="tinymde_commandbar_concept_content">Sisuteema kirjeldus:</label>
                     <div id="tinymde_commandbar_concept_content"></div>
                     <div class="txtcontainer w-full mb-4">
+                        <label for="concept_content" class="hidden"></label>
                         <textarea id="concept_content" cols="30" rows="30"
                                   name="concept[content]">{{readme.content}}</textarea>
                     </div>
@@ -153,4 +156,17 @@
         document.getElementById('newDescription').value = '';
     }
 
+    function deleteConcept() {
+        const id = document.getElementById('courseId').value;
+        const slug = document.getElementById('concept[slug]').value;
+        fetch(
+                '/course-edit/' + id + '/concept/' + slug,
+                {
+                    method: 'DELETE'
+                }
+        ).then((data) => {
+            console.log(data);
+            history.back();
+        });
+    }
 </script>
