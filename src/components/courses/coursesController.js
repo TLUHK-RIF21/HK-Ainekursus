@@ -975,7 +975,6 @@ const allCoursesController = {
       'https://github.com/', '');
     res.locals.breadcrumbNames = breadcrumbNames;
     res.locals.path = path;
-
     return next();
   },
 

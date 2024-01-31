@@ -42,7 +42,6 @@ const function2 = async (coursePathInGithub, path, img, refBranch) => {
 
   // Get the "img src" of single image
   const url = img.match(/[(].*[^)]/)[0].split('(')[1];
-
   if (!url) {
     return;
   }
@@ -100,7 +99,6 @@ const function1 = async (
   refBranch
 ) => {
   const markdownText = componentDecodedUtf8;
-
   // *** code sources: ***
   // functions: https://stackoverflow.com/a/58542933
   // changing img src:

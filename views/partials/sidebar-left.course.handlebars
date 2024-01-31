@@ -10,7 +10,7 @@
             <div class="!no-underline mb-4 pr-4">
                 <!-- Topic name and code -->
                 {{#with course}}
-                    <a href="/course/{{../path.courseId}}/{{../docs.[0].slug}}?ref={{../path.refBranch}}"
+                    <a href="/course/{{../path.courseId}}/{{this.config.docs.[0].slug}}?ref={{../path.refBranch}}"
                     class="!no-underline">
                     <div class="mb-2 w-[22rem] max-w-full">
                         <div class="card-header mb-2 flex justify-between hover:ml-[-10px] hover:pl-[8px] hover:border-l-2 hover:border-link-action">

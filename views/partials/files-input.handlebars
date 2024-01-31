@@ -1,13 +1,20 @@
 <div class="block">
-    <label>Failid:</label>
-    <ul id=fileList"">
+    <label>Lisatud failid:</label>
+    <div class="grid gap-4">
         {{#each files}}
-            <input type="hidden" name="{{prefix}}/files/{{this.name}}" value="{{this.name}}">
-            <input type="hidden" name="{{prefix}}_files[][slug]" value="{{this.slug}}">
-            <li>{{this.name}} {{this.slug}}</li>
+            <div class="relative h-40">
+                <a href="{{this.url}}" target="_blank">
+                    <img class="object-cover object-center w-full h-40 max-w-full rounded-lg"
+                         src="{{this.thumbUrl}}"
+                         alt="{{this.name}}"/>
+                </a>
+                <button class="absolute top-1 right-1 btn btn-primary p-1 min-h-0 min-w-0">
+                    <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
+                </button>
+            </div>
         {{/each}}
-        <li class="card flex justify-content-between items-center mb-2">
-            <!--
+    </div>
+    <!--
             <label for="{{prefix}}_newFile" class="hidden"></label>
             <input type="file" id="{{prefix}}_newFile" name="{{prefix}}_newFile"
                    class="input-single" placeholder="Lisa uus fail">
@@ -16,12 +23,9 @@
                    aria-hidden="true">attach_file</i>
             </button>
 !-->
-            <div class="max-w-xs">
-                <label for="fileInput" class="mb-1 block text-sm font-medium text-gray-700">Lisa fail</label>
-                <input id="fileInput" type="file" name="{{prefix}}/files/" multiple
-                       class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
-            </div>
-
-        </li>
-    </ul>
+    <div class="max-w-xs">
+        <label for="fileInput" class="mb-1 block text-sm font-medium text-gray-700">Lisa fail</label>
+        <input id="fileInput" type="file" name="{{prefix}}/files/" multiple
+               class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
+    </div>
 </div>

@@ -48,7 +48,9 @@ async function getFolder(owner, repo, path, ref = null, files = false) {
     console.log('github get file error: ', path);
   });
 
-  if (content && content.status === '200') {
+  if (content && content.status === 200) {
+    if (files) return content.data.filter(
+      entry => (!entry.name.startsWith('.') && entry.size > 0));
     return content.data.filter((folder) => folder.type === 'dir')
       .map((folder) => {
         return {

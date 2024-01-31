@@ -1,5 +1,5 @@
 import {
-  deleteFolder, getFile, updateFile, uploadFile
+  deleteFolder, getFile, getFolder, updateFile, uploadFile
 } from '../../functions/githubFileFunctions.js';
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
@@ -170,6 +170,23 @@ const courseEditController = {
     res.locals.readme = await getFile(owner, repo, `docs/README.md`, 'draft');
     res.locals.materials = await getFile(
       owner, repo, `docs/lisamaterjalid.md`, 'draft');
+    res.locals.files = await getFolder(
+      owner, repo, 'docs/files', 'draft', true);
+    if (res.locals.files.length) {
+      res.locals.files = res.locals.files.filter(file => file.type === 'file')
+        .map(file => {
+          return {
+            name: file.name,
+            thumbUrl: /\.(jpg|png|gif)$/i.test(file.name)
+              ? file.download_url
+              : '/images/thumb.png',
+            url: file.download_url,
+            sha: file.sha,
+            path: file.path
+          };
+        });
+    }
+    console.log(res.locals.files);
     res.locals.partial = 'course-edit.general';
     next();
   },

@@ -68,7 +68,6 @@
 
                 <div class="block my-4">
                     <h4>Aine lisamaterjalid:</h4>
-
                     <ul id="sources">
                         {{#each sources.content}}
                             <li class="pb-4 mb-4 flex items-center justify-between border-b">
@@ -112,6 +111,7 @@
         </form>
     </div>
 </div>
+<script type="application/javascript" src="/js/submit-edit.js"></script>
 <script>
     const tinyMDE2 = new TinyMDE.Editor(
             { textarea: 'concept_content' }).addEventListener(
