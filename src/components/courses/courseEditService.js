@@ -4,9 +4,12 @@
 
 import getCourseData from '../../functions/getCourseData.js';
 import apiRequests from './coursesService.js';
-import { updateFile, uploadFile } from '../../functions/githubFileFunctions.js';
+import {
+  deleteFile, getFolder, updateFile, uploadFile
+} from '../../functions/githubFileFunctions.js';
 import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
+import { cacheTeamCourses } from '../../setup/setupCache.js';
 
 const GITHUB_URL_PREFIX = 'https://github.com/';
 
@@ -62,14 +65,13 @@ async function createFileContent(
     slugify(concept.name.toLowerCase()), course.config.concepts);
 
   // add README.md file
-  await uploadFile(owner, repo, `concepts/${ slug }/README.md`,
-    concept.content, `created concept: ${ concept.name }`, branch
+  await uploadFile(owner, repo, `concepts/${ slug }/README.md`, concept.content,
+    `created concept: ${ concept.name }`, branch
   );
 
   // add empty sources.json fail
   await uploadFile(owner, repo, `concepts/${ slug }/sources.json`,
-    JSON.stringify(sources),
-    `created concept: ${ concept.name }`, branch
+    JSON.stringify(sources), `created concept: ${ concept.name }`, branch
   );
 
   // update config.json
@@ -79,12 +81,9 @@ async function createFileContent(
     uuid: uuidv4(),
     repo: slugify(course.courseName)
   });
-  await updateFile(owner, repo, 'config.json',
-    {
-      content: JSON.stringify(course.config),
-      sha: course.config.sha
-    }, 'concept added to the config.json', branch
-  );
+  await updateFile(owner, repo, 'config.json', {
+    content: JSON.stringify(course.config), sha: course.config.sha
+  }, 'concept added to the config.json', branch);
 
   // return redirect url
   return `/course-edit/${ course.id }/concept/${ slug }`;
@@ -105,13 +104,9 @@ async function handleCourseAndConceptFiles(courseId, concept, sources) {
         { content: concept.content, sha: concept.sha },
         `edit concept: ${ concept.name }`, 'draft'
       );
-      await updateFile(owner, repo, `concepts/${ concept.slug }/sources.json`,
-        {
-          content: JSON.stringify(sources),
-          sha: concept.additionalMaterials.sha
-        },
-        `edit sources: ${ concept.name }`, 'draft'
-      );
+      await updateFile(owner, repo, `concepts/${ concept.slug }/sources.json`, {
+        content: JSON.stringify(sources), sha: concept.additionalMaterials.sha
+      }, `edit sources: ${ concept.name }`, 'draft');
       return 'back';
     } else { // no sha - create new content
       // get course config
@@ -122,4 +117,102 @@ async function handleCourseAndConceptFiles(courseId, concept, sources) {
   return 'back';
 }
 
-export { updateConfigFile, makeUniqueSlug, handleCourseAndConceptFiles };
+async function handleCourseGeneralFiles(courseId, readme, materials) {
+  // get course from API
+  const course = await apiRequests.getCourseById(courseId);
+  if (course) {
+    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
+      .split('/');
+    await updateFile(owner, repo, `docs/README.md`,
+      { content: readme.content, sha: readme.sha }, `edit docs/readme`, 'draft'
+    );
+    await updateFile(owner, repo, `docs/lisamaterjalid.md`,
+      { content: materials.content, sha: materials.sha },
+      `docs/lisamaterjalid.md`, 'draft'
+    );
+    //clear course cache
+    cacheTeamCourses.del(`course+${ courseId }`);
+  }
+  return 'back';
+}
+
+async function handleCourseFiles(courseId, oldFiles, newFiles) {
+  const course = await apiRequests.getCourseById(courseId);
+  if (course) {
+    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
+      .split('/');
+    const fileFolder = await getFolder(
+      owner, repo, 'docs/files', 'draft', true);
+
+    // 1. Delete removed files
+    // Filter and map files to be deleted
+    const toDelete = fileFolder.filter(item => !oldFiles?.includes(item.sha))
+      .map(file => ({ path: file.path, sha: file.sha }));
+
+    // Delete files in batches to avoid exceeding rate limit
+    for (let i = 0; i < toDelete.length; i += 100) {
+      const batch = toDelete.slice(i, i + 100);
+
+      await Promise.all(batch.map(
+        file => deleteFile(owner, repo, file.path, file.sha,
+          `file ${ file.path } deleted`, 'draft'
+        )));
+    }
+
+    // 2. Upload new files
+    if (typeof newFiles === 'object' && newFiles) {
+      // get key name
+      const fileKey = Object.keys(newFiles)[0];
+      // if single file uploaded - convert this to array, else use original
+      // array
+      const fileList = Array.isArray(newFiles[fileKey])
+        ? newFiles[fileKey]
+        : [newFiles[fileKey]];
+
+      for (const newFile of fileList) {
+        const path = fileKey.replace('[]', '/') + slugify(newFile.name);
+        const content = newFile.data.toString('base64');
+        const existingFile = fileFolder.find(file => file.path === path);
+
+        if (!existingFile) {
+          await uploadFile(owner, repo, path, content, 'file added: ' + path,
+            'draft', true
+          );
+        } else if (existingFile.sha !== newFile.sha) {
+          await deleteFile(owner, repo, path, existingFile.sha,
+            'file updated: ' + path, 'draft'
+          );
+          await uploadFile(owner, repo, path, content, 'file updated: ' + path,
+            'draft', true
+          );
+        }
+      }
+    }
+  }
+}
+
+async function updateGeneralData(courseId, courseName, courseUrl) {
+  const course = await apiRequests.getCourseById(courseId);
+  if (course) {
+    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
+      .split('/');
+    const courseConfig = await getCourseData(course, 'draft');
+    if (courseConfig) {
+      courseConfig.config.courseName = courseName;
+      courseConfig.config.courseUrl = courseUrl;
+      await updateFile(owner, repo, 'config.json', {
+        content: JSON.stringify(courseConfig.config),
+        sha: courseConfig.config.sha
+      }, 'update general data', 'draft');
+    }
+  }
+}
+
+export {
+  updateConfigFile,
+  makeUniqueSlug,
+  handleCourseAndConceptFiles,
+  handleCourseGeneralFiles,
+  updateGeneralData,
+  handleCourseFiles
+};

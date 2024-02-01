@@ -5,7 +5,10 @@ import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getConfig } from '../../functions/getConfigFuncs.js';
 import {
-  handleCourseAndConceptFiles, updateConfigFile
+  handleCourseAndConceptFiles, handleCourseFiles,
+  handleCourseGeneralFiles,
+  updateConfigFile,
+  updateGeneralData
 } from './courseEditService.js';
 import { cacheConfig } from '../../setup/setupCache.js';
 
@@ -177,7 +180,7 @@ const courseEditController = {
         .map(file => {
           return {
             name: file.name,
-            thumbUrl: /\.(jpg|png|gif)$/i.test(file.name)
+            thumbUrl: /\.(jpg|png|gif|jpeg)$/i.test(file.name)
               ? file.download_url
               : '/images/thumb.png',
             url: file.download_url,
@@ -186,7 +189,6 @@ const courseEditController = {
           };
         });
     }
-    console.log(res.locals.files);
     res.locals.partial = 'course-edit.general';
     next();
   },
@@ -282,17 +284,32 @@ const courseEditController = {
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');
+  },
+
+  updateGeneral: async (req, res) => {
+    const {
+      courseId,
+      courseName,
+      courseUrl,
+      readme,
+      materials
+    } = req.body;
+    if (courseId && courseName && courseUrl) {
+      await updateGeneralData(courseId, courseName, courseUrl);
+      await handleCourseGeneralFiles(courseId, readme, materials);
+      await handleCourseFiles(courseId, req.body['files[]'], req.files);
+    }
+    return res.redirect('back');
   }
 };
 
 const renderEditPage = async (req, res) => {
   res.locals.user = req.user;
-  //console.log(JSON.stringify(res.locals.conceptUsage));
   res.render('course-edit', res.locals);
 };
 
 const fileUpload = async (req, res) => {
-  console.log(req.body);
+  console.log(req.files);
   return res.send('OK');
 };
 

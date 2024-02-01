@@ -1115,40 +1115,28 @@ const allCoursesController = {
   },
   getOisContent: async (req, res) => {
     let longDescription = '';
-    let course = await usersApi.get(
-      membersRequests.getCourse + req.query.courseId)
-      .catch((error) => {
-        console.error(error);
-      });
+    await axios('https://ois2.tlu.ee/tluois/aine/' + req.query.courseId)
+      .then((response) => {
+        const { data } = response;
+        const $ = cheerio.load(data);
 
-    if (course) {
-      course = course.data.data;
-      await axios('https://ois2.tlu.ee/tluois/aine/' + course.code)
-        .then((response) => {
-          const { data } = response;
-          const $ = cheerio.load(data);
+        $('.yldaine_r', data).each(function () {
+          const yldaineC1 = $(this).find('div.yldaine_c1').text();
+          const yldaineC2 = $(this).find('div.yldaine_c2').text();
 
-          $('.yldaine_r', data).each(function () {
-            const yldaineC1 = $(this).find('div.yldaine_c1').text();
-            const yldaineC2 = $(this).find('div.yldaine_c2').text();
-
-            switch (yldaineC1) {
-              case 'Õppeaine sisu lühikirjeldus':
-                longDescription = yldaineC2;
-                break;
-              case 'Õppeaine õpiväljundid':
-                longDescription += '\n\n ' + yldaineC2;
-                break;
-            }
-          });
-
-          return res.json(conf);
-        })
-        .catch(() => {
-          console.log('ois fetch error');
+          switch (yldaineC1) {
+            case 'Õppeaine sisu lühikirjeldus':
+              longDescription = yldaineC2;
+              break;
+            case 'Õppeaine õpiväljundid':
+              longDescription += '\n\n ' + yldaineC2;
+              break;
+          }
         });
-    }
-
+      })
+      .catch(() => {
+        console.log('ois fetch error');
+      });
     return res.json({ data: longDescription });
   },
   getAllLessons: async (searchTerm, courses, refBranch) => {

@@ -1993,6 +1993,9 @@ input:checked ~ .tab-content {
 .h-10{
   height: 2.5rem;
 }
+.h-36{
+  height: 9rem;
+}
 .h-4{
   height: 1rem;
 }

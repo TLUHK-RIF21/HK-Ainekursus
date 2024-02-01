@@ -1,31 +1,30 @@
 <div class="block">
-    <label>Lisatud failid:</label>
-    <div class="grid gap-4">
+    <label class="text-sm font-medium text-gray-700">Lisatud failid:</label>
+    <div class="grid grid-cols-4 gap-4">
         {{#each files}}
             <div class="relative h-40">
+                <input type="hidden" name="files[]" value="{{this.sha}}"/>
                 <a href="{{this.url}}" target="_blank">
-                    <img class="object-cover object-center w-full h-40 max-w-full rounded-lg"
+                    <img class="object-cover object-center w-full h-36 max-w-full rounded-lg"
                          src="{{this.thumbUrl}}"
                          alt="{{this.name}}"/>
+                    <p class="m-0 p-0 text-sm overflow-x-hidden">{{this.name}}</p>
                 </a>
-                <button class="absolute top-1 right-1 btn btn-primary p-1 min-h-0 min-w-0">
+                <button class="absolute top-1 right-1 btn btn-primary p-1 min-h-0 min-w-0" onclick="removeImage(this)">
                     <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
                 </button>
             </div>
         {{/each}}
     </div>
-    <!--
-            <label for="{{prefix}}_newFile" class="hidden"></label>
-            <input type="file" id="{{prefix}}_newFile" name="{{prefix}}_newFile"
-                   class="input-single" placeholder="Lisa uus fail">
-            <button class="btn btn-primary ml-4">
-                <i class="material-symbols-outlined text-xxxl text-brand_red  transition ease-in-out duration-1000"
-                   aria-hidden="true">attach_file</i>
-            </button>
-!-->
-    <div class="max-w-xs">
+
+    <div class="mt-4 max-w-xs">
         <label for="fileInput" class="mb-1 block text-sm font-medium text-gray-700">Lisa fail</label>
-        <input id="fileInput" type="file" name="{{prefix}}/files/" multiple
+        <input id="fileInput" type="file" name="{{prefix}}/files[]" multiple
                class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
     </div>
 </div>
+<script>
+    function removeImage(el) {
+        el.closest('div').remove();
+    }
+</script>

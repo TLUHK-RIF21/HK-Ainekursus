@@ -1,85 +1,99 @@
 <div class="">
-    <div class="card-title p-2 flex items-center justify-between">
-        <h4 class="my-0">Üldandmete muutmine</h4>
-        <div class="flex">
-            <button class="btn btn-primary mr-4" onclick="document.getElementById('conceptForm').submit()">
-                Salvesta
-            </button>
-            {{#if readme.data.slug }}
-
-                <button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
-                        title="Kustuta sisuteema" {{#if conceptUsage.length}}disabled{{/if}}
-                        onclick="deleteConcept({{course.id}})">
-                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+    <form action="/course-edit/{{course.id}}" method="post" id="generalForm" enctype="multipart/form-data">
+        <div class="card-title p-2 flex items-center justify-between mb-4">
+            <h4 class="my-0">Üldandmete muutmine</h4>
+            <div class="flex">
+                <button class="btn btn-primary mr-4" type="submit">
+                    Salvesta
                 </button>
-            {{/if}}
+            </div>
         </div>
-    </div>
-    <label class="text-lg font-bold">
+        <label class="text-lg font-bold">
         <span class="flex items-center">
             <i class="material-symbols-outlined mr-2">home</i>
             Kursuse nimi
         </span>
-        <span class="input-w-button">
-            <input type="text" name="config/courseName" class="input-single" required value="{{config.courseName}}">
-            <!--button class="btn btn-primary" type="submit" value="Sisene">
-                <i class="material-symbols-outlined">save</i>
-            </button!-->
+            <span class="input-w-button">
+            <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
+                <!--button class="btn btn-primary" type="submit" value="Sisene">
+                    <i class="material-symbols-outlined">save</i>
+                </button!-->
         </span>
-    </label>
+        </label>
 
-    <label class="text-lg font-bold mt-4">
+        <label class="text-lg font-bold mt-4">
         <span class="flex items-center">
+
             <i class="material-symbols-outlined mr-2">link</i> Kursuse link
         </span>
-        <input type="text" name="config/courseUrl" id="oisUrl" class="input-single" required
-               value="{{config.courseUrl}}">
-    </label>
-    <hr class="my-4">
+            <input type="text" name="courseUrl" id="oisUrl" class="input-single" required
+                   value="{{config.courseUrl}}">
+        </label>
+        <hr class="my-4">
 
-    <div class="block mb-4">
-        <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-        <input type="hidden" name="readme[sha]" value="{{readme.sha}}">
-        <input type="hidden" name="materials[sha]" value="{{materials.sha}}">
-        <label for="component">Üldinfo</label>
-        <div id="tinymde_commandbar"></div>
-        <div class="txtcontainer w-full relative">
-            <button class="btn btn-primary absolute -top-16 right-4" id="sync" title="Uuenda õisist" type="button">
-                <i class="material-symbols-outlined">sync</i>
-            </button>
-            <textarea id="component" cols="30" rows="30" name="readme[content]">{{readme.content}}</textarea>
+        <div class="block mb-4">
+            <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
+            <input type="hidden" name="readme[sha]" value="{{readme.sha}}">
+            <input type="hidden" name="materials[sha]" value="{{materials.sha}}">
+            <label for="component">Üldinfo</label>
+            <div id="tinymde_commandbar"></div>
+            <div class="txtcontainer w-full relative">
+                <button class="btn btn-primary absolute -top-16 right-4" id="sync" title="Uuenda õisist" type="button">
+                    <i class="material-symbols-outlined">sync</i>
+                </button>
+                <textarea id="component" cols="30" rows="30" name="readme[content]">{{readme.content}}</textarea>
+            </div>
         </div>
-    </div>
 
-    <div class="block mb-4">
-        <label>Lisamaterjalid:</label>
-        <input type="hidden" name="additionalMaterials[sha]" value="{{materials.sha}}">
-        <div id="tinymde_commandbar2"></div>
-        <div class="txtcontainer w-full">
+        <div class="block mb-4">
+            <label>Lisamaterjalid:</label>
+            <div id="tinymde_commandbar2"></div>
+            <div class="txtcontainer w-full">
             <textarea id="additionalMaterials" cols="30" rows="30"
                       name="materials[content]">{{materials.content}}</textarea>
+            </div>
         </div>
-
-    </div>
-    {{> files-input files=files prefix="docs"}}
+        {{> files-input files=files prefix="docs"}}
+    </form>
 </div>
 <script type="application/javascript" src="/js/submit-edit.js"></script>
 <script>
     const tinyMDE1 = new TinyMDE.Editor(
-            { textarea: 'component' }).addEventListener(
+            { textarea: 'component' });/*.addEventListener(
             'change', debounce((eventData) => {
-                handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
-            }, 1000));
+                handleMDChange(eventData.content, 'docs/README.md');
+            }, 1000));*/
 
     const commandBar1 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar', editor: tinyMDE1 });
 
     const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'additionalMaterials' }).addEventListener(
+            { textarea: 'additionalMaterials' });/*.addEventListener(
             'change', debounce((eventData) => {
                 handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
-            }, 1000));
+            }, 1000));*/
 
     const commandBar2 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar2', editor: tinyMDE2 });
+
+    const oisSyncButton = document.getElementById('sync');
+
+    oisSyncButton.addEventListener('click', () => {
+        fetch('/get-ois-content?courseId={{course.code}}', {
+            method: 'get', headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((res) => {
+            if (res.ok) {
+                return res.json();
+            }
+            return Promise.reject(res); // 2. reject instead of throw
+        }).then((res) => {
+            tinyMDE1.setContent(res.data);
+            document.getElementById('component').value = res.data;
+        }).catch((e) => {
+            console.log(e);
+        });
+    });
+
 </script>

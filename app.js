@@ -264,6 +264,7 @@ app.get(
 );
 
 app.use('/role-select', roleRoutes);
+app.get('/get-ois-content', allCoursesController.getOisContent);
 
 /** From here on, following endpoints are available only with successful login and authentication */
 app.use(ensureAuthenticated);
@@ -333,8 +334,6 @@ app.use('/add-version', addNewVersionRoutes);
 
 app.use('/course', courseRoutes);
 app.use('/course-edit', courseEditRoutes);
-
-app.get('/get-ois-content', allCoursesController.getOisContent);
 
 /** Redirect all unknown paths to 404 page */
 app.all('*', resetSelectedVersion, otherController.notFound);

@@ -33,11 +33,15 @@ router.get('/:courseId/concept/:slug', validateTeacher,
   renderEditPage
 );
 
-router.post('/:courseId', (req, res) => {
+router.post(
+  '/:courseId',
   // Handle POST request for /:courseId
   // You can access the request body with req.body
   //allCoursesController.updateCourseData
-});
+  //console.log(req.body);
+  //return res.send('ok');
+  courseEditController.updateGeneral
+);
 
 router.post('/:courseId/concept/:slug', courseEditController.updateConcept);
 
