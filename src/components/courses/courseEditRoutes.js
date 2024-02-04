@@ -2,7 +2,8 @@ import express from 'express';
 import validateTeacher from '../../middleware/validateTeacher.js';
 import apiRequests from './coursesService.js';
 import {
-  courseEditController, fileUpload, renderEditPage
+  courseEditController,
+  renderEditPage
 } from './courseEditController.js';
 
 const router = express.Router();
@@ -27,36 +28,35 @@ router.get('/:courseId', validateTeacher,
   courseEditController.getGeneral, renderEditPage
 );
 
-//edit concept data
+router.post(
+  '/:courseId',
+  courseEditController.updateGeneral
+);
+
+//concepts related routes
 router.get('/:courseId/concept/:slug', validateTeacher,
   courseEditController.getSpecificCourse, courseEditController.getConcept,
   renderEditPage
-);
-
-router.post(
-  '/:courseId',
-  // Handle POST request for /:courseId
-  // You can access the request body with req.body
-  //allCoursesController.updateCourseData
-  //console.log(req.body);
-  //return res.send('ok');
-  courseEditController.updateGeneral
 );
 
 router.post('/:courseId/concept/:slug', courseEditController.updateConcept);
 
 router.delete(
   '/:courseId/concept/:slug',
-  // Handle DELETE request for /:courseId/concept/:slug
-  // req.params.slug = { courseId: '1', slug: 'uus-sisuteema' }
   courseEditController.deleteConcept
 );
 
-router.post('/upload', fileUpload);
+//lessons related routes
+router.get('/:courseId/lesson/:slug', validateTeacher,
+  courseEditController.getSpecificCourse, courseEditController.getLesson,
+  renderEditPage
+);
 
-/*router.post(
- '/',
- allCoursesController.updateCourseData
- );*/
+router.post('/:courseId/lesson/:slug', courseEditController.updateLesson);
+
+router.delete(
+  '/:courseId/lesson/:slug',
+  courseEditController.deleteLesson
+);
 
 export default router;

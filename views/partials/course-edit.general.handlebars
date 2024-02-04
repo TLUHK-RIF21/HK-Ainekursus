@@ -1,24 +1,14 @@
 <div class="">
-    <form action="/course-edit/{{course.id}}" method="post" id="generalForm" enctype="multipart/form-data">
+    <form action="/course-edit/{{course.id}}" method="post" id="courseEditForm" enctype="multipart/form-data">
         <div class="card-title p-2 flex items-center justify-between mb-4">
             <h4 class="my-0">Üldandmete muutmine</h4>
-            <div class="flex">
-                <button class="btn btn-primary mr-4" type="submit">
-                    Salvesta
-                </button>
-            </div>
         </div>
         <label class="text-lg font-bold">
-        <span class="flex items-center">
-            <i class="material-symbols-outlined mr-2">home</i>
-            Kursuse nimi
-        </span>
-            <span class="input-w-button">
+            <span class="flex items-center">
+                <i class="material-symbols-outlined mr-2">home</i>
+                Kursuse nimi
+            </span>
             <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
-                <!--button class="btn btn-primary" type="submit" value="Sisene">
-                    <i class="material-symbols-outlined">save</i>
-                </button!-->
-        </span>
         </label>
 
         <label class="text-lg font-bold mt-4">
@@ -56,6 +46,7 @@
         {{> files-input files=files prefix="docs"}}
     </form>
 </div>
+<div class="border-4 border-system-focus hidden"></div>
 <script type="application/javascript" src="/js/submit-edit.js"></script>
 <script>
     const tinyMDE1 = new TinyMDE.Editor(
@@ -96,4 +87,11 @@
         });
     });
 
+    window.addEventListener('beforeunload', (event) => {
+        console.log(event);
+        if (isFormDirty) {
+            event.returnValue = 'Are you sure you want to leave? You have unsaved changes.'; // For older browsers
+            return 'Are you sure you want to leave? You have unsaved changes.'; // Standard
+        }
+    });
 </script>

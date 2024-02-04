@@ -3,9 +3,9 @@
         <div class="card-title p-2 flex items-center justify-between">
             <h4 class="my-0">Sisuteema {{#if readme.data.slug }}muutmine{{else}}lisamine{{/if}}</h4>
             <div class="flex">
-                <button class="btn btn-primary mr-4" onclick="document.getElementById('conceptForm').submit()">
+                <!--button class="btn btn-primary mr-4" onclick="document.getElementById('courseEditForm').submit()">
                     Salvesta
-                </button>
+                </button!--->
                 {{#if readme.data.slug }}
 
                     <button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
@@ -42,7 +42,7 @@
         </div>
     </div>
     <div class="card mb-2">
-        <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="conceptForm">
+        <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="courseEditForm">
             <div class="p-2">
                 <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
                 <input type="hidden" name="concept[slug]" id="concept[slug]" value="{{readme.slug}}">

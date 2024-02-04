@@ -1,4 +1,7 @@
 <!-- course.handlebars -->
+<script>
+    let isFormDirty = false;
+</script>
 <div class="side-btn-wrapper lg:hidden">
     <button id="left-side-button" onclick='panMainContentLeft()'
             class="flex items-center bg-button-default hover:bg-button-hover active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 text-primary-100 py-4 pl-4 pr-8 rounded-r-full">
@@ -28,7 +31,13 @@
         {{> sidebar-right.course-edit }}
     </aside>
 </div>
-
+<script>
+    const form = document.getElementById('courseEditForm');
+    form.addEventListener('input', () => {
+        isFormDirty = true;
+        document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
+    });
+</script>
 <!--script type="application/javascript" src="/js/editor-tabs.js"></script!-->
 <!--script type="application/javascript" src="/js/md-editors.js"></script!-->
 <!--script type="application/javascript" src="/js/sync-ois.js"></script!-->

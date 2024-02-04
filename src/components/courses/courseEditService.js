@@ -1,15 +1,21 @@
-//let input = {'config/lessons/name': 'new name'};
-//let config = {id: 1, name: 'old name', lessons: [ {name: 'lesson 1', slug:
-// 'lesson_1'}]};
-
 import getCourseData from '../../functions/getCourseData.js';
 import apiRequests from './coursesService.js';
 import {
-  deleteFile, getFolder, updateFile, uploadFile
+  deleteFile,
+  deleteFilesFromRepo,
+  getFile,
+  getFolder,
+  updateFile,
+  uploadFile
 } from '../../functions/githubFileFunctions.js';
 import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
-import { cacheTeamCourses } from '../../setup/setupCache.js';
+import {
+  cacheConcepts,
+  cacheConfig,
+  cacheTeamCourses
+} from '../../setup/setupCache.js';
+import { usersApi } from '../../setup/setupUserAPI.js';
 
 const GITHUB_URL_PREFIX = 'https://github.com/';
 
@@ -62,7 +68,7 @@ async function createFileContent(
   owner, repo, concept, course, sources, branch) {
   // create unique slug from name
   const slug = makeUniqueSlug(
-    slugify(concept.name.toLowerCase()), course.config.concepts);
+    slugify(concept.name.toLowerCase().trim()), course.config.concepts);
 
   // add README.md file
   await uploadFile(owner, repo, `concepts/${ slug }/README.md`, concept.content,
@@ -123,10 +129,12 @@ async function handleCourseGeneralFiles(courseId, readme, materials) {
   if (course) {
     const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
       .split('/');
-    await updateFile(owner, repo, `docs/README.md`,
-      { content: readme.content, sha: readme.sha }, `edit docs/readme`, 'draft'
+    if (readme && readme.content) await updateFile(owner, repo,
+      `docs/README.md`, { content: readme.content, sha: readme.sha },
+      `edit docs/readme`, 'draft'
     );
-    await updateFile(owner, repo, `docs/lisamaterjalid.md`,
+    if (materials && materials.content) await updateFile(owner, repo,
+      `docs/lisamaterjalid.md`,
       { content: materials.content, sha: materials.sha },
       `docs/lisamaterjalid.md`, 'draft'
     );
@@ -146,18 +154,10 @@ async function handleCourseFiles(courseId, oldFiles, newFiles) {
 
     // 1. Delete removed files
     // Filter and map files to be deleted
-    const toDelete = fileFolder.filter(item => !oldFiles?.includes(item.sha))
-      .map(file => ({ path: file.path, sha: file.sha }));
 
-    // Delete files in batches to avoid exceeding rate limit
-    for (let i = 0; i < toDelete.length; i += 100) {
-      const batch = toDelete.slice(i, i + 100);
-
-      await Promise.all(batch.map(
-        file => deleteFile(owner, repo, file.path, file.sha,
-          `file ${ file.path } deleted`, 'draft'
-        )));
-    }
+    const toDelete = fileFolder.filter(item => !oldFiles?.includes(item.path))
+      .map(file => file.path);
+    await deleteFilesFromRepo(owner, repo, 'docs/files', toDelete, 'draft');
 
     // 2. Upload new files
     if (typeof newFiles === 'object' && newFiles) {
@@ -208,11 +208,183 @@ async function updateGeneralData(courseId, courseName, courseUrl) {
   }
 }
 
+async function getFolderContent(owner, repo, path, branch) {
+  const data = {};
+
+  // Get README file
+  const readme = await getFile(owner, repo, `${ path }/README.md`, branch);
+  if (readme) {
+    data.readme = readme;
+  }
+
+  // Get lisamaterjalid.md file
+  const lisamaterjalid = await getFile(
+    owner, repo, `${ path }/lisamaterjalid.md`, branch);
+  if (lisamaterjalid) {
+    data.materials = lisamaterjalid;
+  }
+
+  // Get files from "files" directory
+  const files = await getFolder(owner, repo, `${ path }/files`, branch, true);
+  data.files = [];
+  // Filter and format files
+  files.filter(file => file.type === 'file').forEach(file => {
+    const name = file.name;
+    const thumbUrl = /\.(jpg|png|gif|jpeg)$/i.test(name)
+      ? file.download_url
+      : '/images/thumb.png';
+    const url = file.download_url;
+    const sha = file.sha;
+    const path = file.path;
+
+    data.files.push({ name, thumbUrl, url, sha, path });
+  });
+
+  return data;
+}
+
+async function getAllConcepts(courses, refBranch) {
+  if (cacheConcepts.has('concepts')) {
+    return new Promise((resolve) => {
+      console.log('✅✅  concepts IS from cache');
+      resolve(cacheConcepts.get('concepts'));
+    });
+  }
+  console.log('❌❌ concepts IS NOT from cache');
+  const allConcepts = [];
+  await Promise.all(courses.map(async (course) => {
+    // repository: 'https://github.com/tluhk/HK_Sissejuhatus-informaatikasse',
+    const [owner, repo] = course.repository.replace('https://github.com/', '')
+      .split('/');
+    const folderContent = await getFolder(owner, repo, 'concepts', refBranch);
+    course.config?.config?.concepts?.forEach((concept) => {
+      // find where is concept defined
+      if (folderContent.filter((f) => f.name === concept.slug).length) {
+        concept.course = course.repository;
+      }
+      // vaata kas sama uuid'ga on juba kirje, kui on, siis lisa sellele
+      // usedIn
+      const isDefined = allConcepts.find((c) => c.uuid === concept.uuid);
+      if (isDefined) {
+        if (Array.isArray(isDefined.usedIn)) {
+          isDefined.usedIn.push(course.repository);
+        } else {
+          isDefined.usedIn = [course.repository];
+        }
+      } else {
+        concept.course = course.repository;
+        if (Array.isArray(concept.usedIn)) {
+          concept.usedIn.push(course.repository);
+        } else {
+          concept.usedIn = [course.repository];
+        }
+        allConcepts.push(concept);
+      }
+    });
+  }));
+  cacheConcepts.set('concepts', allConcepts);
+  return allConcepts.filter((c) => !!c.course)
+    .sort((a, b) => a.name > b.name ? 1 : b.name > a.name ? -1 : a.course >
+    b.course ? 1 : b.course > a.course ? -1 : 0);
+}
+
+async function fetchAndProcessCourseData(course) {
+  try {
+    const allCoursesResponse = await usersApi.get('groups');
+    const allCourses = allCoursesResponse.data;
+
+    const coursesWithConfig = await Promise.all(
+      allCourses.data.map(async (course) => {
+        course.config = await getCourseData(course, 'master');
+        return course;
+      })
+    );
+
+    const allConcepts = await getAllConcepts(coursesWithConfig, 'master');
+    // todo filter out already used (uuid in lesson.components)
+    return allConcepts; /*.filter(
+     (c) => c.course !== repository
+     );*/
+  } catch (error) {
+    console.error('Error fetching and processing courses:', error);
+  }
+}
+
+async function handleLessonUpdate(
+  courseId, readme, materials, lessonName, lessonSlug, components) {
+  // get course from API
+  const course = await apiRequests.getCourseById(courseId);
+  // if we have course
+  if (course) {
+    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
+      .split('/');
+    const courseConfig = await getCourseData(course, 'draft');
+    const ourLessonIndex = courseConfig.config.lessons.map(l => l.slug)
+      .indexOf(lessonSlug);
+    if (ourLessonIndex >= 0) { // update config.json
+      courseConfig.config.lessons[ourLessonIndex].name = lessonName;
+      courseConfig.config.lessons[ourLessonIndex].components = components;
+      // todo update components part
+      await updateFile(owner, repo, 'config.json', {
+        content: JSON.stringify(courseConfig.config),
+        sha: courseConfig.config.sha
+      }, `edit lesson data ${ lessonName }`, 'draft');
+      cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
+    }
+
+    // if we have sha - update existing file
+    if (lessonSlug !== 'new') {
+      await updateFile(owner, repo, `lessons/${ lessonSlug }/README.md`,
+        { content: readme.content, sha: readme.sha },
+        `edit lesson: ${ lessonName }`, 'draft'
+      );
+      await updateFile(owner, repo, `lessons/${ lessonSlug }/lisamaterjalid.md`,
+        { content: materials.content, sha: materials.sha },
+        `edit lisamaterjalid.md : ${ lessonName }`, 'draft'
+      );
+      return 'back';
+    } else { // no sha - create new content
+      // 1. add lesson to the conf
+      const slug = slugify(lessonName.toLowerCase().trim());
+      courseConfig.config.lessons.push(
+        {
+          slug: slug,
+          name: lessonName.trim(),
+          uuid: uuidv4(),
+          components: [...components],
+          additionalMaterials: []
+        }
+      );
+      await updateFile(owner, repo, 'config.json', {
+        content: JSON.stringify(courseConfig.config),
+        sha: courseConfig.config.sha
+      }, `lesson added ${ lessonName }`, 'draft');
+      cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
+      // 2. upload files
+      await uploadFile(owner, repo, `lessons/${ slug }/README.md`,
+        JSON.stringify(readme.content),
+        `lesson added: ${ lessonName }`, 'draft'
+      );
+      await uploadFile(owner, repo, `lessons/${ slug }/lisamaterjalid.md`,
+        JSON.stringify(materials.content),
+        `lesson added: ${ lessonName }`, 'draft'
+      );
+      // todo upload images
+
+      return `/course-edit/${ course.id }/lesson/${ slug }`;
+    }
+  }
+  return 'back';
+}
+
 export {
   updateConfigFile,
   makeUniqueSlug,
   handleCourseAndConceptFiles,
   handleCourseGeneralFiles,
   updateGeneralData,
-  handleCourseFiles
+  handleCourseFiles,
+  getFolderContent,
+  handleLessonUpdate,
+  fetchAndProcessCourseData
 };

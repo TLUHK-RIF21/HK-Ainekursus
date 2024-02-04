@@ -1,11 +1,11 @@
 <div class="block">
-    <label class="text-sm font-medium text-gray-700">Lisatud failid:</label>
-    <div class="grid grid-cols-4 gap-4">
+    <label class="text-lg font-bold mb-4">Lisatud failid:</label>
+    <ul class="flex flex-wrap justify-center gap-4 after:basis-60 after:content-['']">
         {{#each files}}
-            <div class="relative h-40">
-                <input type="hidden" name="files[]" value="{{this.sha}}"/>
+            <li class="basis-60 relative">
+                <input type="hidden" name="files[]" value="{{this.path}}"/>
                 <a href="{{this.url}}" target="_blank">
-                    <img class="object-cover object-center w-full h-36 max-w-full rounded-lg"
+                    <img class="object-cover object-center w-full h-auto max-w-full rounded-lg"
                          src="{{this.thumbUrl}}"
                          alt="{{this.name}}"/>
                     <p class="m-0 p-0 text-sm overflow-x-hidden">{{this.name}}</p>
@@ -13,18 +13,19 @@
                 <button class="absolute top-1 right-1 btn btn-primary p-1 min-h-0 min-w-0" onclick="removeImage(this)">
                     <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
                 </button>
-            </div>
+            </li>
         {{/each}}
-    </div>
+    </ul>
 
     <div class="mt-4 max-w-xs">
-        <label for="fileInput" class="mb-1 block text-sm font-medium text-gray-700">Lisa fail</label>
+        <label for="fileInput" class="mb-1 block font-medium text-gray-700">Lisa fail</label>
         <input id="fileInput" type="file" name="{{prefix}}/files[]" multiple
-               class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
+               class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
     </div>
 </div>
 <script>
     function removeImage(el) {
-        el.closest('div').remove();
+        el.closest('li').remove();
+        isFormDirty = true;
     }
 </script>

@@ -1,13 +1,15 @@
 import {
-  deleteFolder, getFile, getFolder, updateFile, uploadFile
+  deleteFolderFromRepo, getFile, updateFile
 } from '../../functions/githubFileFunctions.js';
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
-import { getConfig } from '../../functions/getConfigFuncs.js';
 import {
-  handleCourseAndConceptFiles, handleCourseFiles,
+  fetchAndProcessCourseData,
+  getFolderContent,
+  handleCourseAndConceptFiles,
+  handleCourseFiles,
   handleCourseGeneralFiles,
-  updateConfigFile,
+  handleLessonUpdate,
   updateGeneralData
 } from './courseEditService.js';
 import { cacheConfig } from '../../setup/setupCache.js';
@@ -32,7 +34,6 @@ const courseEditController = {
     res.locals.branches = validBranches;
 
     let courseConfig = await getCourseData(course, 'draft');
-
     res.locals.course = course;
     res.locals.config = courseConfig;
 
@@ -117,7 +118,8 @@ const courseEditController = {
       }
     });
     courseConfig.config?.lessons?.forEach((x) => {
-      if (x.additionalMaterials[0].slug === componentSlug && x.slug ===
+      if (x.additionalMaterials.length && x.additionalMaterials[0].slug ===
+        componentSlug && x.slug ===
         contentSlug) {
         componentName = x.additionalMaterials[0].name;
         componentType = 'docs';
@@ -170,25 +172,8 @@ const courseEditController = {
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
       .split('/');
-    res.locals.readme = await getFile(owner, repo, `docs/README.md`, 'draft');
-    res.locals.materials = await getFile(
-      owner, repo, `docs/lisamaterjalid.md`, 'draft');
-    res.locals.files = await getFolder(
-      owner, repo, 'docs/files', 'draft', true);
-    if (res.locals.files.length) {
-      res.locals.files = res.locals.files.filter(file => file.type === 'file')
-        .map(file => {
-          return {
-            name: file.name,
-            thumbUrl: /\.(jpg|png|gif|jpeg)$/i.test(file.name)
-              ? file.download_url
-              : '/images/thumb.png',
-            url: file.download_url,
-            sha: file.sha,
-            path: file.path
-          };
-        });
-    }
+    const folderContent = await getFolderContent(owner, repo, 'docs', 'draft');
+    res.locals = { ...res.locals, ...folderContent };
     res.locals.partial = 'course-edit.general';
     next();
   },
@@ -205,55 +190,55 @@ const courseEditController = {
     return false;
   },
 
-  updateCourseData: async (req, res) => {
-    const body = req.body;
-    const keys = Object.keys(body);
-    const values = Object.values(body);
-    const response = {};
-    const courseId = req.body.courseId;
-    if (courseId) {
-      const course = await apiRequests.getCourseById(courseId);
-      const repoName = course.repository.replace('https://github.com/', '');
-      const [owner, repo] = repoName.split('/');
+  /*updateCourseData: async (req, res) => {
+   const body = req.body;
+   const keys = Object.keys(body);
+   const values = Object.values(body);
+   const response = {};
+   const courseId = req.body.courseId;
+   if (courseId) {
+   const course = await apiRequests.getCourseById(courseId);
+   const repoName = course.repository.replace('https://github.com/', '');
+   const [owner, repo] = repoName.split('/');
 
-      // handle file uploads
-      if (req.files) {
-        const fileKey = Object.keys(req.files)[0];
-        const path = fileKey + req.files[fileKey].name;
-        const content = req.files[fileKey].data.toString('base64');
-        await uploadFile(owner, repo, path, content, 'file added: ' + path,
-          'draft', true
-        );
-        // todo update files data
-      }
-      // courseId is always there, so we start from index 1
-      for (let i = 1; i < keys.length; i++) {
-        response[keys[i]] = values[i];
-        console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-        if (keys[i].startsWith('config/')) { // update config file
-          // key = config/courseName
-          const config = await getConfig(repoName, 'draft');
-          const updatedConfig = updateConfigFile(keys[i], values[i], config);
-          await updateFile(owner, repo, 'config.json',
-            { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
-            'course edit', 'draft'
-          );
-          cacheConfig.set(`getConfig:${ repoName }+draft`, updatedConfig);
-        } else if (keys[i].endsWith('.md')) { // update file in folder
-          // get file sha
-          const oldFile = await getFile(owner, repo, keys[i], 'draft');
-          await updateFile(owner, repo, keys[i],
-            { content: values[i], sha: oldFile.sha }, 'file edit: ' + keys[i],
-            'draft'
-          );
-        } else {
-          console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-        }
-      }
-      return res.json(response);
-    }
-    return res.status(500).send('error');
-  },
+   // handle file uploads
+   if (req.files) {
+   const fileKey = Object.keys(req.files)[0];
+   const path = fileKey + req.files[fileKey].name;
+   const content = req.files[fileKey].data.toString('base64');
+   await uploadFile(owner, repo, path, content, 'file added: ' + path,
+   'draft', true
+   );
+   // todo update files data
+   }
+   // courseId is always there, so we start from index 1
+   for (let i = 1; i < keys.length; i++) {
+   response[keys[i]] = values[i];
+   console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
+   if (keys[i].startsWith('config/')) { // update config file
+   // key = config/courseName
+   const config = await getConfig(repoName, 'draft');
+   const updatedConfig = updateConfigFile(keys[i], values[i], config);
+   await updateFile(owner, repo, 'config.json',
+   { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
+   'course edit', 'draft'
+   );
+   cacheConfig.set(`getConfig:${ repoName }+draft`, updatedConfig);
+   } else if (keys[i].endsWith('.md')) { // update file in folder
+   // get file sha
+   const oldFile = await getFile(owner, repo, keys[i], 'draft');
+   await updateFile(owner, repo, keys[i],
+   { content: values[i], sha: oldFile.sha }, 'file edit: ' + keys[i],
+   'draft'
+   );
+   } else {
+   console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
+   }
+   }
+   return res.json(response);
+   }
+   return res.status(500).send('error');
+   },*/
 
   updateConcept: async (req, res) => {
     const { concept, courseId, sources } = req.body;
@@ -272,7 +257,7 @@ const courseEditController = {
     if (course) {
       const [owner, repo] = course.repository.replace('https://github.com/', '')
         .split('/');
-      await deleteFolder(owner, repo, `concepts/${ slug }`, 'draft');
+      await deleteFolderFromRepo(owner, repo, `concepts/${ slug }`, 'draft');
       const courseConfig = await getCourseData(course.id, 'draft');
       if (courseConfig) {
         course.config.concepts = course.config.concepts.filter(
@@ -288,11 +273,7 @@ const courseEditController = {
 
   updateGeneral: async (req, res) => {
     const {
-      courseId,
-      courseName,
-      courseUrl,
-      readme,
-      materials
+      courseId, courseName, courseUrl, readme, materials
     } = req.body;
     if (courseId && courseName && courseUrl) {
       await updateGeneralData(courseId, courseName, courseUrl);
@@ -300,7 +281,88 @@ const courseEditController = {
       await handleCourseFiles(courseId, req.body['files[]'], req.files);
     }
     return res.redirect('back');
+  },
+
+  getLesson: async (req, res, next) => {
+    const [owner, repo] = res.locals.course.repository.replace(
+      'https://github.com/', '')
+      .split('/');
+    const folderContent = await getFolderContent(
+      owner, repo, 'lessons/' + req.params.slug, 'draft');
+    res.locals = { ...res.locals, ...folderContent };
+
+    if (folderContent) {
+      // add config data
+      res.locals.readme.data = res.locals.config.config.lessons.find(
+        c => c.slug === req.params.slug);
+      // add concepts data
+      res.locals.readme.data.components = res.locals.readme.data.components.map(
+        uuid => {
+          const concept = res.locals.config.config.concepts.find(
+            concept => concept.uuid === uuid);
+          if (!concept) {
+            const practice = res.locals.config.config.practices.find(
+              practice => practice.uuid === uuid);
+            if (practice) {
+              practice.type = 'practices';
+              return practice;
+            } else {
+              // todo check for external concept - eg where is defined concept
+              // with given uuid
+              return null;
+            }
+          } else {
+            concept.type = 'concepts';
+            return concept;
+          }
+        });
+
+    } else { // new lesson
+      res.locals.readme = {
+        slug: '', data: {}, sources: {}
+      };
+    }
+
+    res.locals.allConcepts = await fetchAndProcessCourseData(res.locals.course);
+    res.locals.readme.slug = req.params.slug;
+    res.locals.partial = 'course-edit.lessons';
+    next();
+  },
+
+  updateLesson: async (req, res) => {
+    const { courseId, readme, materials, lessonName, components } = req.body;
+    const lessonSlug = req.params.slug;
+    if (!(courseId && readme && materials && lessonName)) {
+      return res.redirect('back');
+    } else {
+      const url = await handleLessonUpdate(
+        courseId, readme, materials, lessonName, lessonSlug, components);
+      return res.redirect(url);
+    }
+  },
+
+  deleteLesson: async (req, res) => {
+    const { courseId, slug } = req.params;
+    const course = await apiRequests.getCourseById(courseId);
+    if (course) {
+      const [owner, repo] = course.repository.replace('https://github.com/', '')
+        .split('/');
+      await deleteFolderFromRepo(owner, repo, `lessons/${ slug }`, 'draft');
+      const courseConfig = await getCourseData(course, 'draft');
+      if (courseConfig) {
+        courseConfig.config.lessons = courseConfig.config.lessons.filter(
+          l => l.slug !== slug);
+        await updateFile(owner, repo, 'config.json', {
+          content: JSON.stringify(courseConfig.config),
+          sha: courseConfig.config.sha
+        }, 'lesson removed from the config.json', 'draft');
+      }
+      cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
+      return res.status(202).send('ok');
+    }
+    return res.status(501).send('error');
   }
+
 };
 
 const renderEditPage = async (req, res) => {
@@ -308,11 +370,6 @@ const renderEditPage = async (req, res) => {
   res.render('course-edit', res.locals);
 };
 
-const fileUpload = async (req, res) => {
-  console.log(req.files);
-  return res.send('OK');
-};
-
 export {
-  courseEditController, renderEditPage, fileUpload
+  courseEditController, renderEditPage
 };

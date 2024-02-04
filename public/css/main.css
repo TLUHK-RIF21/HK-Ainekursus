@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Serif:wght@700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap");
 /*
-! tailwindcss v3.3.5 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.1 | MIT License | https://tailwindcss.com
 */
 /*
 1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
@@ -27,8 +27,10 @@
 4. Use the user's configured `sans` font-family by default.
 5. Use the user's configured `sans` font-feature-settings by default.
 6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
 */
-html {
+html,
+:host {
   line-height: 1.5; /* 1 */
   -webkit-text-size-adjust: 100%; /* 2 */
   -moz-tab-size: 4; /* 3 */
@@ -37,6 +39,7 @@ html {
   font-family: Montserrat, sans-serif; /* 4 */
   font-feature-settings: normal; /* 5 */
   font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
 }
 /*
 1. Remove the margin in all browsers.
@@ -90,15 +93,19 @@ strong {
   font-weight: bolder;
 }
 /*
-1. Use the user's configured `mono` font family by default.
-2. Correct the odd `em` font sizing in all browsers.
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
 */
 code,
 kbd,
 samp,
 pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
-  font-size: 1em; /* 2 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
 }
 /*
 Add the correct font size in all browsers.
@@ -1993,14 +2000,8 @@ input:checked ~ .tab-content {
 .h-10{
   height: 2.5rem;
 }
-.h-36{
-  height: 9rem;
-}
 .h-4{
   height: 1rem;
-}
-.h-40{
-  height: 10rem;
 }
 .h-6{
   height: 1.5rem;
@@ -2103,6 +2104,9 @@ input:checked ~ .tab-content {
 }
 .basis-48{
   flex-basis: 12rem;
+}
+.basis-60{
+  flex-basis: 15rem;
 }
 .basis-\[calc\(75\%-1rem\)\]{
   flex-basis: calc(75% - 1rem);
@@ -2266,6 +2270,9 @@ input:checked ~ .tab-content {
 .border-2{
   border-width: 2px;
 }
+.border-4{
+  border-width: 4px;
+}
 .border-b{
   border-bottom-width: 1px;
 }
@@ -2283,6 +2290,9 @@ input:checked ~ .tab-content {
 }
 .border-stroke{
   border-color: var(--stroke, #E2D9CF);
+}
+.border-system-focus{
+  border-color: var(--system-focus, #EB6424);
 }
 .border-r-neutral-200{
   border-right-color: var(--neutral-200, #e3e5e8);
@@ -2334,17 +2344,9 @@ input:checked ~ .tab-content {
 .p-8{
   padding: 2rem;
 }
-.px-0{
-  padding-left: 0px;
-  padding-right: 0px;
-}
 .px-2{
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-}
-.px-3{
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
 }
 .px-4{
   padding-left: 1rem;
@@ -2642,11 +2644,16 @@ input:checked ~ .tab-content {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
-.file\:text-sm::file-selector-button{
-  font-size: 0.80rem;
-}
 .file\:font-semibold::file-selector-button{
   font-weight: 600;
+}
+.after\:basis-60::after{
+  content: var(--tw-content);
+  flex-basis: 15rem;
+}
+.after\:content-\[\'\'\]::after{
+  --tw-content: '';
+  content: var(--tw-content);
 }
 .hover\:ml-\[-10px\]:hover{
   margin-left: -10px;

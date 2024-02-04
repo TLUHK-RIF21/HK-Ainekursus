@@ -182,7 +182,8 @@ const deleteFolderFromRepo = async (org, repo, directoryName, branch) => {
   const directorySha = await getDirectorySha(repoTree.tree, directoryName);
 
   if (!directorySha) {
-    throw new Error(`Could not find an directory '${ directoryName }'`);
+    //throw new Error(`Could not find an directory '${ directoryName }'`);
+    return false;
   }
 
   const { data: directoryTree } = await github.git.getTree({
@@ -204,7 +205,6 @@ const deleteFolderFromRepo = async (org, repo, directoryName, branch) => {
   await setBranchToCommit(org, repo, newCommit.sha, branch);
 };
 const deleteFilesFromRepo = async (org, repo, path, toDelete, branch) => {
-
   const currentCommit = await getCurrentCommit(org, repo, branch);
   const { data: repoTree } = await github.git.getTree({
     owner: org, repo, tree_sha: currentCommit.treeSha, recursive: true
@@ -223,7 +223,7 @@ const deleteFilesFromRepo = async (org, repo, path, toDelete, branch) => {
   const blobs = directoryTree.tree.map((blob) => {
     return {
       'url': `${ path }/${ blob.path }`,
-      'sha': toDelete.includes(blob.path) ? null : blob.sha
+      'sha': toDelete.includes(`${ path }/${ blob.path }`) ? null : blob.sha
     };
   });
 
@@ -298,5 +298,6 @@ export {
   uploadFile,
   getTree,
   getBranch,
-  deleteFolderFromRepo
+  deleteFolderFromRepo,
+  deleteFilesFromRepo
 };

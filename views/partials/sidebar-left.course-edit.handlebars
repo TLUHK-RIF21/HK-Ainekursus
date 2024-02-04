@@ -1,40 +1,71 @@
 <!-- sidebar-left.course-edit.handlebars -->
 <nav class="sidebar h-fit relative md:sticky top-36 md:top-52 lg:top-36" id="sidebar">
     <div class="card flex justify-start items-start h-full w-full flex-col">
-        <div class="flex flex-col justify-start items-center w-full border-b">
+        <div class="flex flex-col justify-start items-center w-full">
             <a href="/course-edit/{{course.id}}"
                class="focus:outline-none focus:text-indigo-400 text-left text-white flex justify-between items-center w-full py-5">
                 <span class="leading-4">Üldised andmed</span>
             </a>
+            <hr class="w-full pb-1">
             <button onclick="showMenu1(true)"
                     class="focus:outline-none focus:text-indigo-400 text-left text-white flex justify-between items-center w-full py-5 space-x-14">
-                <span class="leading-5">Sisuteemad</span>
+                <span class="leading-5">Sisuteemad ({{config.config.concepts.length}})</span>
                 <i class="material-symbols-outlined mr-2" id="icon1">expand_more</i>
             </button>
-            <div id="menu1" class="hidden justify-start flex-col w-full md:w-auto items-start pb-1 ">
+            <div id="menu1" class="hidden justify-start flex-col w-full items-start pb-1">
                 {{#each config.config.concepts}}
                     <a href="/course-edit/{{../course.id}}/concept/{{this.slug}}"
-                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 px-3 py-2 w-full">
-                        <i class="material-symbols-outlined mr-2">sticky_note_2</i>
+                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
+                        <i class="material-symbols-outlined">sticky_note_2</i>
                         <span class="leading-4">{{this.name}}</span>
                     </a>
                 {{/each}}
             </div>
             <a href="/course-edit/{{course.id}}/concept/new"
-               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-0">
+               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
                 <span class="whitespace-nowrap">Lisa uus teema</span>
                 <i class="material-symbols-outlined">add</i>
             </a>
-        </div>
-        <div class="flex flex-col justify-start items-center w-full">
+            <hr class="w-full pb-1">
             <button onclick="showMenu2(true)"
                     class="focus:outline-none focus:text-indigo-400 text-left  text-white flex justify-between items-center w-full py-5 space-x-14">
-                <span class="leading-5">Loengud</span>
+                <span class="leading-5">Loengud ({{config.config.lessons.length}})</span>
                 <i class="material-symbols-outlined mr-2" id="icon2">expand_more</i>
             </button>
-            <div id="menu2" class="hidden justify-start flex-col w-full md:w-auto items-start pb-1 ">
-                loengute list
+            <div id="menu2" class="hidden justify-start flex-col w-full items-start pb-1">
+                {{#each config.config.lessons}}
+                    <a href="/course-edit/{{../course.id}}/lesson/{{this.slug}}"
+                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
+                        <i class="material-symbols-outlined">sticky_note_2</i>
+                        <span class="leading-4">{{this.name}}</span>
+                    </a>
+                {{/each}}
             </div>
+            <a href="/course-edit/{{course.id}}/lesson/new"
+               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
+                <span class="whitespace-nowrap">Lisa uus loeng</span>
+                <i class="material-symbols-outlined">add</i>
+            </a>
+            <hr class="w-full pb-1">
+            <button onclick="showMenu3(true)"
+                    class="focus:outline-none focus:text-indigo-400 text-left  text-white flex justify-between items-center w-full py-5 space-x-14">
+                <span class="leading-5">Praktikumid ({{config.config.practices.length}})</span>
+                <i class="material-symbols-outlined mr-2" id="icon3">expand_more</i>
+            </button>
+            <div id="menu3" class="hidden justify-start flex-col w-full items-start pb-1">
+                {{#each config.config.practices}}
+                    <a href="/course-edit/{{../course.id}}/practice/{{this.slug}}"
+                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
+                        <i class="material-symbols-outlined">sticky_note_2</i>
+                        <span class="leading-4">{{this.name}}</span>
+                    </a>
+                {{/each}}
+            </div>
+            <a href="/course-edit/{{course.id}}/practice/new"
+               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
+                <span class="whitespace-nowrap">Lisa uus praktikum</span>
+                <i class="material-symbols-outlined">add</i>
+            </a>
         </div>
     </div>
 </nav>

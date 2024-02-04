@@ -18,25 +18,13 @@ import {
   getComponentsUUIDs,
   getMarkedAsDoneComponents
 } from '../../functions/getListOfDoneComponentUUIDs.js';
-import {
-  getFile,
-  getFolder,
-  updateFile, uploadFile
-} from '../../functions/githubFileFunctions.js';
-import {
-  cacheConcepts,
-  cacheConfig,
-  cacheLessons
-} from '../../setup/setupCache.js';
-import { usersApi } from '../../setup/setupUserAPI.js';
-import membersRequests from '../../functions/usersHkTluRequests.js';
+import { getFolder } from '../../functions/githubFileFunctions.js';
+import { cacheConcepts, cacheLessons } from '../../setup/setupCache.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getCombinedUserData } from '../../functions/githubUsersFuncs.js';
 import { axios } from '../../setup/setupGithub.js';
 import * as cheerio from 'cheerio';
-import { createConfig, getConfig } from '../../functions/getConfigFuncs.js';
-import { updateConfigFile } from './courseEditService.js';
-import fs from 'fs';
+import { createConfig } from '../../functions/getConfigFuncs.js';
 
 /** responseAction function defines what to do after info about courses and current course page is received.
  * This step gets the data from GitHub, by doing Axios requests via
@@ -1018,52 +1006,6 @@ const allCoursesController = {
     });
 
     return allCoursesActive;
-  },
-  getAllConcepts: async (courses, refBranch) => {
-    if (cacheConcepts.has('concepts')) {
-      return new Promise((resolve) => {
-        console.log('✅✅  concepts IS from cache');
-        resolve(cacheConcepts.get('concepts'));
-      });
-    }
-    console.log('❌❌ concepts IS NOT from cache');
-    const allConcepts = [];
-    await Promise.all(courses.map(async (course) => {
-      // repository: 'https://github.com/tluhk/HK_Sissejuhatus-informaatikasse',
-      const [owner, repo] = course.repository.replace('https://github.com/', '')
-        .split('/');
-      const folderContent = await getFolder(owner, repo, 'concepts', refBranch);
-      //console.log(folderContent);
-      course.config?.concepts?.forEach((concept) => {
-        // find where is concept defined
-        if (folderContent.filter((f) => f.name === concept.slug).length) {
-          concept.course = course.courseSlugInGithub;
-        }
-        // vaata kas sama uuid'ga on juba kirje, kui on, siis lisa sellele
-        // usedIn
-        const isDefined = allConcepts.find((c) => c.uuid === concept.uuid);
-        if (isDefined) {
-          if (Array.isArray(isDefined.usedIn)) {
-            isDefined.usedIn.push(course.courseSlugInGithub);
-          } else {
-            isDefined.usedIn = [course.courseSlugInGithub];
-          }
-        } else {
-          concept.course = course.courseSlugInGithub;
-          if (Array.isArray(concept.usedIn)) {
-            concept.usedIn.push(course.courseSlugInGithub);
-          } else {
-            concept.usedIn = [course.courseSlugInGithub];
-          }
-          allConcepts.push(concept);
-        }
-      });
-    }));
-    cacheConcepts.set('concepts', allConcepts);
-
-    return allConcepts.filter((c) => !!c.course)
-      .sort((a, b) => a.name > b.name ? 1 : b.name > a.name ? -1 : a.course >
-      b.course ? 1 : b.course > a.course ? -1 : 0);
   },
 
   getOtherTeachersCourses: async (req, res) => {
