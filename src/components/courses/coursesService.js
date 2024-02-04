@@ -337,8 +337,8 @@ const apiRequests = {
         owner: 'OWNER', repo: 'REPO', headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
-      }).catch(() => {
-      console.log('Unable to fetch branches');
+      }).catch((e) => {
+      console.log('Unable to fetch branches', e);
     });
     return (resp && resp.data) ? resp.data : [];
   }, getAllCourses: async () => {

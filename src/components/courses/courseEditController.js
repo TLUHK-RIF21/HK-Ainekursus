@@ -13,6 +13,7 @@ import {
   updateGeneralData
 } from './courseEditService.js';
 import { cacheConfig } from '../../setup/setupCache.js';
+import validBranchesService from './coursesService.js';
 
 const courseEditController = {
   getSpecificCourse: async (req, res, next) => {
@@ -30,8 +31,15 @@ const courseEditController = {
     if (validBranches.length === 0) { // repo not found
       return res.redirect('/notfound');
     }
+
+    if (!validBranches.includes('draft')) {
+      await validBranchesService.createNewBranch(
+        course.repository.replace('https://github.com/', ''), 'master',
+        'draft'
+      );
+    }
     res.locals.refBranch = 'draft';
-    res.locals.branches = validBranches;
+    //res.locals.branches = validBranches;
 
     let courseConfig = await getCourseData(course, 'draft');
     res.locals.course = course;
