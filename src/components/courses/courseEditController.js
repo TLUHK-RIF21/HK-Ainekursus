@@ -39,7 +39,6 @@ const courseEditController = {
       );
     }
     res.locals.refBranch = 'draft';
-    //res.locals.branches = validBranches;
 
     let courseConfig = await getCourseData(course, 'draft');
     res.locals.course = course;
