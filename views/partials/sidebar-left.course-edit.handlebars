@@ -7,65 +7,9 @@
                 <span class="leading-4">Üldised andmed</span>
             </a>
             <hr class="w-full pb-1">
-            <button onclick="showMenu1(true)"
-                    class="focus:outline-none focus:text-indigo-400 text-left text-white flex justify-between items-center w-full py-5 space-x-14">
-                <span class="leading-5">Sisuteemad ({{config.config.concepts.length}})</span>
-                <i class="material-symbols-outlined mr-2" id="icon1">expand_more</i>
-            </button>
-            <div id="menu1" class="hidden justify-start flex-col w-full items-start pb-1">
-                {{#each config.config.concepts}}
-                    <a href="/course-edit/{{../course.id}}/concept/{{this.slug}}"
-                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
-                        <i class="material-symbols-outlined">sticky_note_2</i>
-                        <span class="leading-4">{{this.name}}</span>
-                    </a>
-                {{/each}}
-            </div>
-            <a href="/course-edit/{{course.id}}/concept/new"
-               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
-                <span class="whitespace-nowrap">Lisa uus teema</span>
-                <i class="material-symbols-outlined">add</i>
-            </a>
-            <hr class="w-full pb-1">
-            <button onclick="showMenu2(true)"
-                    class="focus:outline-none focus:text-indigo-400 text-left  text-white flex justify-between items-center w-full py-5 space-x-14">
-                <span class="leading-5">Loengud ({{config.config.lessons.length}})</span>
-                <i class="material-symbols-outlined mr-2" id="icon2">expand_more</i>
-            </button>
-            <div id="menu2" class="hidden justify-start flex-col w-full items-start pb-1">
-                {{#each config.config.lessons}}
-                    <a href="/course-edit/{{../course.id}}/lesson/{{this.slug}}"
-                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
-                        <i class="material-symbols-outlined">sticky_note_2</i>
-                        <span class="leading-4">{{this.name}}</span>
-                    </a>
-                {{/each}}
-            </div>
-            <a href="/course-edit/{{course.id}}/lesson/new"
-               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
-                <span class="whitespace-nowrap">Lisa uus loeng</span>
-                <i class="material-symbols-outlined">add</i>
-            </a>
-            <hr class="w-full pb-1">
-            <button onclick="showMenu3(true)"
-                    class="focus:outline-none focus:text-indigo-400 text-left  text-white flex justify-between items-center w-full py-5 space-x-14">
-                <span class="leading-5">Praktikumid ({{config.config.practices.length}})</span>
-                <i class="material-symbols-outlined mr-2" id="icon3">expand_more</i>
-            </button>
-            <div id="menu3" class="hidden justify-start flex-col w-full items-start pb-1">
-                {{#each config.config.practices}}
-                    <a href="/course-edit/{{../course.id}}/practice/{{this.slug}}"
-                       class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
-                        <i class="material-symbols-outlined">sticky_note_2</i>
-                        <span class="leading-4">{{this.name}}</span>
-                    </a>
-                {{/each}}
-            </div>
-            <a href="/course-edit/{{course.id}}/practice/new"
-               class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
-                <span class="whitespace-nowrap">Lisa uus praktikum</span>
-                <i class="material-symbols-outlined">add</i>
-            </a>
+            {{> course-edit.menuitem index='1' items=config.config.concepts label='Sisuteemad' type='concept'}}
+            {{> course-edit.menuitem index='2' items=config.config.lessons label='Loengud' type='lesson'}}
+            {{> course-edit.menuitem index='3' items=config.config.practices label='Praktikumid' type='practice'}}
         </div>
     </div>
 </nav>
