@@ -6,6 +6,10 @@
     @apply text-system-white bg-button-default hover:bg-button-hover active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
 }
 
+.btn-danger {
+    @apply text-system-white bg-system-red-tlu active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
 .btn-secondary {
     @apply text-button-secondary-label-default hover:bg-button-secondary-fill-hover active:bg-button-secondary-fill-active hover:text-button-secondary-hover border-2 border-button-secondary-default hover:border-button-secondary-hover active:border-button-secondary-active active:text-button-secondary-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
 }

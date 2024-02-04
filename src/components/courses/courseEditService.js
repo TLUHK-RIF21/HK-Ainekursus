@@ -258,6 +258,7 @@ async function getAllConcepts(courses, refBranch) {
       .split('/');
     const folderContent = await getFolder(owner, repo, 'concepts', refBranch);
     course.config?.config?.concepts?.forEach((concept) => {
+      console.log(course);
       // find where is concept defined
       if (folderContent.filter((f) => f.name === concept.slug).length) {
         concept.course = course.repository;
@@ -267,16 +268,16 @@ async function getAllConcepts(courses, refBranch) {
       const isDefined = allConcepts.find((c) => c.uuid === concept.uuid);
       if (isDefined) {
         if (Array.isArray(isDefined.usedIn)) {
-          isDefined.usedIn.push(course.repository);
+          isDefined.usedIn.push(course.code);
         } else {
-          isDefined.usedIn = [course.repository];
+          isDefined.usedIn = [course.code];
         }
       } else {
-        concept.course = course.repository;
+        concept.course = course.code;
         if (Array.isArray(concept.usedIn)) {
-          concept.usedIn.push(course.repository);
+          concept.usedIn.push(course.code);
         } else {
-          concept.usedIn = [course.repository];
+          concept.usedIn = [course.code];
         }
         allConcepts.push(concept);
       }

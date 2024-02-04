@@ -298,7 +298,7 @@ const courseEditController = {
       owner, repo, 'lessons/' + req.params.slug, 'draft');
     res.locals = { ...res.locals, ...folderContent };
 
-    if (folderContent) {
+    if (folderContent && req.params.slug !== 'new') {
       // add config data
       res.locals.readme.data = res.locals.config.config.lessons.find(
         c => c.slug === req.params.slug);

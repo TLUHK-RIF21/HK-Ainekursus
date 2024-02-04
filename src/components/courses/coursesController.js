@@ -608,7 +608,6 @@ const allCoursesController = {
       validBranches = validBranches.map((b) => b.name);
     }
 
-    console.log(validBranches);
     if (validBranches.length === 0) { // repo not found
       return res.redirect('/notfound');
     }

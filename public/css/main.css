@@ -948,6 +948,20 @@ body{
 .btn-primary:active{
   background-color: var(--button-active, #4d2e6b);
 }
+.btn-danger{
+  background-color: var(--system-red-tlu, #b71234);
+  color: var(--system-white, #ffffff);
+}
+.btn-danger:focus-visible{
+  border-style: solid;
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 2px;
+  outline-color: var(--system-focus, #EB6424);
+}
+.btn-danger:active{
+  background-color: var(--button-active, #4d2e6b);
+}
 .btn-secondary{
   border-width: 2px;
   border-color: var(--button-secondary-default, #80609f);
@@ -1924,6 +1938,10 @@ input:checked ~ .tab-content {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
+.my-16{
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
 .my-4{
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -2526,6 +2544,9 @@ input:checked ~ .tab-content {
 }
 .text-system-red-tlu{
   color: var(--system-red-tlu, #b71234);
+}
+.text-system-white{
+  color: var(--system-white, #ffffff);
 }
 .text-text{
   color: var(--text, #414a58);
