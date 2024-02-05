@@ -4,7 +4,7 @@ import {
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import {
-  fetchAndProcessCourseData,
+  fetchAndProcessCourseData, getAllConcepts,
   getFolderContent,
   handleCourseAndConceptFiles,
   handleCourseFiles,
@@ -305,6 +305,7 @@ const courseEditController = {
       res.locals.readme.data = res.locals.config.config.lessons.find(
         c => c.slug === req.params.slug);
       // add concepts data
+      const allConcepts = await fetchAndProcessCourseData();
       res.locals.readme.data.components = res.locals.readme.data.components.map(
         uuid => {
           const concept = res.locals.config.config.concepts.find(
@@ -316,9 +317,8 @@ const courseEditController = {
               practice.type = 'practices';
               return practice;
             } else {
-              // todo check for external concept - eg where is defined concept
-              // with given uuid
-              return null;
+              // check external concepts
+              return allConcepts.find(c => c.uuid === uuid);
             }
           } else {
             concept.type = 'concepts';

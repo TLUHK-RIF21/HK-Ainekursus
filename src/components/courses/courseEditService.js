@@ -289,7 +289,7 @@ async function getAllConcepts(courses, refBranch) {
     b.course ? 1 : b.course > a.course ? -1 : 0);
 }
 
-async function fetchAndProcessCourseData(course) {
+async function fetchAndProcessCourseData() {
   try {
     const allCoursesResponse = await usersApi.get('groups');
     const allCourses = allCoursesResponse.data;
@@ -387,5 +387,6 @@ export {
   handleCourseFiles,
   getFolderContent,
   handleLessonUpdate,
-  fetchAndProcessCourseData
+  fetchAndProcessCourseData,
+  getAllConcepts
 };
