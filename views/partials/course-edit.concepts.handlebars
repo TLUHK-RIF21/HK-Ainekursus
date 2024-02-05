@@ -3,16 +3,13 @@
         <div class="card-title p-2 flex items-center justify-between">
             <h4 class="my-0">Sisuteema {{#if readme.data.slug }}muutmine{{else}}lisamine{{/if}}</h4>
             <div class="flex">
-                <!--button class="btn btn-primary mr-4" onclick="document.getElementById('courseEditForm').submit()">
-                    Salvesta
-                </button!--->
                 {{#if readme.data.slug }}
 
-                    <button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
+                    <!--button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
                             title="Kustuta sisuteema" {{#if conceptUsage.length}}disabled{{/if}}
                             onclick="deleteConcept({{course.id}})">
                         <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                    </button>
+                    </button!-->
                 {{/if}}
             </div>
         </div>
@@ -111,16 +108,15 @@
         </form>
     </div>
 </div>
-<script type="application/javascript" src="/js/submit-edit.js"></script>
 <script>
     const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'concept_content' }).addEventListener(
+            { textarea: 'concept_content' });/*.addEventListener(
             'change', debounce((eventData) => {
                 handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
-            }, 1000));
+            }, 1000));*/
 
     const commandBar2 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar2', editor: tinyMDE2 });
+            { element: 'tinymde_commandbar_concept_content', editor: tinyMDE2 });
 
     function deleteSource(el) {
         el.closest('li').remove();
@@ -165,8 +161,22 @@
                     method: 'DELETE'
                 }
         ).then((data) => {
-            console.log(data);
+            document.getElementById('modal').style.display = 'none';
             history.back();
         });
     }
+
+    window.onload = function () {
+        document.getElementById('saveBtn').innerHTML = 'Salvesta sisuteema';
+        if (document.getElementById('showUsage')) {
+            document.getElementById('delBtn').disabled = true;
+        } else {
+            document.getElementById('delBtn').onclick = function () {
+                document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle sisuteema kustutada?';
+                document.getElementById('modal').style.display = 'flex';
+            };
+            document.getElementById('delOK').onclick = deleteConcept;
+        }
+    };
+
 </script>

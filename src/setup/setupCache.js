@@ -20,6 +20,11 @@ const cacheTeamCourses = new NodeCache({
   stdTTL: 1800,
   useClones: false
 });
+// for course concept usages
+const cacheConceptUsage = new NodeCache({
+  stdTTL: 1800,
+  useClones: false
+});
 // for Commit Comments, set cache for 30 minutes
 const cacheCommits = new NodeCache({
   stdTTL: 1800,
@@ -127,5 +132,6 @@ export {
   cacheOrgMembers,
   cacheConcepts,
   cacheLessons,
-  cacheComponentsUUIds
+  cacheComponentsUUIds,
+  cacheConceptUsage
 };

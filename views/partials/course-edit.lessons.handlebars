@@ -6,11 +6,11 @@
                 <!--button class="btn btn-primary mr-4" onclick="document.getElementById('courseEditForm').submit()">
                     Salvesta
                 </button!-->
-                <button class="btn btn-primary"
+                <!--button class="btn btn-primary"
                         title="Kustuta sisuteema"
                         onclick="deleteLesson('{{readme.slug}}')">
                     <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                </button>
+                </button!-->
             </div>
         </div>
     </div>
@@ -20,6 +20,7 @@
                 <div class="block mb-4">
                     <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
                     <input type="hidden" name="readme[sha]" value="{{readme.sha}}">
+                    <input type="hidden" id="slug" value="{{readme.slug}}">
                     <input type="hidden" name="materials[sha]" value="{{materials.sha}}">
                     <label class="text-lg font-bold mb-4">
                         Loengu nimetus
@@ -53,8 +54,14 @@
                                 <label class="text-lg font-bold mb-4" for="concepts">Lisa sisuteema:</label>
                                 <select name="linkConcept" id="concepts" class="input-single">
                                     {{#each allConcepts}}
-                                        <option value="{{this.uuid}}" data-name="{{this.name}}">{{this.name}} - <span
-                                                class="text-gray-500">{{this.course}}</span></option>
+                                        <option value="{{this.uuid}}"
+                                                data-name="{{this.name}}"
+                                            {{#contains this.uuid ../readme.data.components}}
+                                                disabled
+                                            {{/contains}}
+                                        >
+                                            {{this.name}} - <span class="text-gray-500">{{this.course}}</span>
+                                        </option>
                                     {{/each}}
                                 </select>
                             </div>
@@ -85,19 +92,13 @@
 </div>
 <script>
     const tinyMDE1 = new TinyMDE.Editor(
-            { textarea: 'component' });/*.addEventListener(
-        'change', debounce((eventData) => {
-        handleMDChange(eventData.content, 'docs/README.md');
-    }, 1000));*/
+            { textarea: 'component' });
 
     const commandBar1 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar', editor: tinyMDE1 });
 
     const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'additionalMaterials' });/*.addEventListener(
-        'change', debounce((eventData) => {
-        handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
-    }, 1000));*/
+            { textarea: 'additionalMaterials' });
 
     const commandBar2 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar2', editor: tinyMDE2 });
@@ -133,7 +134,8 @@
         optionToEnable.disabled = false; // Re-enable the option in the select element
     }
 
-    function deleteLesson(slug) {
+    function deleteLesson() {
+        const slug = document.getElementById('slug').value;
         const id = document.getElementById('courseId').value;
         fetch(
                 '/course-edit/' + id + '/lesson/' + slug,
@@ -141,8 +143,19 @@
                     method: 'DELETE'
                 }
         ).then((data) => {
-            console.log(data);
+            document.getElementById('modal').style.display = 'none';
             history.back();
         });
+
     }
+
+    window.onload = function () {
+        document.getElementById('saveBtn').innerHTML = 'Salvesta loeng';
+        document.getElementById('delBtn').onclick = function () {
+            document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle loengu kustutada?';
+            document.getElementById('modal').style.display = 'flex';
+        };
+        document.getElementById('delOK').onclick = deleteLesson;
+    };
+
 </script>

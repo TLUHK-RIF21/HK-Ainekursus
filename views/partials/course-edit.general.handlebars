@@ -47,22 +47,15 @@
     </form>
 </div>
 <div class="border-4 border-system-focus hidden"></div>
-<script type="application/javascript" src="/js/submit-edit.js"></script>
 <script>
     const tinyMDE1 = new TinyMDE.Editor(
-            { textarea: 'component' });/*.addEventListener(
-            'change', debounce((eventData) => {
-                handleMDChange(eventData.content, 'docs/README.md');
-            }, 1000));*/
+            { textarea: 'component' });
 
     const commandBar1 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar', editor: tinyMDE1 });
 
     const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'additionalMaterials' });/*.addEventListener(
-            'change', debounce((eventData) => {
-                handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
-            }, 1000));*/
+            { textarea: 'additionalMaterials' });
 
     const commandBar2 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar2', editor: tinyMDE2 });
@@ -88,10 +81,18 @@
     });
 
     window.addEventListener('beforeunload', (event) => {
-        console.log(event);
         if (isFormDirty) {
             event.returnValue = 'Are you sure you want to leave? You have unsaved changes.'; // For older browsers
             return 'Are you sure you want to leave? You have unsaved changes.'; // Standard
         }
     });
+
+    window.onload = function () {
+        document.getElementById('saveBtn').innerHTML = 'Salvesta üldandmed';
+        document.getElementById('delBtn').onclick = function () {
+            document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle ainekursuse kustutada?';
+            document.getElementById('modal').style.display = 'flex';
+        };
+        //document.getElementById('delOK').onclick = deleteCourse;
+    };
 </script>

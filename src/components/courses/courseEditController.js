@@ -12,7 +12,7 @@ import {
   handleLessonUpdate,
   updateGeneralData
 } from './courseEditService.js';
-import { cacheConfig } from '../../setup/setupCache.js';
+import { cacheConceptUsage, cacheConfig } from '../../setup/setupCache.js';
 import validBranchesService from './coursesService.js';
 
 const courseEditController = {
@@ -253,6 +253,7 @@ const courseEditController = {
       return res.redirect('back');
     } else {
       const url = await handleCourseAndConceptFiles(courseId, concept, sources);
+      cacheConceptUsage.del('conceptUsages+' + courseId);
       return res.redirect(url);
     }
   },
@@ -273,6 +274,7 @@ const courseEditController = {
           content: JSON.stringify(course.config), sha: course.config.sha
         }, 'concept removed from the config.json', 'draft');
       }
+      cacheConceptUsage.del('conceptUsages+' + courseId);
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');
@@ -344,6 +346,7 @@ const courseEditController = {
     } else {
       const url = await handleLessonUpdate(
         courseId, readme, materials, lessonName, lessonSlug, components);
+      cacheConceptUsage.del('conceptUsages+' + courseId);
       return res.redirect(url);
     }
   },
@@ -365,6 +368,7 @@ const courseEditController = {
         }, 'lesson removed from the config.json', 'draft');
       }
       cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
+      cacheConceptUsage.del('conceptUsages+' + courseId);
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');

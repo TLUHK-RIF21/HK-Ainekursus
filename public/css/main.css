@@ -1822,7 +1822,7 @@ input:checked ~ .tab-content {
     display: none;
 }
 .custom-backdrop {
-    background: rgba(255, 255, 255, 0.27);
+    background: rgba(144, 144, 144, 0.45);
 }
 .custom-modal-content {
     position: absolute;
@@ -1938,13 +1938,13 @@ input:checked ~ .tab-content {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
-.my-16{
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-}
 .my-4{
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+.my-8{
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 .mb-0{
   margin-bottom: 0px;
@@ -2740,6 +2740,12 @@ input:checked ~ .tab-content {
 }
 .disabled\:pointer-events-none:disabled{
   pointer-events: none;
+}
+.disabled\:cursor-not-allowed:disabled{
+  cursor: not-allowed;
+}
+.disabled\:bg-button-secondary-label-default:disabled{
+  background-color: var(--button-secondary-label-default, #414a58);
 }
 .disabled\:opacity-60:disabled{
   opacity: 0.6;

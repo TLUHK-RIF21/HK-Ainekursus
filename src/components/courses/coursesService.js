@@ -1,6 +1,10 @@
 import axios from 'axios';
 import {
-  cacheBranches, cacheFiles, cachePageContent, cacheTeamCourses
+  cacheBranches,
+  cacheConceptUsage,
+  cacheFiles,
+  cachePageContent,
+  cacheTeamCourses
 } from '../../setup/setupCache.js';
 import githubReposRequests from '../../functions/githubReposRequests.js';
 import { authToken } from '../../setup/setupGithub.js';
@@ -377,33 +381,36 @@ const apiRequests = {
       });
   }, conceptUsage: async (req, uuid) => {
     const usages = [];
-
-    const allCourses = await getAllCoursesData(req);
-    for await (const contents of allCourses.map(async course => {
-      // get config from draft (this course) or from master (other courses)
-      const courseConfig = await getCourseData(
-        course, parseInt(course.id) === parseInt(req.params.courseId)
-          ? 'draft'
-          : 'master');
-      if (courseConfig) {
-        // find matches by slug (this course) or by uuid (other courses)
-        const match = parseInt(course.id) === parseInt(req.params.courseId)
-          ? req.params.slug
-          : uuid;
-        const lessons = courseConfig.config.lessons.filter(
-          lesson => lesson.components.includes(match));
-        if (lessons.length) {
-          usages.push({
-            course: course,
-            lessons: lessons
-          });
+    if (cacheConceptUsage.has('conceptUsages+' + req.params.courseId)) {
+      return cacheConceptUsage.get('conceptUsages+' + req.params.courseId);
+    } else {
+      const allCourses = await getAllCoursesData(req);
+      for await (const contents of allCourses.map(async course => {
+        // get config from draft (this course) or from master (other courses)
+        const courseConfig = await getCourseData(
+          course, parseInt(course.id) === parseInt(req.params.courseId)
+            ? 'draft'
+            : 'master');
+        if (courseConfig) {
+          // find matches by slug (this course) or by uuid (other courses)
+          /*const match = parseInt(course.id) === parseInt(req.params.courseId)
+           ? req.params.slug
+           : uuid;*/
+          const lessons = courseConfig.config.lessons.filter(
+            lesson => lesson.components.includes(uuid));
+          if (lessons.length) {
+            usages.push({
+              course: course,
+              lessons: lessons
+            });
+          }
         }
+      })) {
+        //console.log(usages);
       }
-    })) {
-      //console.log(usages);
+      cacheConceptUsage.set('conceptUsages+' + req.params.courseId, usages);
+      return usages;
     }
-
-    return usages;
   }
 };
 

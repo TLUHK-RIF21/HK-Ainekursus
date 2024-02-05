@@ -79,10 +79,12 @@ export default function hbsHelpers(hbs) {
         }
         return options.inverse(this);
       },
-      if_contains: (a, opts) => {
-        if (opts) {
-          return opts.includes(a);
-        }
+      contains: (value, array, options) => {
+        // fallback...
+        array = (array instanceof Array) ? array : [array];
+        return (array.some(item => (item && item.uuid === value)))
+          ? options.fn(this)
+          : '';
       },
       componentIcon: (type) => {
         switch (type) {
