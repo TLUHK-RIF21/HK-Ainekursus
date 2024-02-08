@@ -123,6 +123,30 @@ async function handleCourseAndConceptFiles(courseId, concept, sources) {
   return 'back';
 }
 
+async function handleCourseAndPracticeFiles(courseId, practice, sources) {
+  // get course from API
+  const course = await apiRequests.getCourseById(courseId);
+  // if we have course
+  if (course) {
+    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
+      .split('/');
+    const courseConfig = await getCourseData(course, 'draft');
+    // if we have sha - update existing file
+    if (practice.sha) {
+      await updateFile(owner, repo, `practices/${ practice.slug }/README.md`,
+        { content: practice.content, sha: practice.sha },
+        `edit practice: ${ practice.name }`, 'draft'
+      );
+    } else { // no sha - create new content
+      await updateFile(owner, repo, `practices/${ practice.slug }/README.md`,
+        { content: practice.content },
+        `edit practice: ${ practice.name }`, 'draft'
+      );
+    }
+  }
+  return 'back';
+}
+
 async function handleCourseGeneralFiles(courseId, readme, materials) {
   // get course from API
   const course = await apiRequests.getCourseById(courseId);
@@ -154,38 +178,62 @@ async function handleCourseFiles(courseId, oldFiles, newFiles) {
 
     // 1. Delete removed files
     // Filter and map files to be deleted
-
+    // delete if file in fileFolder but not in oldFiles
     const toDelete = fileFolder.filter(item => !oldFiles?.includes(item.path))
       .map(file => file.path);
     await deleteFilesFromRepo(owner, repo, 'docs/files', toDelete, 'draft');
 
     // 2. Upload new files
-    if (typeof newFiles === 'object' && newFiles) {
-      // get key name
-      const fileKey = Object.keys(newFiles)[0];
-      // if single file uploaded - convert this to array, else use original
-      // array
-      const fileList = Array.isArray(newFiles[fileKey])
-        ? newFiles[fileKey]
-        : [newFiles[fileKey]];
+    await uploadNewFiles(owner, repo, newFiles, fileFolder);
+  }
+}
 
-      for (const newFile of fileList) {
-        const path = fileKey.replace('[]', '/') + slugify(newFile.name);
-        const content = newFile.data.toString('base64');
-        const existingFile = fileFolder.find(file => file.path === path);
+async function handleLessonFiles(courseId, courseSlug, oldFiles, newFiles) {
+  const course = await apiRequests.getCourseById(courseId);
+  if (course) {
+    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
+      .split('/');
+    const fileFolder = await getFolder(
+      owner, repo, `lessons/${ courseSlug }/files`, 'draft', true);
 
-        if (!existingFile) {
-          await uploadFile(owner, repo, path, content, 'file added: ' + path,
-            'draft', true
-          );
-        } else if (existingFile.sha !== newFile.sha) {
-          await deleteFile(owner, repo, path, existingFile.sha,
-            'file updated: ' + path, 'draft'
-          );
-          await uploadFile(owner, repo, path, content, 'file updated: ' + path,
-            'draft', true
-          );
-        }
+    // 1. Delete removed files
+    // Filter and map files to be deleted
+    const toDelete = fileFolder.filter(item => !oldFiles?.includes(item.path))
+      .map(file => file.path);
+    if (toDelete.length)
+      await deleteFilesFromRepo(
+        owner, repo, `lessons/${ courseSlug }/files`, toDelete, 'draft');
+    // 2. Upload new files
+    await uploadNewFiles(owner, repo, newFiles, fileFolder);
+  }
+}
+
+async function uploadNewFiles(owner, repo, newFiles, fileFolder) {
+  if (typeof newFiles === 'object' && newFiles) {
+    // get key name
+    const fileKey = Object.keys(newFiles)[0];
+    // if single file uploaded - convert this to array, else use original
+    // array
+    const fileList = Array.isArray(newFiles[fileKey])
+      ? newFiles[fileKey]
+      : [newFiles[fileKey]];
+
+    for (const newFile of fileList) {
+      console.log('🚨uued failid:', newFiles);
+      const path = fileKey.replace('[]', '/') + slugify(newFile.name);
+      const content = newFile.data.toString('base64');
+      const existingFile = fileFolder.find(file => file.path === path);
+      if (!existingFile) {
+        await uploadFile(owner, repo, path, content, 'file added: ' + path,
+          'draft', true
+        );
+      } else if (existingFile.sha !== newFile.sha) {
+        await deleteFile(owner, repo, path, existingFile.sha,
+          'file updated: ' + path, 'draft'
+        );
+        await uploadFile(owner, repo, path, content, 'file updated: ' + path,
+          'draft', true
+        );
       }
     }
   }
@@ -225,8 +273,14 @@ async function getFolderContent(owner, repo, path, branch) {
   }
 
   // Get files from "files" directory
-  const files = await getFolder(owner, repo, `${ path }/files`, branch, true);
-  data.files = [];
+  data.files = await getImageFiles(owner, repo, `${ path }/files`, branch);
+
+  return data;
+}
+
+async function getImageFiles(owner, repo, path, branch) {
+  const files = await getFolder(owner, repo, path, branch, true);
+  const result = [];
   // Filter and format files
   files.filter(file => file.type === 'file').forEach(file => {
     const name = file.name;
@@ -237,10 +291,9 @@ async function getFolderContent(owner, repo, path, branch) {
     const sha = file.sha;
     const path = file.path;
 
-    data.files.push({ name, thumbUrl, url, sha, path });
+    result.push({ name, thumbUrl, url, sha, path });
   });
-
-  return data;
+  return result;
 }
 
 async function getAllConcepts(courses, refBranch) {
@@ -258,7 +311,6 @@ async function getAllConcepts(courses, refBranch) {
       .split('/');
     const folderContent = await getFolder(owner, repo, 'concepts', refBranch);
     course.config?.config?.concepts?.forEach((concept) => {
-      console.log(course);
       // find where is concept defined
       if (folderContent.filter((f) => f.name === concept.slug).length) {
         concept.course = course.repository;
@@ -382,11 +434,14 @@ export {
   updateConfigFile,
   makeUniqueSlug,
   handleCourseAndConceptFiles,
+  handleCourseAndPracticeFiles,
   handleCourseGeneralFiles,
   updateGeneralData,
   handleCourseFiles,
+  handleLessonFiles,
   getFolderContent,
   handleLessonUpdate,
   fetchAndProcessCourseData,
-  getAllConcepts
+  getAllConcepts,
+  getImageFiles
 };

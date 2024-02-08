@@ -110,10 +110,7 @@
 </div>
 <script>
     const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'concept_content' });/*.addEventListener(
-            'change', debounce((eventData) => {
-                handleMDChange(eventData.content, 'docs/lisamaterjalid.md');
-            }, 1000));*/
+            { textarea: 'concept_content' });
 
     const commandBar2 = new TinyMDE.CommandBar(
             { element: 'tinymde_commandbar_concept_content', editor: tinyMDE2 });

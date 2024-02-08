@@ -47,8 +47,22 @@
         document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
     });
 
+    function submitEditForm() {
+        window.removeEventListener('beforeunload', beforeUnloadHandler); // Remove the listener
+        form.submit();
+    }
+
     function cancelAction() {
         document.getElementById('modal').style.display = 'none';
     }
+
+    const beforeUnloadHandler = (event) => {
+        if (isFormDirty) {
+            event.returnValue = 'Are you sure you want to leave? You have unsaved changes.'; // For older browsers
+            return 'Are you sure you want to leave? You have unsaved changes.'; // Standard
+        }
+    };
+
+    window.addEventListener('beforeunload', beforeUnloadHandler);
 </script>
 

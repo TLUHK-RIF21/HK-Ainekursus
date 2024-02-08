@@ -86,6 +86,7 @@ export default function hbsHelpers(hbs) {
           ? options.fn(this)
           : '';
       },
+
       componentIcon: (type) => {
         switch (type) {
           case 'docs':

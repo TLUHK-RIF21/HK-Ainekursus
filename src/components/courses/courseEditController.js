@@ -5,10 +5,10 @@ import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import {
   fetchAndProcessCourseData, getAllConcepts,
-  getFolderContent,
-  handleCourseAndConceptFiles,
+  getFolderContent, getImageFiles,
+  handleCourseAndConceptFiles, handleCourseAndPracticeFiles,
   handleCourseFiles,
-  handleCourseGeneralFiles,
+  handleCourseGeneralFiles, handleLessonFiles,
   handleLessonUpdate,
   updateGeneralData
 } from './courseEditService.js';
@@ -282,12 +282,24 @@ const courseEditController = {
 
   updateGeneral: async (req, res) => {
     const {
-      courseId, courseName, courseUrl, readme, materials
+      courseId,
+      courseName,
+      courseUrl,
+      readmeSHA,
+      readmeContent,
+      materialsSHA,
+      materialsContent
     } = req.body;
+    const oldFiles = req.body['files[]'];
+    const newFiles = req.files;
     if (courseId && courseName && courseUrl) {
       await updateGeneralData(courseId, courseName, courseUrl);
-      await handleCourseGeneralFiles(courseId, readme, materials);
-      await handleCourseFiles(courseId, req.body['files[]'], req.files);
+      await handleCourseGeneralFiles(
+        courseId,
+        { sha: readmeSHA, content: readmeContent },
+        { sha: materialsSHA, content: materialsContent }
+      );
+      await handleCourseFiles(courseId, oldFiles, newFiles);
     }
     return res.redirect('back');
   },
@@ -347,6 +359,10 @@ const courseEditController = {
       const url = await handleLessonUpdate(
         courseId, readme, materials, lessonName, lessonSlug, components);
       cacheConceptUsage.del('conceptUsages+' + courseId);
+      // add files
+      console.log('🚨uued failid:', req.files);
+      await handleLessonFiles(
+        courseId, lessonSlug, req.body['files[]'], req.files);
       return res.redirect(url);
     }
   },
@@ -372,8 +388,71 @@ const courseEditController = {
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');
-  }
+  },
 
+  getPractice: async (req, res, next) => {
+    // Get one practice data based on req.params.courseId and req.params.slug
+    const [owner, repo] = res.locals.course.repository.replace(
+      'https://github.com/', '')
+      .split('/');
+    res.locals.readme = await getFile(
+      owner, repo, `practices/${ req.params.slug }/README.md`, 'draft');
+    if (res.locals.readme) { // existing concept
+      res.locals.readme.slug = req.params.slug;
+      res.locals.readme.data = res.locals.config.config.practices.find(
+        c => c.slug === req.params.slug);
+      /*const sources = await getFile(
+       owner, repo, `practices/${ req.params.slug }/sources.json`, 'draft');
+       if (sources && sources.content) {
+       sources.content = JSON.parse(sources.content);
+       }
+       res.locals.sources = sources;*/
+      res.locals.conceptUsage = await apiRequests.conceptUsage(
+        req, res.locals.readme.data?.uuid);
+      res.locals.files = await getImageFiles(
+        owner, repo, `practices/${ req.params.slug }/images`, 'draft');
+    } else { // create new
+      res.locals.readme = {
+        slug: '', data: {}, sources: {}
+      };
+    }
+    res.locals.partial = 'course-edit.practices';
+    next();
+  },
+
+  updatePractice: async (req, res) => {
+    const { practice, courseId, sources } = req.body;
+    if (!(practice && courseId)) {
+      return res.redirect('back');
+    } else {
+      const url = await handleCourseAndPracticeFiles(
+        courseId, practice, sources);
+      cacheConceptUsage.del('conceptUsages+' + courseId);
+      return res.redirect(url);
+    }
+  },
+
+  deletePractice: async (req, res) => {
+    const { courseId, slug } = req.params;
+    const course = await apiRequests.getCourseById(courseId);
+
+    if (course) {
+      const [owner, repo] = course.repository.replace('https://github.com/', '')
+        .split('/');
+      await deleteFolderFromRepo(owner, repo, `practices/${ slug }`, 'draft');
+      const courseConfig = await getCourseData(course.id, 'draft');
+      if (courseConfig) {
+        course.config.practices = course.config.practices.filter(
+          c => c.slug !== slug);
+        await updateFile(owner, repo, 'config.json', {
+          content: JSON.stringify(course.config), sha: course.config.sha
+        }, 'practice removed from the config.json', 'draft');
+      }
+      cacheConceptUsage.del('conceptUsages+' + courseId);
+      return res.status(202).send('ok');
+    }
+    return res.status(501).send('error');
+  }
 };
 
 const renderEditPage = async (req, res) => {

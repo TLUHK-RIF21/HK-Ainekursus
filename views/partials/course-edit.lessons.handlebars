@@ -15,7 +15,8 @@
         </div>
     </div>
     <div class="card mb-2">
-        <form action="/course-edit/{{course.id}}/lesson/{{readme.slug}}" method="post" id="courseEditForm">
+        <form action="/course-edit/{{course.id}}/lesson/{{readme.slug}}" method="post" id="courseEditForm"
+              enctype="multipart/form-data">
             <div class="p-2">
                 <div class="block mb-4">
                     <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
@@ -84,7 +85,7 @@
                 </div>
                 <hr class="w-full py-4">
 
-                {{> files-input files=files prefix="lessons" }}
+                {{> files-input files=files prefix=(concatActivePath "lessons" readme.slug) }}
             </div>
         </form>
     </div>

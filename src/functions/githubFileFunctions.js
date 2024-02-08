@@ -158,14 +158,6 @@ async function getBranch(owner, repo, branch = 'master') {
   }).catch(() => {
     console.log('get tree error');
   });
-  /*const content = await octokit.request(
-   `GET /repos/${ repo }/branches/${ branch }`, {
-   headers: {
-   'X-GitHub-Api-Version': '2022-11-28'
-   }
-   }).catch(() => {
-   console.log('get tree error');
-   });*/
 
   if (content && content.status === 200) {
     return content.data;

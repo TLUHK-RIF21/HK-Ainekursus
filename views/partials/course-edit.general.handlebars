@@ -1,51 +1,50 @@
-<div class="">
-    <form action="/course-edit/{{course.id}}" method="post" id="courseEditForm" enctype="multipart/form-data">
-        <div class="card-title p-2 flex items-center justify-between mb-4">
-            <h4 class="my-0">Üldandmete muutmine</h4>
-        </div>
-        <label class="text-lg font-bold">
+<form action="/course-edit/{{course.id}}" method="post" id="courseEditForm" enctype="multipart/form-data">
+    <div class="card-title p-2 flex items-center justify-between mb-4">
+        <h4 class="my-0">Üldandmete muutmine</h4>
+    </div>
+    <label class="text-lg font-bold">
             <span class="flex items-center">
                 <i class="material-symbols-outlined mr-2">home</i>
                 Kursuse nimi
             </span>
-            <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
-        </label>
+        <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
+    </label>
 
-        <label class="text-lg font-bold mt-4">
+    <label class="text-lg font-bold mt-4">
         <span class="flex items-center">
 
             <i class="material-symbols-outlined mr-2">link</i> Kursuse link
         </span>
-            <input type="text" name="courseUrl" id="oisUrl" class="input-single" required
-                   value="{{config.courseUrl}}">
-        </label>
-        <hr class="my-4">
+        <input type="text" name="courseUrl" id="oisUrl" class="input-single" required
+               value="{{config.courseUrl}}">
+    </label>
+    <hr class="my-4">
 
-        <div class="block mb-4">
-            <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-            <input type="hidden" name="readme[sha]" value="{{readme.sha}}">
-            <input type="hidden" name="materials[sha]" value="{{materials.sha}}">
-            <label for="component">Üldinfo</label>
-            <div id="tinymde_commandbar"></div>
-            <div class="txtcontainer w-full relative">
-                <button class="btn btn-primary absolute -top-16 right-4" id="sync" title="Uuenda õisist" type="button">
-                    <i class="material-symbols-outlined">sync</i>
-                </button>
-                <textarea id="component" cols="30" rows="30" name="readme[content]">{{readme.content}}</textarea>
-            </div>
+    <div class="block mb-4">
+        <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
+        <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
+        <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
+        <label for="component">Üldinfo</label>
+        <div id="tinymde_commandbar"></div>
+        <div class="txtcontainer w-full relative">
+            <button class="btn btn-primary absolute -top-16 right-4" id="sync" title="Uuenda õisist" type="button">
+                <i class="material-symbols-outlined">sync</i>
+            </button>
+            <textarea id="component" cols="30" rows="30" name="readmeContent">{{readme.content}}</textarea>
         </div>
+    </div>
 
-        <div class="block mb-4">
-            <label>Lisamaterjalid:</label>
-            <div id="tinymde_commandbar2"></div>
-            <div class="txtcontainer w-full">
+    <div class="block mb-4">
+        <label>Lisamaterjalid:</label>
+        <div id="tinymde_commandbar2"></div>
+        <div class="txtcontainer w-full">
             <textarea id="additionalMaterials" cols="30" rows="30"
-                      name="materials[content]">{{materials.content}}</textarea>
-            </div>
+                      name="materialsContent">{{materials.content}}</textarea>
         </div>
-        {{> files-input files=files prefix="docs"}}
-    </form>
-</div>
+    </div>
+    {{> files-input files=files prefix="docs"}}
+</form>
+
 <div class="border-4 border-system-focus hidden"></div>
 <script>
     const tinyMDE1 = new TinyMDE.Editor(
@@ -78,13 +77,6 @@
         }).catch((e) => {
             console.log(e);
         });
-    });
-
-    window.addEventListener('beforeunload', (event) => {
-        if (isFormDirty) {
-            event.returnValue = 'Are you sure you want to leave? You have unsaved changes.'; // For older browsers
-            return 'Are you sure you want to leave? You have unsaved changes.'; // Standard
-        }
     });
 
     window.onload = function () {

@@ -59,4 +59,17 @@ router.delete(
   courseEditController.deleteLesson
 );
 
+//practices related routes
+router.get('/:courseId/practice/:slug', validateTeacher,
+  courseEditController.getSpecificCourse, courseEditController.getPractice,
+  renderEditPage
+);
+
+router.post('/:courseId/practice/:slug', courseEditController.updatePractice);
+
+router.delete(
+  '/:courseId/practice/:slug',
+  courseEditController.deletePractice
+);
+
 export default router;
