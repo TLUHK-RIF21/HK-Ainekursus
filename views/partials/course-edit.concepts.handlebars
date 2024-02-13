@@ -2,24 +2,15 @@
     <div class="mb-2">
         <div class="card-title p-2 flex items-center justify-between">
             <h4 class="my-0">Sisuteema {{#if readme.data.slug }}muutmine{{else}}lisamine{{/if}}</h4>
-            <div class="flex">
-                {{#if readme.data.slug }}
-
-                    <!--button class="btn btn-primary {{#if conceptUsage.length}}cursor-not-allowed opacity-50{{/if}}"
-                            title="Kustuta sisuteema" {{#if conceptUsage.length}}disabled{{/if}}
-                            onclick="deleteConcept({{course.id}})">
-                        <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                    </button!-->
-                {{/if}}
-            </div>
         </div>
         <div>
             {{#if conceptUsage.length}}
                 <p class="p-2 my-0 cursor-pointer flex items-center text-system-red-tlu"
                    onclick="document.getElementById('showUsage').classList.toggle('hidden')">
-                    NB! Antud sisuteema on kasutuses ({{conceptUsage.length}})
+                    NB! Antud sisuteemat kasutab vähemalt {{conceptUsage.length}} kursust
                     <i class="material-symbols-outlined ml-2">expand_more</i>
                 </p>
+                <p class="pl-2 text-sm">Sisuteemat ei saa kustuda, kui see on kasutuses.</p>
                 <ul class="hidden transition" id="showUsage">
                     {{#each conceptUsage}}
                         <li><strong>{{this.course.name}}</strong> [{{this.course.code}}]:
@@ -39,115 +30,33 @@
         </div>
     </div>
     <div class="card mb-2">
-        <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="courseEditForm">
+        <form action="/course-edit/{{course.id}}/concept/{{readme.slug}}" method="post" id="courseEditForm"
+              enctype="multipart/form-data">
             <div class="p-2">
-                <input type="hidden" name="concept[sha]" value="{{readme.sha}}">
-                <input type="hidden" name="concept[slug]" id="concept[slug]" value="{{readme.slug}}">
+                <input type="hidden" name="sha" value="{{readme.sha}}">
+                <input type="hidden" name="slug" id="slug" value="{{readme.slug}}">
                 <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-                <input type="hidden" name="concept[additionalMaterials][sha]"
-                       value="{{sources.sha}}">
-                <label for="concept[name]">Sisuteema nimetus</label>
-                <input type="text" name="concept[name]" id="concept[name]" value="{{readme.data.name}}"
+                <input type="hidden" id="content" name="content" value="{{readme.content}}">
+                <label for="name">Sisuteema nimetus</label>
+                <input type="text" name="name" id="name" value="{{readme.data.name}}"
                        class="input-single" required>
-                <!--label for="concept[slug]">Sisuteema kaust</label>
-                <input type="text" name="concept[slug]" id="concept[slug]" value="{{readme.data.slug}}"
-                       class="input-single" required!-->
-
                 <div class="block my-4 border-b">
-                    <label for="tinymde_commandbar_concept_content">Sisuteema kirjeldus:</label>
-                    <div id="tinymde_commandbar_concept_content"></div>
-                    <div class="txtcontainer w-full mb-4">
-                        <label for="concept_content" class="hidden"></label>
-                        <textarea id="concept_content" cols="30" rows="30"
-                                  name="concept[content]">{{readme.content}}</textarea>
-                    </div>
+                    <label>Sisuteema kirjeldus:</label>
+                    <div id="editor" class="bg-white text-system-black"></div>
                 </div>
-
-                <div class="block my-4">
-                    <h4>Aine lisamaterjalid:</h4>
-                    <ul id="sources">
-                        {{#each sources.content}}
-                            <li class="pb-4 mb-4 flex items-center justify-between border-b">
-                                <div class="grow">
-                                    <label for="sources[{{@index}}][description]">Nimetus</label>
-                                    <input type="text" id="sources[{{@index}}][description]" class="input-single"
-                                           name="sources[{{@index}}][description]" value="{{this.description}}">
-                                </div>
-                                <div class="grow">
-                                    <label for="sources[{{@index}}][url]">Lingi aadress</label>
-                                    <input type="text" id="sources[{{@index}}][url]" class="input-single"
-                                           name="sources[{{@index}}][url]"
-                                           value="{{this.url}}">
-                                </div>
-                                <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal"
-                                        type="button" onclick="deleteSource(this)">
-                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                                </button>
-                            </li>
-                        {{/each}}
-                        <li class="mb-4">
-                            <h6>Lisa uus materjal</h6>
-                            <div class="mt-4 flex items-center justify-between">
-                                <div class="grow">
-                                    <label for="newDescription">Nimetus</label>
-                                    <input type="text" id="newDescription" class="input-single" name="newDescription">
-                                </div>
-                                <div class="grow">
-                                    <label for="newUrl">Lingi aadress</label>
-                                    <input type="text" id="newUrl" class="input-single" name="newUrl">
-                                </div>
-                                <button class="btn btn-primary ml-2 self-end" title="Lisa uus" type="button"
-                                        onclick="addSource()">
-                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
-                                </button>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                {{> files-input files=files prefix=(concatActivePath "concepts" readme.slug) }}
             </div>
         </form>
     </div>
 </div>
 <script>
-    const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'concept_content' });
-
-    const commandBar2 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar_concept_content', editor: tinyMDE2 });
-
-    function deleteSource(el) {
-        el.closest('li').remove();
-    }
-
-    function addSource() {
-        const ul = document.getElementById('sources');
-        const penultimateLi = ul.lastChild.previousSibling;
-        const index = ul.getElementsByTagName('li').length - 1;
-        const newLi = document.createElement('li');
-        newLi.classList.add('pb-4', 'mb-4', 'flex', 'items-center', 'justify-between', 'border-b');
-        newLi.innerHTML = `
-        <div class="grow">
-            <label for="sources[${ index }][description]">Nimetus</label>
-            <input type="text" id="sources[${ index }][description]" class="input-single"
-                   name="sources[${ index }][description]" value="${ document.getElementById('newDescription').value }">
-        </div>
-        <div class="grow">
-            <label for="sources[${ index }][url]">Lingi aadress</label>
-            <input type="text" id="sources[${ index }][url]" class="input-single"
-                   name="sources[${ index }][url]"
-                   value="${ document.getElementById('newUrl').value }">
-        </div>
-        <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal"
-                onclick="deleteSource(this)">
-            <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-        </button>
-        `;
-
-        // insert new li before last li element
-        ul.insertBefore(newLi, penultimateLi);
-        document.getElementById('newUrl').value = '';
-        document.getElementById('newDescription').value = '';
-    }
+    const Editor = toastui.Editor;
+    const editor = new Editor({
+        el: document.querySelector('#editor'),
+        height: '500px',
+        initialEditType: 'markdown',
+        initialValue: document.getElementById('content').value
+    });
 
     function deleteConcept() {
         const id = document.getElementById('courseId').value;

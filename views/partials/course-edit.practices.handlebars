@@ -32,80 +32,42 @@
     </div>
 </div>
 <div class="card mb-2">
-    <form action="/course-edit/{{course.id}}/practice/{{readme.slug}}" method="post" id="courseEditForm">
+    <form action="/course-edit/{{course.id}}/practice/{{readme.slug}}" method="post" id="courseEditForm"
+          enctype="multipart/form-data">
         <div class="p-2">
-            <input type="hidden" name="practice[sha]" value="{{readme.sha}}">
-            <input type="hidden" name="practice[slug]" id="practice[slug]" value="{{readme.slug}}">
+            <input type="hidden" name="sha" value="{{readme.sha}}">
+            <input type="hidden" name="slug" id="slug" value="{{readme.slug}}">
             <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-            <input type="hidden" name="practice[additionalMaterials][sha]"
-                   value="{{sources.sha}}">
-            <label for="practice[name]">Praktikumi nimetus</label>
-            <input type="text" name="practice[name]" id="practice[name]" value="{{readme.data.name}}"
+            <input type="hidden" id="content" name="content" value="{{readme.content}}">
+            <label for="name">Praktikumi nimetus</label>
+            <input type="text" name="name" id="name" value="{{readme.data.name}}"
                    class="input-single" required>
-
             <div class="block my-4 border-b">
-                <label for="tinymde_commandbar_concept_content">Praktikumi kirjeldus:</label>
-                <div id="tinymde_commandbar_concept_content"></div>
-                <div class="txtcontainer w-full mb-4">
-                    <label for="concept_content" class="hidden"></label>
-                    <textarea id="concept_content" cols="30" rows="30"
-                              name="practice[content]">{{readme.content}}</textarea>
-                </div>
+                <label>Praktikumi kirjeldus:</label>
+                <div id="editor" class="bg-white text-system-black"></div>
             </div>
-
-            <!--div class="block my-4">
-                <h4>Praktikumi lisamaterjalid:</h4>
-                <ul id="sources">
-                    {{#each sources.content}}
-                        <li class="pb-4 mb-4 flex items-center justify-between border-b">
-                            <div class="grow">
-                                <label for="sources[{{@index}}][description]">Nimetus</label>
-                                <input type="text" id="sources[{{@index}}][description]" class="input-single"
-                                       name="sources[{{@index}}][description]" value="{{this.description}}">
-                            </div>
-                            <div class="grow">
-                                <label for="sources[{{@index}}][url]">Lingi aadress</label>
-                                <input type="text" id="sources[{{@index}}][url]" class="input-single"
-                                       name="sources[{{@index}}][url]"
-                                       value="{{this.url}}">
-                            </div>
-                            <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal"
-                                    type="button" onclick="deleteSource(this)">
-                                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                            </button>
-                        </li>
-                    {{/each}}
-                    <li class="mb-4">
-                        <h6>Lisa uus materjal</h6>
-                        <div class="mt-4 flex items-center justify-between">
-                            <div class="grow">
-                                <label for="newDescription">Nimetus</label>
-                                <input type="text" id="newDescription" class="input-single" name="newDescription">
-                            </div>
-                            <div class="grow">
-                                <label for="newUrl">Lingi aadress</label>
-                                <input type="text" id="newUrl" class="input-single" name="newUrl">
-                            </div>
-                            <button class="btn btn-primary ml-2 self-end" title="Lisa uus" type="button"
-                                    onclick="addSource()">
-                                <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
-                            </button>
-                        </div>
-                    </li>
-                </ul>
-            </div!-->
             {{> files-input files=files prefix=(concatActivePath "practices" readme.slug) }}
         </div>
     </form>
 </div>
 <script>
-    const tinyMDE2 = new TinyMDE.Editor(
+    const Editor = toastui.Editor;
+    const editor = new Editor({
+        el: document.querySelector('#editor'),
+        height: '500px',
+        initialEditType: 'markdown',
+        initialValue: document.getElementById('content').value
+    });
+
+    //editor.getMarkdown();
+
+    /*const tinyMDE2 = new TinyMDE.Editor(
             { textarea: 'concept_content' });
 
     const commandBar2 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar_concept_content', editor: tinyMDE2 });
+            { element: 'tinymde_commandbar_concept_content', editor: tinyMDE2 });*/
 
-    function deleteSource(el) {
+    /*function deleteSource(el) {
         el.closest('li').remove();
     }
 
@@ -137,17 +99,17 @@
         ul.insertBefore(newLi, penultimateLi);
         document.getElementById('newUrl').value = '';
         document.getElementById('newDescription').value = '';
-    }
+    }*/
 
     function deletePractice() {
         const id = document.getElementById('courseId').value;
-        const slug = document.getElementById('practice[slug]').value;
+        const slug = document.getElementById('slug').value;
         fetch(
                 '/course-edit/' + id + '/practice/' + slug,
                 {
                     method: 'DELETE'
                 }
-        ).then((data) => {
+        ).then(() => {
             document.getElementById('modal').style.display = 'none';
             history.back();
         });

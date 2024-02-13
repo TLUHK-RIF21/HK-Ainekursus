@@ -10,73 +10,95 @@
         <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
     </label>
 
-    <label class="text-lg font-bold mt-4">
-        <span class="flex items-center">
-
-            <i class="material-symbols-outlined mr-2">link</i> Kursuse link
+    <div class="text-lg font-bold mt-4 whitespace-nowrap">
+        <span>
+            <i class="material-symbols-outlined mr-2">link</i> Kursuse link:
         </span>
-        <input type="text" name="courseUrl" id="oisUrl" class="input-single" required
-               value="{{config.courseUrl}}">
-    </label>
+        <a href="{{config.courseUrl}}" target="_blank">{{config.courseUrl}}</a>
+    </div>
     <hr class="my-4">
 
     <div class="block mb-4">
         <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
         <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
         <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
-        <label for="component">Üldinfo</label>
-        <div id="tinymde_commandbar"></div>
-        <div class="txtcontainer w-full relative">
-            <button class="btn btn-primary absolute -top-16 right-4" id="sync" title="Uuenda õisist" type="button">
-                <i class="material-symbols-outlined">sync</i>
-            </button>
-            <textarea id="component" cols="30" rows="30" name="readmeContent">{{readme.content}}</textarea>
-        </div>
+        <input type="hidden" id="readmeContent" name="readmeContent" value="{{readme.content}}"/>
+        <input type="hidden" id="materialsContent" name="materialsContent" value="{{materials.content}}"/>
+        <label>Üldinfo</label>
+        <div id="editor1" class="bg-white text-system-black"></div>
     </div>
 
     <div class="block mb-4">
         <label>Lisamaterjalid:</label>
-        <div id="tinymde_commandbar2"></div>
-        <div class="txtcontainer w-full">
-            <textarea id="additionalMaterials" cols="30" rows="30"
-                      name="materialsContent">{{materials.content}}</textarea>
-        </div>
+        <div id="editor2" class="bg-white text-system-black"></div>
     </div>
     {{> files-input files=files prefix="docs"}}
 </form>
 
 <div class="border-4 border-system-focus hidden"></div>
 <script>
-    const tinyMDE1 = new TinyMDE.Editor(
-            { textarea: 'component' });
+    const Editor = toastui.Editor;
 
-    const commandBar1 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar', editor: tinyMDE1 });
-
-    const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'additionalMaterials' });
-
-    const commandBar2 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar2', editor: tinyMDE2 });
-
-    const oisSyncButton = document.getElementById('sync');
-
-    oisSyncButton.addEventListener('click', () => {
-        fetch('/get-ois-content?courseId={{course.code}}', {
-            method: 'get', headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then((res) => {
-            if (res.ok) {
-                return res.json();
-            }
-            return Promise.reject(res); // 2. reject instead of throw
-        }).then((res) => {
-            tinyMDE1.setContent(res.data);
-            document.getElementById('component').value = res.data;
-        }).catch((e) => {
-            console.log(e);
+    function createOisButton() {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'toastui-editor-toolbar-icons last';
+        button.style.backgroundImage = 'none';
+        button.style.margin = '0';
+        button.innerHTML = `<i class="material-symbols-outlined">sync</i>`;
+        button.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            fetch('/get-ois-content?courseId={{course.code}}', {
+                method: 'get', headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then((res) => {
+                if (res.ok) {
+                    return res.json();
+                }
+                return Promise.reject(res); // 2. reject instead of throw
+            }).then((res) => {
+                editor1.setMarkdown(res.data);
+                document.getElementById('readmeContent').value = res.data;
+                console.log(res.data);
+            }).catch((e) => {
+                console.log(e);
+            });
         });
+
+        return button;
+    }
+
+    const editor1 = new Editor({
+        usageStatistics: false,
+        el: document.querySelector('#editor1'),
+        height: '500px',
+        initialEditType: 'markdown',
+        initialValue: document.getElementById('readmeContent').value,
+        toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['hr', 'quote'],
+            ['ul', 'ol', 'task', 'indent', 'outdent'],
+            ['table', 'image', 'link'],
+            ['code', 'codeblock'],
+            // Using Option: Customize the last button
+            [
+                {
+                    el: createOisButton(),
+                    //command: 'bold',
+                    tooltip: 'Uuenda õisist'
+                }]
+        ],
+        events: {
+            change: () => {isFormDirty = true;}
+        }
+    });
+
+    const editor2 = new Editor({
+        el: document.querySelector('#editor2'),
+        height: '500px',
+        initialEditType: 'markdown',
+        initialValue: document.getElementById('materialsContent').value
     });
 
     window.onload = function () {

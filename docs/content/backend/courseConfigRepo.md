@@ -4,26 +4,23 @@
 │   ├── README.md
 │   ├── lisamaterjalid.md
 │   ├── files/
-│   │   ├── somefile.png
 │   │   └── somefile.pdf
 ├── concepts/
 │   ├── sample_concept_1/
 │   │   ├── README.md
-│   │   ├── sources.json
 │   │   └── files/
 │   │       ├── somefile.png
 │   │       └── somefile.pdf
 │   └── sample_concept_2/
-│       ├── README.md
-│       ├── sources.json
-│       └── files/
-│           ├── somefile.png
-│           └── somefile.pdf
+│       └── README.md
 ├── practices/
 │   ├── sample_pactice_1/
-│   │   └── README.md
+│   │   ├── README.md
+│   │   └── files/
+│   │       ├── somefile.png
+│   │       └── somefile.pdf
 │   └── sample_pactice_2/
-│      └── README.md
+│   │   └── README.md
 ├── lessons/
 │   ├── lesson_1/
 │   │   ├── README.md
@@ -39,5 +36,4 @@
 │           └── somefile.pdf
 ├── config.json
 └── README.md
-
 ```

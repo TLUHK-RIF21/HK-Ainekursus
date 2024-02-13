@@ -10,8 +10,13 @@
                          alt="{{this.name}}"/>
                     <p class="m-0 p-0 text-sm overflow-x-hidden">{{this.name}}</p>
                 </a>
+                <button type="button" class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4 cursor-pointer"
+                        onclick="copyFileLink('[{{this.name}}]({{this.shortUrl}})')">Kopeeri
+                    faili link
+                    <i class="material-symbols-outlined text-sm" aria-hidden="true">link</i>
+                </button>
                 <button class="absolute top-1 right-1 btn btn-primary p-1 min-h-0 min-w-0" onclick="removeImage(this)">
-                    <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
+                    <i class="material-symbols-outlined" aria-hidden="true">delete</i>
                 </button>
             </li>
         {{/each}}
@@ -27,5 +32,11 @@
     function removeImage(el) {
         el.closest('li').remove();
         isFormDirty = true;
+        // trigger input event, so Save btn can be updated
+        form.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function copyFileLink(copyText) {
+        navigator.clipboard.writeText(copyText);
     }
 </script>

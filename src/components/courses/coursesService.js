@@ -396,7 +396,6 @@ const apiRequests = {
           /*const match = parseInt(course.id) === parseInt(req.params.courseId)
            ? req.params.slug
            : uuid;*/
-          console.log(courseConfig.config.lessons, uuid);
           const lessons = courseConfig.config.lessons.filter(
             lesson => lesson.components.includes(uuid));
           if (lessons.length) {

@@ -4,16 +4,23 @@ import {
 import apiRequests from './coursesService.js';
 import getCourseData from '../../functions/getCourseData.js';
 import {
-  fetchAndProcessCourseData, getAllConcepts,
-  getFolderContent, getImageFiles,
-  handleCourseAndConceptFiles, handleCourseAndPracticeFiles,
-  handleCourseFiles,
-  handleCourseGeneralFiles, handleLessonFiles,
+  fetchAndProcessCourseData,
+  getCourseGeneralContent,
+  getImageFiles,
+  handleCourseAndConceptFiles,
+  //handleCourseFiles,
+  handleCourseGeneralFiles,
+  //handleLessonFiles,
   handleLessonUpdate,
-  updateGeneralData
+  updateCourseName,
+  extractAllImageDetails,
+  handleContentImages,
+  handleCourseItemData,
+  handleCourseItemFiles
 } from './courseEditService.js';
 import { cacheConceptUsage, cacheConfig } from '../../setup/setupCache.js';
 import validBranchesService from './coursesService.js';
+import slugify from 'slugify';
 
 const courseEditController = {
   getSpecificCourse: async (req, res, next) => {
@@ -126,8 +133,7 @@ const courseEditController = {
     });
     courseConfig.config?.lessons?.forEach((x) => {
       if (x.additionalMaterials.length && x.additionalMaterials[0].slug ===
-        componentSlug && x.slug ===
-        contentSlug) {
+        componentSlug && x.slug === contentSlug) {
         componentName = x.additionalMaterials[0].name;
         componentType = 'docs';
         githubRequest = 'lessonAdditionalMaterialsService';
@@ -146,45 +152,6 @@ const courseEditController = {
 
   },
 
-  getConcept: async (req, res, next) => {
-    // Get one concept data based on req.params.courseId and req.params.slug
-    const [owner, repo] = res.locals.course.repository.replace(
-      'https://github.com/', '')
-      .split('/');
-    res.locals.readme = await getFile(
-      owner, repo, `concepts/${ req.params.slug }/README.md`, 'draft');
-    if (res.locals.readme) { // existing concept
-      res.locals.readme.slug = req.params.slug;
-      res.locals.readme.data = res.locals.config.config.concepts.find(
-        c => c.slug === req.params.slug);
-      const sources = await getFile(
-        owner, repo, `concepts/${ req.params.slug }/sources.json`, 'draft');
-      if (sources && sources.content) {
-        sources.content = JSON.parse(sources.content);
-      }
-      res.locals.sources = sources;
-      res.locals.conceptUsage = await apiRequests.conceptUsage(
-        req, res.locals.readme.data?.uuid);
-    } else { // create new
-      res.locals.readme = {
-        slug: '', data: {}, sources: {}
-      };
-    }
-    res.locals.partial = 'course-edit.concepts';
-    next();
-  },
-
-  getGeneral: async (req, res, next) => {
-    // Get course docs/README.md, docs/lisamaterjalid.md
-    const [owner, repo] = res.locals.course.repository.replace(
-      'https://github.com/', '')
-      .split('/');
-    const folderContent = await getFolderContent(owner, repo, 'docs', 'draft');
-    res.locals = { ...res.locals, ...folderContent };
-    res.locals.partial = 'course-edit.general';
-    next();
-  },
-
   async publishCourse(course) {
     const mergeResponse = await apiRequests.mergeMasterWithDraft(
       course.repository.replace('https://github.com/', ''),
@@ -197,62 +164,109 @@ const courseEditController = {
     return false;
   },
 
-  /*updateCourseData: async (req, res) => {
-   const body = req.body;
-   const keys = Object.keys(body);
-   const values = Object.values(body);
-   const response = {};
-   const courseId = req.body.courseId;
-   if (courseId) {
-   const course = await apiRequests.getCourseById(courseId);
-   const repoName = course.repository.replace('https://github.com/', '');
-   const [owner, repo] = repoName.split('/');
+  /**
+   * Get course general data
+   * @param req
+   * @param res
+   * @param next
+   * @return {Promise<void>}
+   */
+  getGeneral: async (req, res, next) => {
+    // Get course docs/README.md, docs/lisamaterjalid.md
+    const [owner, repo] = res.locals.course.repository.replace(
+      'https://github.com/', '')
+      .split('/');
+    const generalContent = await getCourseGeneralContent(
+      owner, repo, 'docs', 'draft');
+    res.locals = { ...res.locals, ...generalContent };
+    res.locals.partial = 'course-edit.general';
+    next();
+  },
 
-   // handle file uploads
-   if (req.files) {
-   const fileKey = Object.keys(req.files)[0];
-   const path = fileKey + req.files[fileKey].name;
-   const content = req.files[fileKey].data.toString('base64');
-   await uploadFile(owner, repo, path, content, 'file added: ' + path,
-   'draft', true
-   );
-   // todo update files data
-   }
-   // courseId is always there, so we start from index 1
-   for (let i = 1; i < keys.length; i++) {
-   response[keys[i]] = values[i];
-   console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-   if (keys[i].startsWith('config/')) { // update config file
-   // key = config/courseName
-   const config = await getConfig(repoName, 'draft');
-   const updatedConfig = updateConfigFile(keys[i], values[i], config);
-   await updateFile(owner, repo, 'config.json',
-   { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
-   'course edit', 'draft'
-   );
-   cacheConfig.set(`getConfig:${ repoName }+draft`, updatedConfig);
-   } else if (keys[i].endsWith('.md')) { // update file in folder
-   // get file sha
-   const oldFile = await getFile(owner, repo, keys[i], 'draft');
-   await updateFile(owner, repo, keys[i],
-   { content: values[i], sha: oldFile.sha }, 'file edit: ' + keys[i],
-   'draft'
-   );
-   } else {
-   console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-   }
-   }
-   return res.json(response);
-   }
-   return res.status(500).send('error');
-   },*/
+  /**
+   * Update course general data
+   * @param req
+   * @param res
+   * @return {Promise<*>}
+   */
+  updateGeneral: async (req, res) => {
+    const {
+      courseId,
+      courseName,
+      readmeSHA,
+      readmeContent,
+      materialsSHA,
+      materialsContent
+    } = req.body;
+    const oldFiles = req.body['files[]'];
+    const newFiles = req.files;
+    if (courseId && courseName) {
+      const course = await apiRequests.getCourseById(courseId);
+      if (course) {
+        const [owner, repo] = course.repository.replace(
+          'https://github.com/', '')
+          .split('/');
+        await updateCourseName(owner, repo, course, courseName);
+        await handleCourseGeneralFiles(owner, repo, courseId,
+          { sha: readmeSHA, content: readmeContent },
+          { sha: materialsSHA, content: materialsContent }
+        );
+        await handleCourseItemFiles(
+          owner, repo, '', oldFiles, newFiles, 'docs');
+      }
+    }
+    return res.redirect('back');
+  },
+
+  // concept handlers
+  getConcept: async (req, res, next) => {
+    // Get one concept data based on req.params.courseId and req.params.slug
+    const [owner, repo] = res.locals.course.repository.replace(
+      'https://github.com/', '')
+      .split('/');
+    /*const generalContent = await getCourseGeneralContent(
+     owner, repo, `concepts/${ req.params.slug }`, 'draft');
+     res.locals = { ...res.locals, ...generalContent };*/
+
+    res.locals.readme = await getFile(
+      owner, repo, `concepts/${ req.params.slug }/README.md`, 'draft');
+    if (res.locals.readme) { // existing concept
+      res.locals.readme.slug = req.params.slug;
+      res.locals.readme.data = res.locals.config.config.concepts.find(
+        c => c.slug === req.params.slug);
+
+      res.locals.conceptUsage = await apiRequests.conceptUsage(
+        req, res.locals.readme.data?.uuid);
+      res.locals.files = await getImageFiles(
+        owner, repo, `concepts/${ req.params.slug }/files`, 'draft');
+      // replace relative image url's in markdown with absolute path
+      // ![Protsessor](images/sample_photo.jpg) - >
+      // https://raw.githubusercontent.com/tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus/draft/practices/praktikum_01/images/sample_photo.jpg?token=ACJBOZNEM5SZZQPVCTES3CTFY523I
+      const imageUrls = extractAllImageDetails(res.locals.readme.content);
+      imageUrls.forEach((image) => {
+        const dest = res.locals.files.find(
+          (img) => image.imageUrl === 'images/' + img.name);
+        if (dest) {
+          res.locals.readme.content = res.locals.readme.content.replace(
+            image.imageUrl, dest.thumbUrl);
+        }
+      });
+    } else { // create new
+      res.locals.readme = {
+        slug: 'new', data: {}, sources: {}
+      };
+    }
+    res.locals.partial = 'course-edit.concepts';
+    next();
+  },
 
   updateConcept: async (req, res) => {
-    const { concept, courseId, sources } = req.body;
-    if (!(concept && courseId)) {
+    const { courseId, content, name, sha, slug } = req.body;
+    if (!(content && courseId)) {
       return res.redirect('back');
     } else {
-      const url = await handleCourseAndConceptFiles(courseId, concept, sources);
+      const concept = { name, content, sha, slug };
+      const url = await handleCourseAndConceptFiles(courseId, concept);
       cacheConceptUsage.del('conceptUsages+' + courseId);
       return res.redirect(url);
     }
@@ -280,44 +294,20 @@ const courseEditController = {
     return res.status(501).send('error');
   },
 
-  updateGeneral: async (req, res) => {
-    const {
-      courseId,
-      courseName,
-      courseUrl,
-      readmeSHA,
-      readmeContent,
-      materialsSHA,
-      materialsContent
-    } = req.body;
-    const oldFiles = req.body['files[]'];
-    const newFiles = req.files;
-    if (courseId && courseName && courseUrl) {
-      await updateGeneralData(courseId, courseName, courseUrl);
-      await handleCourseGeneralFiles(
-        courseId,
-        { sha: readmeSHA, content: readmeContent },
-        { sha: materialsSHA, content: materialsContent }
-      );
-      await handleCourseFiles(courseId, oldFiles, newFiles);
-    }
-    return res.redirect('back');
-  },
-
+  // lesson handlers
   getLesson: async (req, res, next) => {
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
       .split('/');
-    const folderContent = await getFolderContent(
+    const folderContent = await getCourseGeneralContent(
       owner, repo, 'lessons/' + req.params.slug, 'draft');
     res.locals = { ...res.locals, ...folderContent };
-
+    // add concepts data
+    res.locals.allConcepts = await fetchAndProcessCourseData();
     if (folderContent && req.params.slug !== 'new') {
       // add config data
       res.locals.readme.data = res.locals.config.config.lessons.find(
         c => c.slug === req.params.slug);
-      // add concepts data
-      const allConcepts = await fetchAndProcessCourseData();
       res.locals.readme.data.components = res.locals.readme.data.components.map(
         uuid => {
           const concept = res.locals.config.config.concepts.find(
@@ -330,7 +320,7 @@ const courseEditController = {
               return practice;
             } else {
               // check external concepts
-              return allConcepts.find(c => c.uuid === uuid);
+              return res.locals.allConcepts.find(c => c.uuid === uuid);
             }
           } else {
             concept.type = 'concepts';
@@ -344,26 +334,34 @@ const courseEditController = {
       };
     }
 
-    res.locals.allConcepts = await fetchAndProcessCourseData(res.locals.course);
     res.locals.readme.slug = req.params.slug;
     res.locals.partial = 'course-edit.lessons';
     next();
   },
 
   updateLesson: async (req, res) => {
-    const { courseId, readme, materials, lessonName, components } = req.body;
+    const { courseId, lessonName } = req.body;
     const lessonSlug = req.params.slug;
-    if (!(courseId && readme && materials && lessonName)) {
+    if (!(courseId && lessonName)) {
       return res.redirect('back');
     } else {
-      const url = await handleLessonUpdate(
-        courseId, readme, materials, lessonName, lessonSlug, components);
-      cacheConceptUsage.del('conceptUsages+' + courseId);
-      // add files
-      console.log('🚨uued failid:', req.files);
-      await handleLessonFiles(
-        courseId, lessonSlug, req.body['files[]'], req.files);
-      return res.redirect(url);
+      const course = await apiRequests.getCourseById(data.courseId);
+      // if we have course
+      if (course) {
+        const [owner, repo] = course.repository.replace(
+          'https://github.com/', '')
+          .split('/');
+        const url = await handleLessonUpdate(
+          owner, repo, course, req.body, lessonSlug);
+        cacheConceptUsage.del('conceptUsages+' + courseId);
+        console.log('🚨uued failid:', req.files);
+        // add files
+        await handleCourseItemFiles(owner, repo, lessonSlug,
+          req.body['files[]'], req.files, 'lessons'
+        );
+        return res.redirect(url);
+      }
+      return res.redirect('back');
     }
   },
 
@@ -390,6 +388,7 @@ const courseEditController = {
     return res.status(501).send('error');
   },
 
+  // practice handlers
   getPractice: async (req, res, next) => {
     // Get one practice data based on req.params.courseId and req.params.slug
     const [owner, repo] = res.locals.course.repository.replace(
@@ -401,19 +400,25 @@ const courseEditController = {
       res.locals.readme.slug = req.params.slug;
       res.locals.readme.data = res.locals.config.config.practices.find(
         c => c.slug === req.params.slug);
-      /*const sources = await getFile(
-       owner, repo, `practices/${ req.params.slug }/sources.json`, 'draft');
-       if (sources && sources.content) {
-       sources.content = JSON.parse(sources.content);
-       }
-       res.locals.sources = sources;*/
       res.locals.conceptUsage = await apiRequests.conceptUsage(
         req, res.locals.readme.data?.uuid);
       res.locals.files = await getImageFiles(
         owner, repo, `practices/${ req.params.slug }/images`, 'draft');
+      // replace relative image url's in markdown with absolute path
+      // ![Protsessor](images/sample_photo.jpg) - >
+      // https://raw.githubusercontent.com/tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus/draft/practices/praktikum_01/images/sample_photo.jpg?token=ACJBOZNEM5SZZQPVCTES3CTFY523I
+      const imageUrls = extractAllImageDetails(res.locals.readme.content);
+      imageUrls.forEach((image) => {
+        const dest = res.locals.files.find(
+          (img) => image.imageUrl === 'images/' + img.name);
+        if (dest) {
+          res.locals.readme.content = res.locals.readme.content.replace(
+            image.imageUrl, dest.thumbUrl);
+        }
+      });
     } else { // create new
       res.locals.readme = {
-        slug: '', data: {}, sources: {}
+        slug: req.params.slug, data: {}, sources: {}
       };
     }
     res.locals.partial = 'course-edit.practices';
@@ -421,14 +426,34 @@ const courseEditController = {
   },
 
   updatePractice: async (req, res) => {
-    const { practice, courseId, sources } = req.body;
-    if (!(practice && courseId)) {
+    const { name, courseId, slug, sha } = req.body;
+    let { content } = req.body;
+    if (!(name && courseId && content)) {
       return res.redirect('back');
     } else {
-      const url = await handleCourseAndPracticeFiles(
-        courseId, practice, sources);
-      cacheConceptUsage.del('conceptUsages+' + courseId);
-      return res.redirect(url);
+      const course = await apiRequests.getCourseById(courseId);
+      if (course) {
+        const [owner, repo] = course.repository.replace(
+          'https://github.com/', '')
+          .split('/');
+        content = await handleContentImages(
+          content, owner, repo, slug, 'practices');
+        const practice = {
+          name: name,
+          content: content,
+          slug: sha.length ? slug : slugify(name.trim().toLowerCase()),
+          sha: sha.length ? sha : null
+        };
+        const url = await handleCourseItemData(
+          owner, repo, course, practice, 'practices');
+        await handleCourseItemFiles(owner, repo, practice.slug,
+          req.body['files[]'], req.files, 'practices'
+        );
+        cacheConceptUsage.del('conceptUsages+' + courseId);
+        return res.redirect(url);
+      } else {
+        return res.redirect('back');
+      }
     }
   },
 

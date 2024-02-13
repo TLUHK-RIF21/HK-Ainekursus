@@ -656,12 +656,9 @@ pre {
     white-space: pre-wrap;
     overflow-wrap: break-word;
     border-radius: 0.25rem;
-    background-color: var(--neutral-800, #414a58);
-    color: var(--neutral-100, #f4f5f7);
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 1.5rem;
-    padding-bottom: 0.5rem;
+    /*background-color: var(--neutral-800, #414a58);
+    color: var(--neutral-100, #f4f5f7);*/
+    padding: 1.5rem 1rem 0.5rem;
     margin-bottom: 2rem;
 }
 /* if we want to wrap code element text */
@@ -710,6 +707,9 @@ li ul.markdown {
 }
 img.markdown-iframe {
     border-radius: 0.5rem;
+}
+.bg-white {
+    background-color: white;
 }
 .side-btn-wrapper{
   position: relative;
@@ -1851,9 +1851,6 @@ input:checked ~ .tab-content {
 .-left-4{
   left: -1rem;
 }
-.-top-16{
-  top: -4rem;
-}
 .-top-6{
   top: -1.5rem;
 }
@@ -1868,9 +1865,6 @@ input:checked ~ .tab-content {
 }
 .right-1{
   right: 0.25rem;
-}
-.right-4{
-  right: 1rem;
 }
 .right-8{
   right: 2rem;
@@ -2143,9 +2137,6 @@ input:checked ~ .tab-content {
 }
 .transform{
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-.cursor-not-allowed{
-  cursor: not-allowed;
 }
 .cursor-pointer{
   cursor: pointer;
@@ -2524,6 +2515,9 @@ input:checked ~ .tab-content {
 .capitalize{
   text-transform: capitalize;
 }
+.italic{
+  font-style: italic;
+}
 .not-italic{
   font-style: normal;
 }
@@ -2542,6 +2536,9 @@ input:checked ~ .tab-content {
 .text-primary-100{
   color: var(--primary-100, #f2eff5);
 }
+.text-system-black{
+  color: var(--system-black, #000000);
+}
 .text-system-red-tlu{
   color: var(--system-red-tlu, #b71234);
 }
@@ -2556,9 +2553,6 @@ input:checked ~ .tab-content {
 }
 .\!no-underline{
   text-decoration-line: none !important;
-}
-.opacity-50{
-  opacity: 0.5;
 }
 .shadow-lg{
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);

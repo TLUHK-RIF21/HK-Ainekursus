@@ -16,16 +16,19 @@ erDiagram
         string uuid PK
         string name
         string slug
+        string repo
     }
     EXT_CONCEPT {
         string uuid PK
         string name
         string slug
+        string repo
     }
     PRACTICE {
         string uuid PK
         string name
         string slug
+        string repo
     }
     LESSON ||--o{ CONCEPT: contains
     LESSON ||--o{ EXT_CONCEPT: contains

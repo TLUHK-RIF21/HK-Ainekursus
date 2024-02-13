@@ -2,16 +2,6 @@
     <div class="mb-2">
         <div class="card-title p-2 flex items-center justify-between ">
             <h4 class="my-0">Loengu {{#if readme.sha }}muutmine{{else}}lisamine{{/if}}</h4>
-            <div class="flex">
-                <!--button class="btn btn-primary mr-4" onclick="document.getElementById('courseEditForm').submit()">
-                    Salvesta
-                </button!-->
-                <!--button class="btn btn-primary"
-                        title="Kustuta sisuteema"
-                        onclick="deleteLesson('{{readme.slug}}')">
-                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                </button!-->
-            </div>
         </div>
     </div>
     <div class="card mb-2">
@@ -20,39 +10,38 @@
             <div class="p-2">
                 <div class="block mb-4">
                     <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-                    <input type="hidden" name="readme[sha]" value="{{readme.sha}}">
+                    <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
                     <input type="hidden" id="slug" value="{{readme.slug}}">
-                    <input type="hidden" name="materials[sha]" value="{{materials.sha}}">
+                    <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
+                    <input type="hidden" id="readmeContent" name="readmeContent" value="{{readme.content}}"/>
+                    <input type="hidden" id="materialsContent" name="materialsContent" value="{{materials.content}}"/>
                     <label class="text-lg font-bold mb-4">
                         Loengu nimetus
                         <input type="text" name="lessonName" class="input-single" required
                                value="{{readme.data.name}}">
                     </label>
-
-                    <label class="text-lg font-bold mb-4" for="component">Loengu kirjeldus</label>
-                    <div id="tinymde_commandbar"></div>
-                    <div class="txtcontainer w-full relative">
-                        <textarea id="component" cols="30" rows="30"
-                                  name="readme[content]">{{readme.content}}</textarea>
-                    </div>
+                    <label class="text-lg font-bold mt-4">Loengu kirjeldus</label>
+                    <div class="text-sm mb-4">Selle faili sisu kuvatakse õppekeskkonnas vastava loengu avalehel.</div>
+                    <div id="editor1" class="bg-white text-system-black"></div>
                 </div>
 
                 <div class="block mb-4">
-                    <label class="text-lg font-bold mb-4">Kasutatud sisuteemad:</label>
+                    <label class="text-lg font-bold mb-4">Loengus kasutatud sisuteemad:</label>
                     <ul class="list-disc" id="conceptList">
                         {{#each readme.data.components}}
                             <li class="ml-4 pb-4 flex items-center justify-between">
                                 <input type="hidden" name="components[]" value="{{this.uuid}}">
                                 <a href="/show/{{this.uuid}}">{{this.name}}</a>
-                                <button class="btn btn-primary ml-2 self-end" title="Eemalda sisuteema"
+                                <button class="btn btn-primary ml-2 self-end p-2 min-h-0 min-w-0"
+                                        title="Eemalda sisuteema"
                                         type="button" onclick="deleteConcept(this)">
-                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+                                    <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
                                 </button>
                             </li>
                         {{/each}}
                         <li class="flex w-100 items-end justify-between mb-2 border-t mt-4 pt-4">
                             <div>
-                                <label class="text-lg font-bold mb-4" for="concepts">Lisa sisuteema:</label>
+                                <label class="text-md font-bold mb-4" for="concepts">Lisa sisuteema:</label>
                                 <select name="linkConcept" id="concepts" class="input-single">
                                     {{#each allConcepts}}
                                         <option value="{{this.uuid}}"
@@ -76,12 +65,11 @@
                 <hr class="w-full py-4">
 
                 <div class="block mb-4">
-                    <label class="text-lg font-bold mb-4">Lisamaterjalid:</label>
-                    <div id="tinymde_commandbar2"></div>
-                    <div class="txtcontainer w-full">
-                        <textarea id="additionalMaterials" cols="30" rows="30"
-                                  name="materials[content]">{{materials.content}}</textarea>
+                    <label class="text-lg font-bold mb-2">Lisamaterjalid:</label>
+                    <div class="text-sm mb-4">Siin saad viidata vastava loenguga seonduvatele lisamaterjalidele, mis
+                        kuvatakse õppekeskkonnas "Loengu lisamaterjalid" lehel.
                     </div>
+                    <div id="editor2" class="bg-white text-system-black"></div>
                 </div>
                 <hr class="w-full py-4">
 
@@ -91,17 +79,21 @@
     </div>
 </div>
 <script>
-    const tinyMDE1 = new TinyMDE.Editor(
-            { textarea: 'component' });
+    const Editor = toastui.Editor;
 
-    const commandBar1 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar', editor: tinyMDE1 });
+    const editor1 = new Editor({
+        el: document.querySelector('#editor1'),
+        height: '500px',
+        initialEditType: 'markdown',
+        initialValue: document.getElementById('readmeContent').value
+    });
 
-    const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'additionalMaterials' });
-
-    const commandBar2 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar2', editor: tinyMDE2 });
+    const editor2 = new Editor({
+        el: document.querySelector('#editor2'),
+        height: '300px',
+        initialEditType: 'markdown',
+        initialValue: document.getElementById('materialsContent').value
+    });
 
     function addConcept() {
         const conceptList = document.getElementById('conceptList');
@@ -114,10 +106,9 @@
         <input type="hidden" name="components[]" value="${ document.getElementById('concepts').value }">
             <a href="/show/${ document.getElementById(
                 'concepts').value }">${ sel.options[sel.selectedIndex].dataset.name }</a>
-        <button class="btn btn-primary ml-2 self-end" title="Eemalda sisuteema"
-                                        type="button" onclick="deleteConcept(this)">
-                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                                </button>`;
+        <button class="btn btn-primary ml-2 self-end p-2 min-h-0 min-w-0" title="Eemalda sisuteema" type="button" onclick="deleteConcept(this)">
+            <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
+        </button>`;
         conceptList.insertBefore(newLi, penultimateLi);
         sel.options[sel.selectedIndex].disabled = true;
         sel.selectedIndex = -1;

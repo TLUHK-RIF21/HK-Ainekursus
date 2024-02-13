@@ -86,7 +86,9 @@ export default function hbsHelpers(hbs) {
           ? options.fn(this)
           : '';
       },
-
+      showDelBtn: (partial, slug) => {
+        return !!(slug !== 'new' && partial !== 'course-edit.general');
+      },
       componentIcon: (type) => {
         switch (type) {
           case 'docs':
@@ -238,14 +240,6 @@ export default function hbsHelpers(hbs) {
         markedAsDoneComponentsUUIDs,
         courseBranchComponentsUUIDs
       ) => {
-        /*console.log(
-         'markedAsDoneComponentsUUIDs7:',
-         markedAsDoneComponentsUUIDs
-         );
-         console.log(
-         'courseBranchComponentsUUIDs7:',
-         courseBranchComponentsUUIDs
-         );*/
         if (markedAsDoneComponentsUUIDs) {
           return markedAsDoneComponentsUUIDs.filter(
             (item) => courseBranchComponentsUUIDs.includes(item)).length;
