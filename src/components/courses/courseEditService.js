@@ -1,19 +1,11 @@
 import getCourseData from '../../functions/getCourseData.js';
-import apiRequests from './coursesService.js';
 import {
-  deleteFile,
-  deleteFilesFromRepo,
-  getFile,
-  getFolder,
-  updateFile,
-  uploadFile
+  deleteFile, deleteFilesFromRepo, getFile, getFolder, updateFile, uploadFile
 } from '../../functions/githubFileFunctions.js';
 import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  cacheConcepts,
-  cacheConfig,
-  cacheTeamCourses
+  cacheConcepts, cacheConfig, cacheTeamCourses
 } from '../../setup/setupCache.js';
 import { usersApi } from '../../setup/setupUserAPI.js';
 
@@ -27,7 +19,7 @@ function makeUniqueSlug(slug, array) {
   let counter = 0;
   // Create a loop that runs until "slug" is unique
   while (true) {
-    const isDuplicate = array.some(concept => concept.slug === slug);
+    const isDuplicate = array.some(item => item.slug === slug);
     // If "slug" is not in the array, return it and end the function
     if (!isDuplicate) {
       return slug;
@@ -40,54 +32,46 @@ function makeUniqueSlug(slug, array) {
   }
 }
 
-async function createFileContent(
-  owner, repo, concept, course, branch) {
-  // create unique slug from name
-  const slug = makeUniqueSlug(
-    slugify(concept.name.toLowerCase().trim()), course.config.concepts);
+/*async function createFileContent(
+ owner, repo, concept, course, branch) {
+ // create unique slug from name
+ const slug = makeUniqueSlug(
+ slugify(concept.name.toLowerCase().trim()), course.config.concepts);
 
-  // add README.md file
-  await uploadFile(owner, repo, `concepts/${ slug }/README.md`, concept.content,
-    `created concept: ${ concept.name }`, branch
-  );
-  // update config.json
-  course.config.concepts.push({
-    name: concept.name,
-    slug: slug,
-    uuid: uuidv4(),
-    repo: concept.repo
-  });
-  await updateFile(owner, repo, 'config.json', {
-    content: JSON.stringify(course.config), sha: course.config.sha
-  }, 'concept added to the config.json', branch);
+ // add README.md file
+ await uploadFile(owner, repo, `concepts/${ slug }/README.md`, concept.content,
+ `created concept: ${ concept.name }`, branch
+ );
+ // update config.json
+ course.config.concepts.push({
+ name: concept.name,
+ slug: slug,
+ uuid: uuidv4(),
+ repo: concept.repo
+ });
+ await updateFile(owner, repo, 'config.json', {
+ content: JSON.stringify(course.config), sha: course.config.sha
+ }, 'concept added to the config.json', branch);
 
-  // return redirect url
-  return `/course-edit/${ course.id }/concept/${ slug }`;
-}
+ // return redirect url
+ return `/course-edit/${ course.id }/concept/${ slug }`;
+ }*/
 
-async function handleCourseAndConceptFiles(courseId, concept) {
-  // get course from API
-  const course = await apiRequests.getCourseById(courseId);
-  // if we have course
-  if (course) {
-    const [owner, repo] = course.repository.replace(GITHUB_URL_PREFIX, '')
-      .split('/');
-    const courseConfig = await getCourseData(course, 'draft');
-    concept.repo = course.repository;
-    // if we have sha - update existing file
-    if (concept.sha) {
-      await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,
-        { content: concept.content, sha: concept.sha },
-        `edit concept: ${ concept.name }`, 'draft'
-      );
-      return 'back';
-    } else { // no sha - create new content
-      return await createFileContent(
-        owner, repo, concept, courseConfig, 'draft');
-    }
-  }
-  return 'back';
-}
+/*async function handleCourseAndConceptFiles(owner, repo, course, concept) {
+ const courseConfig = await getCourseData(course, 'draft');
+ concept.repo = course.repository;
+ // if we have sha - update existing file
+ if (concept.sha) {
+ await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,
+ { content: concept.content, sha: concept.sha },
+ `edit concept: ${ concept.name }`, 'draft'
+ );
+ return 'back';
+ } else { // no sha - create new content
+ return await createFileContent(
+ owner, repo, concept, courseConfig, 'draft');
+ }
+ }*/
 
 /**
  * General function for updating course data (lesson, practice, etc.)
@@ -96,53 +80,54 @@ async function handleCourseAndConceptFiles(courseId, concept) {
  * @param course
  * @param item what we are changing
  * @param parentPath
- * @return {Promise<string>}
+ * @return {Promise<{item, slug: *}>}
  */
 async function handleCourseItemData(owner, repo, course, item, parentPath) {
-  let returnUrl = 'back';
-  // if we have course
-  if (course) {
-    // if we have item sha - update existing file
-    if (item.sha) {
-      await updateFile(owner, repo, `${ parentPath }/${ item.slug }/README.md`,
-        { content: item.content, sha: item.sha },
-        `editing ${ parentPath }: ${ item.name }`, 'draft'
-      );
-    } else { // no sha - create new content
-      await updateFile(owner, repo, `${ parentPath }/${ item.slug }/README.md`,
-        { content: item.content },
-        `added ${ parentPath }: ${ item.name }`, 'draft'
-      );
-      returnUrl = `course-edit/${ course.id }/${ parentPath }/${ item.slug }`;
-    }
-    // get config and update it
-    const courseConfig = await getCourseData(course, 'draft');
-    const ourItemIndex = courseConfig.config[parentPath].map(l => l.slug)
-      .indexOf(item.slug);
-    if (ourItemIndex >= 0) { // update config.json
-      courseConfig.config[parentPath][ourItemIndex].name = item.name;
-    } else { // add new item
-      const slug = item.slug.trim().toLowerCase();
-      courseConfig.config[parentPath].push({
-        slug: slug,
-        name: item.name,
-        uuid: uuidv4()
-      });
-    }
-    await updateFile(owner, repo, 'config.json', {
-      content: JSON.stringify(courseConfig.config),
-      sha: courseConfig.config.sha
-    }, `editing ${ parentPath } data ${ item.name }`, 'draft');
-    cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
+  const courseConfig = await getCourseData(course, 'draft');
+  let slug = item.slug;
+  if (slug === 'new') {
+    slug = makeUniqueSlug(
+      item.name.trim().toLowerCase(),
+      courseConfig.config[parentPath]
+    );
   }
-  return returnUrl;
+  // upload embedded images and change image links in content
+  item.content = await handleContentImages(
+    item.content, owner, repo, slug, parentPath);
+  // if we have item sha - update existing file
+  if (item.sha) {
+    await updateFile(owner, repo, `${ parentPath }/${ item.slug }/README.md`,
+      { content: item.content, sha: item.sha },
+      `editing ${ parentPath }: ${ item.name }`, 'draft'
+    );
+  } else { // no sha - create new content
+    await uploadFile(owner, repo, `${ parentPath }/${ slug }/README.md`,
+      { content: item.content }, `added ${ parentPath }: ${ item.name }`,
+      'draft'
+    );
+  }
+  // update config
+  const ourItemIndex = courseConfig.config[parentPath].map(l => l.slug)
+    .indexOf(item.slug);
+  if (ourItemIndex >= 0) { // update config.json
+    courseConfig.config[parentPath][ourItemIndex].name = item.name;
+  } else { // add new item
+    courseConfig.config[parentPath].push({
+      slug: slug, name: item.name, uuid: uuidv4()
+    });
+  }
+  await updateFile(owner, repo, 'config.json', {
+    content: JSON.stringify(courseConfig.config), sha: courseConfig.config.sha
+  }, `editing ${ parentPath } data ${ item.name }`, 'draft');
+  return { slug: slug, content: item.content }; //`/course-edit/${ course.id
+                                                // }/${
+  // parentPath }/${ slug }`;
 }
 
 async function handleCourseGeneralFiles(
   owner, repo, courseId, readme, materials) {
-  if (readme && readme.content) await updateFile(owner, repo,
-    `docs/README.md`, { content: readme.content, sha: readme.sha },
-    `edit docs/readme`, 'draft'
+  if (readme && readme.content) await updateFile(owner, repo, `docs/README.md`,
+    { content: readme.content, sha: readme.sha }, `edit docs/readme`, 'draft'
   );
   if (materials && materials.content) await updateFile(owner, repo,
     `docs/lisamaterjalid.md`,
@@ -166,21 +151,27 @@ async function handleCourseGeneralFiles(
  */
 async function handleCourseItemFiles(
   owner, repo, slug, oldFiles, newFiles, parentPath) {
-  const fileFolder = await getFolder(
-    owner, repo,
-    slug ? `${ parentPath }/${ slug }/files` : `${ parentPath }/files`,
-    'draft', true
+  const fileFolder = await getFolder(owner, repo,
+    slug ? `${ parentPath }/${ slug }/files` : `${ parentPath }/files`, 'draft',
+    true
   );
   // 1. Delete removed files
   // Filter and map files to be deleted
   const toDelete = fileFolder.filter(item => !oldFiles?.includes(item.path))
     .map(file => file.path);
-  if (toDelete.length)
-    await deleteFilesFromRepo(
-      owner, repo,
-      slug ? `${ parentPath }/${ slug }/files` : `${ parentPath }/files`,
-      toDelete, 'draft'
-    );
+  if (toDelete.length) await deleteFilesFromRepo(owner, repo,
+    slug ? `${ parentPath }/${ slug }/files` : `${ parentPath }/files`,
+    toDelete, 'draft'
+  );
+
+  if (slug && newFiles && typeof newFiles === 'object') {
+    // replace 'new' in object
+    newFiles = Object.fromEntries(
+      Object.entries(newFiles).map(([key, value]) => {
+        const newKey = key.replace('/new/', `/${ slug }/`);
+        return [newKey, value];
+      }));
+  }
   // 2. Upload new files
   await uploadNewFiles(owner, repo, newFiles, fileFolder);
 }
@@ -221,8 +212,7 @@ async function updateCourseName(owner, repo, course, courseName) {
   if (courseConfig) {
     courseConfig.config.courseName = courseName;
     await updateFile(owner, repo, 'config.json', {
-      content: JSON.stringify(courseConfig.config),
-      sha: courseConfig.config.sha
+      content: JSON.stringify(courseConfig.config), sha: courseConfig.config.sha
     }, 'update general data', 'draft');
   }
 }
@@ -308,8 +298,10 @@ async function getAllConcepts(courses, refBranch) {
   }));
   cacheConcepts.set('concepts', allConcepts);
   return allConcepts.filter((c) => !!c.course)
-    .sort((a, b) => a.name > b.name ? 1 : b.name > a.name ? -1 : a.course >
-    b.course ? 1 : b.course > a.course ? -1 : 0);
+    .sort(
+      (a, b) => a.name > b.name ? 1 : b.name > a.name ? -1 : a.course > b.course
+        ? 1
+        : b.course > a.course ? -1 : 0);
 }
 
 async function fetchAndProcessCourseData() {
@@ -321,8 +313,7 @@ async function fetchAndProcessCourseData() {
       allCourses.data.map(async (course) => {
         course.config = await getCourseData(course, 'master');
         return course;
-      })
-    );
+      }));
 
     // todo filter out already used (uuid in lesson.components)
     return await getAllConcepts(coursesWithConfig, 'master'); /*.filter(
@@ -343,8 +334,7 @@ async function handleLessonUpdate(owner, repo, course, data, lessonSlug) {
     courseConfig.config.lessons[ourLessonIndex].components = data['components[]'];
     // todo update components part
     await updateFile(owner, repo, 'config.json', {
-      content: JSON.stringify(courseConfig.config),
-      sha: courseConfig.config.sha
+      content: JSON.stringify(courseConfig.config), sha: courseConfig.config.sha
     }, `edit lesson data ${ data.lessonName }`, 'draft');
     cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
   }
@@ -365,18 +355,15 @@ async function handleLessonUpdate(owner, repo, course, data, lessonSlug) {
   } else { // no sha - create new content
     // 1. add lesson to the conf
     const slug = slugify(data.lessonName.toLowerCase().trim());
-    courseConfig.config.lessons.push(
-      {
-        slug: slug,
-        name: data.lessonName.trim(),
-        uuid: uuidv4(),
-        components: [...data['components[]']],
-        additionalMaterials: []
-      }
-    );
+    courseConfig.config.lessons.push({
+      slug: slug,
+      name: data.lessonName.trim(),
+      uuid: uuidv4(),
+      components: [...data['components[]']],
+      additionalMaterials: []
+    });
     await updateFile(owner, repo, 'config.json', {
-      content: JSON.stringify(courseConfig.config),
-      sha: courseConfig.config.sha
+      content: JSON.stringify(courseConfig.config), sha: courseConfig.config.sha
     }, `lesson added ${ data.lessonName }`, 'draft');
     cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
     // 2. upload files
@@ -434,6 +421,7 @@ async function handleContentImages(content, owner, repo, slug, parentPath) {
         ? slugify(img.imageName.trim().toLowerCase()) + '.' + ext
         : `${ uuidv4() }.${ ext }`;
       const path = `${ parentPath }/${ slug }/files/${ fileName }`;
+
       try {
         // Try uploading the image file using uploadFile function
         await uploadFile(
@@ -455,7 +443,6 @@ async function handleContentImages(content, owner, repo, slug, parentPath) {
 
 export {
   makeUniqueSlug,
-  handleCourseAndConceptFiles,
   handleCourseItemData,
   handleCourseGeneralFiles,
   updateCourseName,

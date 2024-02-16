@@ -10,7 +10,7 @@
                     NB! Antud sisuteemat kasutab vähemalt {{conceptUsage.length}} kursust
                     <i class="material-symbols-outlined ml-2">expand_more</i>
                 </p>
-                <p class="pl-2 text-sm">Sisuteemat ei saa kustuda, kui see on kasutuses.</p>
+                <p class="pl-2 text-sm">Sisuteemat ei saa kustutada kuna see on kasutuses!</p>
                 <ul class="hidden transition" id="showUsage">
                     {{#each conceptUsage}}
                         <li><strong>{{this.course.name}}</strong> [{{this.course.code}}]:
@@ -25,7 +25,7 @@
                     {{/each}}
                 </ul>
             {{else}}
-                <p class="my-0 p-2">Antud sisuteemat ei kasutata</p>
+                <p class="my-0 p-2">Antud sisuteemat ei kasutata.</p>
             {{/if}}
         </div>
     </div>
@@ -60,13 +60,13 @@
 
     function deleteConcept() {
         const id = document.getElementById('courseId').value;
-        const slug = document.getElementById('concept[slug]').value;
+        const slug = document.getElementById('slug').value;
         fetch(
                 '/course-edit/' + id + '/concept/' + slug,
                 {
                     method: 'DELETE'
                 }
-        ).then((data) => {
+        ).then(() => {
             document.getElementById('modal').style.display = 'none';
             history.back();
         });
@@ -74,14 +74,16 @@
 
     window.onload = function () {
         document.getElementById('saveBtn').innerHTML = 'Salvesta sisuteema';
-        if (document.getElementById('showUsage')) {
-            document.getElementById('delBtn').disabled = true;
-        } else {
-            document.getElementById('delBtn').onclick = function () {
-                document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle sisuteema kustutada?';
-                document.getElementById('modal').style.display = 'flex';
-            };
-            document.getElementById('delOK').onclick = deleteConcept;
+        if (document.getElementById('delBtn')) {
+            if (document.getElementById('showUsage')) {
+                document.getElementById('delBtn').disabled = true;
+            } else {
+                document.getElementById('delBtn').onclick = function () {
+                    document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle sisuteema kustutada?';
+                    document.getElementById('modal').style.display = 'flex';
+                };
+                document.getElementById('delOK').onclick = deleteConcept;
+            }
         }
     };
 

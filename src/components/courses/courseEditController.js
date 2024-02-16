@@ -7,22 +7,29 @@ import {
   fetchAndProcessCourseData,
   getCourseGeneralContent,
   getImageFiles,
-  handleCourseAndConceptFiles,
-  //handleCourseFiles,
   handleCourseGeneralFiles,
-  //handleLessonFiles,
   handleLessonUpdate,
   updateCourseName,
   extractAllImageDetails,
-  handleContentImages,
   handleCourseItemData,
   handleCourseItemFiles
 } from './courseEditService.js';
-import { cacheConceptUsage, cacheConfig } from '../../setup/setupCache.js';
+import {
+  cacheConceptUsage,
+  cacheConfig,
+  cacheTeamCourses
+} from '../../setup/setupCache.js';
 import validBranchesService from './coursesService.js';
 import slugify from 'slugify';
 
 const courseEditController = {
+  /**
+   * Get one course for editing based on ID
+   * @param req
+   * @param res
+   * @param next
+   * @return {Promise<*>}
+   */
   getSpecificCourse: async (req, res, next) => {
     const { courseId } = req.params;
     let course = await apiRequests.getCourseById(courseId);
@@ -152,7 +159,12 @@ const courseEditController = {
 
   },
 
-  async publishCourse(course) {
+  /**
+   * Merge 'master' branch with 'draft' and delete 'draft' on success
+   * @param course
+   * @return {Promise<*>}
+   */
+  publishCourse: async (course) => {
     const mergeResponse = await apiRequests.mergeMasterWithDraft(
       course.repository.replace('https://github.com/', ''),
       'Shipped cool_feature!'
@@ -245,10 +257,10 @@ const courseEditController = {
       const imageUrls = extractAllImageDetails(res.locals.readme.content);
       imageUrls.forEach((image) => {
         const dest = res.locals.files.find(
-          (img) => image.imageUrl === 'images/' + img.name);
+          (img) => image.imageUrl === 'files/' + img.name);
         if (dest) {
           res.locals.readme.content = res.locals.readme.content.replace(
-            image.imageUrl, dest.thumbUrl);
+            `](${ image.imageUrl })`, `](${ dest.thumbUrl })`);
         }
       });
     } else { // create new
@@ -265,10 +277,32 @@ const courseEditController = {
     if (!(content && courseId)) {
       return res.redirect('back');
     } else {
-      const concept = { name, content, sha, slug };
-      const url = await handleCourseAndConceptFiles(courseId, concept);
-      cacheConceptUsage.del('conceptUsages+' + courseId);
-      return res.redirect(url);
+      const course = await apiRequests.getCourseById(courseId);
+      if (course) {
+        const [owner, repo] = course.repository.replace(
+          'https://github.com/', '').split('/');
+        // create new concept object
+        const concept = { name, content, slug, sha: sha.length ? sha : null };
+        // update course config and concept data
+        const updated = await handleCourseItemData(
+          owner, repo, course, concept, 'concepts');
+        // get embedded images from content
+        const imageUrls = extractAllImageDetails(updated.content, true)
+          .map((img) => (`concepts/${ updated.slug }/${ img.imageUrl }`));
+        // add files from content
+        req.body['files[]'] = [
+          ...new Set([...req.body['files[]'], ...imageUrls])];
+        await handleCourseItemFiles(
+          owner, repo, updated.slug, req.body['files[]'], req.files,
+          'concepts'
+        );
+        // clear cache
+        cacheConceptUsage.del('conceptUsages+' + courseId);
+        cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
+        return res.redirect(
+          `/course-edit/${ course.id }/concept/${ updated.slug }`);
+      }
+      return res.redirect('back');
     }
   },
 
@@ -280,15 +314,17 @@ const courseEditController = {
       const [owner, repo] = course.repository.replace('https://github.com/', '')
         .split('/');
       await deleteFolderFromRepo(owner, repo, `concepts/${ slug }`, 'draft');
-      const courseConfig = await getCourseData(course.id, 'draft');
+      const courseConfig = await getCourseData(course, 'draft');
       if (courseConfig) {
-        course.config.concepts = course.config.concepts.filter(
+        courseConfig.config.concepts = courseConfig.config.concepts.filter(
           c => c.slug !== slug);
         await updateFile(owner, repo, 'config.json', {
-          content: JSON.stringify(course.config), sha: course.config.sha
+          content: JSON.stringify(courseConfig.config),
+          sha: courseConfig.config.sha
         }, 'concept removed from the config.json', 'draft');
       }
       cacheConceptUsage.del('conceptUsages+' + courseId);
+      cacheTeamCourses.del(`course+${ courseId }`);
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');
@@ -381,7 +417,7 @@ const courseEditController = {
           sha: courseConfig.config.sha
         }, 'lesson removed from the config.json', 'draft');
       }
-      cacheConfig.del(`getConfig:${ owner }/${ repo }/+draft`);
+      cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
       cacheConceptUsage.del('conceptUsages+' + courseId);
       return res.status(202).send('ok');
     }
@@ -436,20 +472,24 @@ const courseEditController = {
         const [owner, repo] = course.repository.replace(
           'https://github.com/', '')
           .split('/');
-        content = await handleContentImages(
-          content, owner, repo, slug, 'practices');
+        const newSlug = sha.length ? slug : slugify(name.trim().toLowerCase()),
+          content = await handleContentImages(
+            content, owner, repo, newSlug, 'practices');
         const practice = {
           name: name,
           content: content,
-          slug: sha.length ? slug : slugify(name.trim().toLowerCase()),
+          slug: newSlug,
           sha: sha.length ? sha : null
         };
         const url = await handleCourseItemData(
           owner, repo, course, practice, 'practices');
-        await handleCourseItemFiles(owner, repo, practice.slug,
-          req.body['files[]'], req.files, 'practices'
-        );
+        /*await handleCourseItemFiles(owner, repo, practice.slug,
+         req.body['file
+         s[]'], req.files, 'practices'
+         );*/
+        console.log(owner, repo, practice.slug, req.body['files[]'], req.files);
         cacheConceptUsage.del('conceptUsages+' + courseId);
+        cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
         return res.redirect(url);
       } else {
         return res.redirect('back');
@@ -474,6 +514,7 @@ const courseEditController = {
         }, 'practice removed from the config.json', 'draft');
       }
       cacheConceptUsage.del('conceptUsages+' + courseId);
+      cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');

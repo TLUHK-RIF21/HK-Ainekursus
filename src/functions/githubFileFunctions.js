@@ -142,14 +142,12 @@ async function uploadFile(owner, repo, path, // folder + new filename
     ? new Buffer.from(file.data).toString('base64')
     : bytesToBase64(file);
 
-  return await octokit.request(
-    `PUT /repos/${ owner }/${ repo }/contents/${ path }`, {
-      message: commitMessage, content: base64Content, branch: branch, headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    }).catch((err) => {
+  return await github.repos.createOrUpdateFileContents({
+    owner, repo, branch, path, content: base64Content, message: commitMessage
+  }).catch((err) => {
     console.log(err);
   });
+
 }
 
 async function getBranch(owner, repo, branch = 'master') {
@@ -174,13 +172,12 @@ const deleteFolderFromRepo = async (org, repo, directoryName, branch) => {
   const directorySha = await getDirectorySha(repoTree.tree, directoryName);
 
   if (!directorySha) {
-    //throw new Error(`Could not find an directory '${ directoryName }'`);
+    //throw new Error(`Could not find a directory '${ directoryName }'`);
     return false;
   }
 
   const { data: directoryTree } = await github.git.getTree({
-    owner: org,
-    repo, tree_sha: directorySha, recursive: true
+    owner: org, repo, tree_sha: directorySha, recursive: true
   });
 
   const blobs = directoryTree.tree.map((blob) => {
@@ -189,12 +186,15 @@ const deleteFolderFromRepo = async (org, repo, directoryName, branch) => {
 
   const newTree = await createNewTree(org, repo, blobs, currentCommit.treeSha);
 
+  if (!newTree) {
+    return false;
+  }
   const commitMessage = `Deleting '${ directoryName }' files.`;
   const newCommit = await createNewCommit(org, repo, commitMessage, newTree.sha,
     currentCommit.commitSha
   );
 
-  await setBranchToCommit(org, repo, newCommit.sha, branch);
+  if (newCommit) await setBranchToCommit(org, repo, newCommit.sha, branch);
 };
 const deleteFilesFromRepo = async (org, repo, path, toDelete, branch) => {
   const currentCommit = await getCurrentCommit(org, repo, branch);
@@ -208,8 +208,7 @@ const deleteFilesFromRepo = async (org, repo, path, toDelete, branch) => {
   }
 
   const { data: directoryTree } = await github.git.getTree({
-    owner: org,
-    repo, tree_sha: directorySha, recursive: true
+    owner: org, repo, tree_sha: directorySha, recursive: true
   });
 
   const blobs = directoryTree.tree.map((blob) => {
@@ -234,11 +233,12 @@ const createNewTree = async (owner, repo, blobs, parentTreeSha) => {
     path: path, mode: `100644`, type: `blob`, sha
   }));
 
-  const { data } = await github.git.createTree({
+  const response = await github.git.createTree({
     owner, repo, tree, base_tree: parentTreeSha
+  }).catch((e) => {
+    console.log('error creating tree: ', e.message);
   });
-
-  return data;
+  return (response && response.data) ? response.data : null;
 };
 
 const setBranchToCommit = (
