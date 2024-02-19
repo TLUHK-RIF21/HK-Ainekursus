@@ -36,7 +36,6 @@
                 <input type="hidden" name="sha" value="{{readme.sha}}">
                 <input type="hidden" name="slug" id="slug" value="{{readme.slug}}">
                 <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-                <input type="hidden" id="content" name="content" value="{{readme.content}}">
                 <label for="name">Sisuteema nimetus</label>
                 <input type="text" name="name" id="name" value="{{readme.data.name}}"
                        class="input-single" required>
@@ -55,7 +54,7 @@
         el: document.querySelector('#editor'),
         height: '500px',
         initialEditType: 'markdown',
-        initialValue: document.getElementById('content').value
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`
     });
 
     function deleteConcept() {

@@ -113,7 +113,7 @@ async function handleCourseItemData(owner, repo, course, item, parentPath) {
     courseConfig.config[parentPath][ourItemIndex].name = item.name;
   } else { // add new item
     courseConfig.config[parentPath].push({
-      slug: slug, name: item.name, uuid: uuidv4()
+      slug: slug, name: item.name, uuid: uuidv4(), repo: repo
     });
   }
   await updateFile(owner, repo, 'config.json', {

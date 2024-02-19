@@ -38,7 +38,6 @@
             <input type="hidden" name="sha" value="{{readme.sha}}">
             <input type="hidden" name="slug" id="slug" value="{{readme.slug}}">
             <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
-            <input type="hidden" id="content" name="content" value="{{readme.content}}">
             <label for="name">Praktikumi nimetus</label>
             <input type="text" name="name" id="name" value="{{readme.data.name}}"
                    class="input-single" required>
@@ -54,52 +53,10 @@
     const Editor = toastui.Editor;
     const editor = new Editor({
         el: document.querySelector('#editor'),
-        height: '500px',
+        height: 'auto',
         initialEditType: 'markdown',
-        initialValue: document.getElementById('content').value
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`
     });
-
-    //editor.getMarkdown();
-
-    /*const tinyMDE2 = new TinyMDE.Editor(
-            { textarea: 'concept_content' });
-
-    const commandBar2 = new TinyMDE.CommandBar(
-            { element: 'tinymde_commandbar_concept_content', editor: tinyMDE2 });*/
-
-    /*function deleteSource(el) {
-        el.closest('li').remove();
-    }
-
-    function addSource() {
-        const ul = document.getElementById('sources');
-        const penultimateLi = ul.lastChild.previousSibling;
-        const index = ul.getElementsByTagName('li').length - 1;
-        const newLi = document.createElement('li');
-        newLi.classList.add('pb-4', 'mb-4', 'flex', 'items-center', 'justify-between', 'border-b');
-        newLi.innerHTML = `
-        <div class="grow">
-            <label for="sources[${ index }][description]">Nimetus</label>
-            <input type="text" id="sources[${ index }][description]" class="input-single"
-                   name="sources[${ index }][description]" value="${ document.getElementById('newDescription').value }">
-        </div>
-        <div class="grow">
-            <label for="sources[${ index }][url]">Lingi aadress</label>
-            <input type="text" id="sources[${ index }][url]" class="input-single"
-                   name="sources[${ index }][url]"
-                   value="${ document.getElementById('newUrl').value }">
-        </div>
-        <button class="btn btn-primary ml-2 self-end" title="Kustuta lisamaterjal"
-                onclick="deleteSource(this)">
-            <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-        </button>
-        `;
-
-        // insert new li before last li element
-        ul.insertBefore(newLi, penultimateLi);
-        document.getElementById('newUrl').value = '';
-        document.getElementById('newDescription').value = '';
-    }*/
 
     function deletePractice() {
         const id = document.getElementById('courseId').value;

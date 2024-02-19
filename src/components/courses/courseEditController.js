@@ -16,11 +16,9 @@ import {
 } from './courseEditService.js';
 import {
   cacheConceptUsage,
-  cacheConfig,
-  cacheTeamCourses
+  cacheConfig
 } from '../../setup/setupCache.js';
 import validBranchesService from './coursesService.js';
-import slugify from 'slugify';
 
 const courseEditController = {
   /**
@@ -156,7 +154,6 @@ const courseEditController = {
       return res.redirect('/notfound');
     }
     next();
-
   },
 
   /**
@@ -236,13 +233,13 @@ const courseEditController = {
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
       .split('/');
-    /*const generalContent = await getCourseGeneralContent(
-     owner, repo, `concepts/${ req.params.slug }`, 'draft');
-     res.locals = { ...res.locals, ...generalContent };*/
-
+    // Get main content
     res.locals.readme = await getFile(
       owner, repo, `concepts/${ req.params.slug }/README.md`, 'draft');
     if (res.locals.readme) { // existing concept
+      //remove extra whitespaces and replace line endings
+      res.locals.readme.content = res.locals.readme.content.split('\r\n')
+        .map(line => line.trim() + '\r');
       res.locals.readme.slug = req.params.slug;
       res.locals.readme.data = res.locals.config.config.concepts.find(
         c => c.slug === req.params.slug);
@@ -251,9 +248,7 @@ const courseEditController = {
         req, res.locals.readme.data?.uuid);
       res.locals.files = await getImageFiles(
         owner, repo, `concepts/${ req.params.slug }/files`, 'draft');
-      // replace relative image url's in markdown with absolute path
-      // ![Protsessor](images/sample_photo.jpg) - >
-      // https://raw.githubusercontent.com/tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus/draft/practices/praktikum_01/images/sample_photo.jpg?token=ACJBOZNEM5SZZQPVCTES3CTFY523I
+      // replace relative image urls in markdown with absolute path
       const imageUrls = extractAllImageDetails(res.locals.readme.content);
       imageUrls.forEach((image) => {
         const dest = res.locals.files.find(
@@ -290,12 +285,20 @@ const courseEditController = {
         const imageUrls = extractAllImageDetails(updated.content, true)
           .map((img) => (`concepts/${ updated.slug }/${ img.imageUrl }`));
         // add files from content
-        req.body['files[]'] = [
-          ...new Set([...req.body['files[]'], ...imageUrls])];
-        await handleCourseItemFiles(
-          owner, repo, updated.slug, req.body['files[]'], req.files,
-          'concepts'
-        );
+        if (imageUrls.length) {
+          if (req.body['files[]']) {
+            req.body['files[]'] = [
+              ...new Set([...req.body['files[]'], ...imageUrls])];
+          } else {
+            req.body['files[]'] = imageUrls;
+          }
+        }
+        if (req.body['files[]']) {
+          await handleCourseItemFiles(
+            owner, repo, updated.slug, req.body['files[]'], req.files,
+            'concepts'
+          );
+        }
         // clear cache
         cacheConceptUsage.del('conceptUsages+' + courseId);
         cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
@@ -324,7 +327,7 @@ const courseEditController = {
         }, 'concept removed from the config.json', 'draft');
       }
       cacheConceptUsage.del('conceptUsages+' + courseId);
-      cacheTeamCourses.del(`course+${ courseId }`);
+      cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
       return res.status(202).send('ok');
     }
     return res.status(501).send('error');
@@ -342,6 +345,7 @@ const courseEditController = {
     res.locals.allConcepts = await fetchAndProcessCourseData();
     if (folderContent && req.params.slug !== 'new') {
       // add config data
+
       res.locals.readme.data = res.locals.config.config.lessons.find(
         c => c.slug === req.params.slug);
       res.locals.readme.data.components = res.locals.readme.data.components.map(
@@ -430,31 +434,35 @@ const courseEditController = {
     const [owner, repo] = res.locals.course.repository.replace(
       'https://github.com/', '')
       .split('/');
+    // Get main content
     res.locals.readme = await getFile(
       owner, repo, `practices/${ req.params.slug }/README.md`, 'draft');
-    if (res.locals.readme) { // existing concept
+    //remove extra whitespaces and replace line endings
+    res.locals.readme.content = res.locals.readme.content.split('\r\n')
+      .map(line => line.trim() + '\r');
+    //console.log(res.locals.readme.content);
+    if (res.locals.readme) { // existing practice
       res.locals.readme.slug = req.params.slug;
       res.locals.readme.data = res.locals.config.config.practices.find(
         c => c.slug === req.params.slug);
-      res.locals.conceptUsage = await apiRequests.conceptUsage(
+
+      res.locals.practiceUsage = await apiRequests.conceptUsage(
         req, res.locals.readme.data?.uuid);
       res.locals.files = await getImageFiles(
-        owner, repo, `practices/${ req.params.slug }/images`, 'draft');
-      // replace relative image url's in markdown with absolute path
-      // ![Protsessor](images/sample_photo.jpg) - >
-      // https://raw.githubusercontent.com/tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus/draft/practices/praktikum_01/images/sample_photo.jpg?token=ACJBOZNEM5SZZQPVCTES3CTFY523I
+        owner, repo, `practices/${ req.params.slug }/files`, 'draft');
+      // replace relative image urls in markdown with absolute path
       const imageUrls = extractAllImageDetails(res.locals.readme.content);
       imageUrls.forEach((image) => {
         const dest = res.locals.files.find(
-          (img) => image.imageUrl === 'images/' + img.name);
+          (img) => image.imageUrl === 'files/' + img.name);
         if (dest) {
           res.locals.readme.content = res.locals.readme.content.replace(
-            image.imageUrl, dest.thumbUrl);
+            `](${ image.imageUrl })`, `](${ dest.thumbUrl })`);
         }
       });
     } else { // create new
       res.locals.readme = {
-        slug: req.params.slug, data: {}, sources: {}
+        slug: 'new', data: {}, sources: {}
       };
     }
     res.locals.partial = 'course-edit.practices';
@@ -462,38 +470,44 @@ const courseEditController = {
   },
 
   updatePractice: async (req, res) => {
-    const { name, courseId, slug, sha } = req.body;
-    let { content } = req.body;
-    if (!(name && courseId && content)) {
+    const { courseId, content, name, sha, slug } = req.body;
+    if (!(content && courseId)) {
       return res.redirect('back');
     } else {
       const course = await apiRequests.getCourseById(courseId);
       if (course) {
         const [owner, repo] = course.repository.replace(
-          'https://github.com/', '')
-          .split('/');
-        const newSlug = sha.length ? slug : slugify(name.trim().toLowerCase()),
-          content = await handleContentImages(
-            content, owner, repo, newSlug, 'practices');
-        const practice = {
-          name: name,
-          content: content,
-          slug: newSlug,
-          sha: sha.length ? sha : null
-        };
-        const url = await handleCourseItemData(
+          'https://github.com/', '').split('/');
+        // create new concept object
+        const practice = { name, content, slug, sha: sha.length ? sha : null };
+        // update course config and concept data
+        const updated = await handleCourseItemData(
           owner, repo, course, practice, 'practices');
-        /*await handleCourseItemFiles(owner, repo, practice.slug,
-         req.body['file
-         s[]'], req.files, 'practices'
-         );*/
-        console.log(owner, repo, practice.slug, req.body['files[]'], req.files);
+        // get embedded images from content
+        const imageUrls = extractAllImageDetails(updated.content, true)
+          .map((img) => (`practices/${ updated.slug }/${ img.imageUrl }`));
+        // add files from content
+        if (imageUrls.length) {
+          if (req.body['files[]']) {
+            req.body['files[]'] = [
+              ...new Set([...req.body['files[]'], ...imageUrls])];
+          } else {
+            req.body['files[]'] = imageUrls;
+          }
+        }
+        if (req.body['files[]']) {
+          await handleCourseItemFiles(
+            owner, repo, updated.slug, req.body['files[]'], req.files,
+            'practices'
+          );
+        }
+        // clear cache
         cacheConceptUsage.del('conceptUsages+' + courseId);
         cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
-        return res.redirect(url);
-      } else {
-        return res.redirect('back');
+        return res.redirect(
+          `/course-edit/${ course.id }/practice/${ updated.slug }`);
       }
+      return res.redirect('back');
     }
   },
 
