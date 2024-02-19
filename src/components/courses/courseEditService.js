@@ -224,6 +224,8 @@ async function getCourseGeneralContent(owner, repo, path, branch) {
   const readme = await getFile(owner, repo, `${ path }/README.md`, branch);
   if (readme) {
     data.readme = readme;
+    data.readme.content = readme.content.split('\r\n')
+      .map(line => line.trim() + '\r');
   }
 
   // Get lisamaterjalid.md file
@@ -231,6 +233,8 @@ async function getCourseGeneralContent(owner, repo, path, branch) {
     owner, repo, `${ path }/lisamaterjalid.md`, branch);
   if (lisamaterjalid) {
     data.materials = lisamaterjalid;
+    data.materials.content = lisamaterjalid.content.split('\r\n')
+      .map(line => line.trim() + '\r');
   }
 
   // Get files from "files" directory

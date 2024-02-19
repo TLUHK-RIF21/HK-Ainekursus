@@ -13,8 +13,6 @@
                     <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
                     <input type="hidden" id="slug" value="{{readme.slug}}">
                     <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
-                    <input type="hidden" id="readmeContent" name="readmeContent" value="{{readme.content}}"/>
-                    <input type="hidden" id="materialsContent" name="materialsContent" value="{{materials.content}}"/>
                     <label class="text-lg font-bold mb-4">
                         Loengu nimetus
                         <input type="text" name="lessonName" class="input-single" required
@@ -84,15 +82,15 @@
     const editor1 = new Editor({
         el: document.querySelector('#editor1'),
         height: '500px',
-        initialEditType: 'markdown',
-        initialValue: document.getElementById('readmeContent').value
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`
     });
 
     const editor2 = new Editor({
         el: document.querySelector('#editor2'),
         height: '300px',
-        initialEditType: 'markdown',
-        initialValue: document.getElementById('materialsContent').value
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each materials.content}}{{this}}{{/each}}`
     });
 
     function addConcept() {

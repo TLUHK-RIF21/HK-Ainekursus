@@ -22,8 +22,6 @@
         <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
         <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
         <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
-        <input type="hidden" id="readmeContent" name="readmeContent" value="{{readme.content}}"/>
-        <input type="hidden" id="materialsContent" name="materialsContent" value="{{materials.content}}"/>
         <label>Üldinfo</label>
         <div id="editor1" class="bg-white text-system-black"></div>
     </div>
@@ -73,8 +71,8 @@
         usageStatistics: false,
         el: document.querySelector('#editor1'),
         height: '500px',
-        initialEditType: 'markdown',
-        initialValue: document.getElementById('readmeContent').value,
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
         toolbarItems: [
             ['heading', 'bold', 'italic', 'strike'],
             ['hr', 'quote'],
@@ -97,8 +95,8 @@
     const editor2 = new Editor({
         el: document.querySelector('#editor2'),
         height: '500px',
-        initialEditType: 'markdown',
-        initialValue: document.getElementById('materialsContent').value
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each materials.content}}{{this}}{{/each}}`
     });
 
     window.onload = function () {

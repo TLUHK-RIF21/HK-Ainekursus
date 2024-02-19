@@ -238,8 +238,8 @@ const courseEditController = {
       owner, repo, `concepts/${ req.params.slug }/README.md`, 'draft');
     if (res.locals.readme) { // existing concept
       //remove extra whitespaces and replace line endings
-      res.locals.readme.content = res.locals.readme.content.split('\r\n')
-        .map(line => line.trim() + '\r');
+      /*res.locals.readme.content = res.locals.readme.content.split('\r\n')
+       .map(line => line.trim() + '\r');*/
       res.locals.readme.slug = req.params.slug;
       res.locals.readme.data = res.locals.config.config.concepts.find(
         c => c.slug === req.params.slug);
@@ -438,8 +438,8 @@ const courseEditController = {
     res.locals.readme = await getFile(
       owner, repo, `practices/${ req.params.slug }/README.md`, 'draft');
     //remove extra whitespaces and replace line endings
-    res.locals.readme.content = res.locals.readme.content.split('\r\n')
-      .map(line => line.trim() + '\r');
+    /*res.locals.readme.content = res.locals.readme.content.split('\r\n')
+     .map(line => line.trim() + '\r');*/
     //console.log(res.locals.readme.content);
     if (res.locals.readme) { // existing practice
       res.locals.readme.slug = req.params.slug;
