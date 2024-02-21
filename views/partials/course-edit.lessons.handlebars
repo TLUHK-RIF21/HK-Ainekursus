@@ -78,21 +78,22 @@
         </form>
     </div>
 </div>
+<script src="/js/et-editor.js"></script>
 <script>
-    const Editor = toastui.Editor;
-
     const editor1 = new Editor({
         el: document.querySelector('#editor1'),
         height: '500px',
         initialEditType: 'wysiwyg',
-        initialValue: `{{#each readme.content}}{{this}}{{/each}}`
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
     });
 
     const editor2 = new Editor({
         el: document.querySelector('#editor2'),
         height: '300px',
         initialEditType: 'wysiwyg',
-        initialValue: `{{#each materials.content}}{{this}}{{/each}}`
+        initialValue: `{{#each materials.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
     });
 
     function addConcept() {

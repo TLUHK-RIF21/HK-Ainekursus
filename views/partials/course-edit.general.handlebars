@@ -36,8 +36,8 @@
 </form>
 
 <div class="border-4 border-system-focus hidden"></div>
+<script src="/js/et-editor.js"></script>
 <script>
-    const Editor = toastui.Editor;
 
     function createOisButton() {
         const button = document.createElement('button');
@@ -88,17 +88,19 @@
                     el: createOisButton(),
                     tooltip: 'Uuenda õisist'
                 }]
-        ]
+        ],
         /*events: {
             change: () => {isFormDirty = true;}
         }*/
+        language: 'et-EE'
     });
 
     const editor2 = new Editor({
         el: document.querySelector('#editor2'),
         height: 'auto',
         initialEditType: 'wysiwyg',
-        initialValue: `{{#each materials.content}}{{this}}{{/each}}`
+        initialValue: `{{#each materials.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
     });
 
     window.onload = function () {

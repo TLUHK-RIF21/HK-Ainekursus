@@ -50,13 +50,15 @@
         </div>
     </form>
 </div>
+<script src="/js/et-editor.js"></script>
 <script>
-    const Editor = toastui.Editor;
+
     const editor = new Editor({
         el: document.querySelector('#editor'),
         height: 'auto',
         initialEditType: 'wysiwyg',
-        initialValue: `{{#each readme.content}}{{this}}{{/each}}`
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
     });
 
     function deletePractice() {
