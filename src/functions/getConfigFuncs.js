@@ -90,14 +90,14 @@ const validateConfig = (configObj, selectedCourse, refBranch) => {
         `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson keys missing.`);
       return false;
     }
-    if (!Array.isArray(lesson.components) || !lesson.components.length > 0 ||
-      !Array.isArray(lesson.additionalMaterials)) {
-      console.log(
-        `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson keys with incorrect type, or empty array.`);
-      return false;
-    }
-    const lessonKeysAdditionalMaterials = Object.keys(
-      lesson.additionalMaterials[0] || []);
+    /*if (!Array.isArray(lesson.components) || !lesson.components.length > 0 ||
+     !Array.isArray(lesson.additionalMaterials)) {
+     console.log(
+     `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson keys with incorrect type, or empty array.`);
+     return false;
+     }*/
+    //const lessonKeysAdditionalMaterials = Object.keys(
+    //  lesson.additionalMaterials[0] || []);
 
     // console.log('lessonKeysAdditionalMaterials1:',
     // lessonKeysAdditionalMaterials);

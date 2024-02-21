@@ -49,13 +49,13 @@
 
     function submitEditForm() {
         window.removeEventListener('beforeunload', beforeUnloadHandler); // Remove the listener
-        // concept, lesson and practice pages use one editor
+        // concept and practice pages use one editor
         const editorElement = document.getElementById('editor');
         const contentElement = document.getElementById('content');
         if (editorElement && contentElement) {
             contentElement.value = editor.getMarkdown();
         }
-        // general page uses 2 editors
+        // general and lesson pages uses 2 editors
         const editor1Element = document.getElementById('editor1');
         const editor2Element = document.getElementById('editor2');
         const content1Element = document.getElementById('readmeContent');

@@ -2252,6 +2252,9 @@ input:checked ~ .tab-content {
 .rounded{
   border-radius: 0.25rem;
 }
+.rounded-2xl{
+  border-radius: 1rem;
+}
 .rounded-full{
   border-radius: 9999px;
 }

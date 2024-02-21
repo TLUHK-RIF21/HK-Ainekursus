@@ -134,8 +134,6 @@ async function handleCourseGeneralFiles(
     { content: materials.content, sha: materials.sha },
     `docs/lisamaterjalid.md`, 'draft'
   );
-  //clear course cache
-  cacheTeamCourses.del(`course+${ courseId }`);
   return 'back';
 }
 
@@ -224,8 +222,6 @@ async function getCourseGeneralContent(owner, repo, path, branch) {
   const readme = await getFile(owner, repo, `${ path }/README.md`, branch);
   if (readme) {
     data.readme = readme;
-    data.readme.content = readme.content.split('\r\n')
-      .map(line => line.trim() + '\r');
   }
 
   // Get lisamaterjalid.md file
@@ -233,8 +229,6 @@ async function getCourseGeneralContent(owner, repo, path, branch) {
     owner, repo, `${ path }/lisamaterjalid.md`, branch);
   if (lisamaterjalid) {
     data.materials = lisamaterjalid;
-    data.materials.content = lisamaterjalid.content.split('\r\n')
-      .map(line => line.trim() + '\r');
   }
 
   // Get files from "files" directory
@@ -330,6 +324,7 @@ async function fetchAndProcessCourseData() {
 
 async function handleLessonUpdate(owner, repo, course, data, lessonSlug) {
   // get course from API
+  console.log(data);
   const courseConfig = await getCourseData(course, 'draft');
   const ourLessonIndex = courseConfig.config.lessons.map(l => l.slug)
     .indexOf(lessonSlug);
@@ -445,6 +440,24 @@ async function handleContentImages(content, owner, repo, slug, parentPath) {
   return content;
 }
 
+function replaceImageUrls(content, files) {
+  const imageUrls = extractAllImageDetails(content);
+  let result = content;
+  imageUrls.forEach((image) => {
+    const dest = files.find(
+      (img) => image.imageUrl === 'files/' + img.name);
+    if (dest) {
+      result = result.replace(
+        `](${ image.imageUrl })`, `](${ dest.thumbUrl })`);
+    }
+  });
+  return result;
+}
+
+function trimContent(content) {
+  return content.split('\r\n').map(line => line.trim() + '\r');
+}
+
 export {
   makeUniqueSlug,
   handleCourseItemData,
@@ -457,5 +470,7 @@ export {
   getImageFiles,
   handleCourseItemFiles,
   extractAllImageDetails,
-  handleContentImages
+  handleContentImages,
+  replaceImageUrls,
+  trimContent
 };

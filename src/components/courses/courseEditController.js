@@ -12,7 +12,7 @@ import {
   updateCourseName,
   extractAllImageDetails,
   handleCourseItemData,
-  handleCourseItemFiles
+  handleCourseItemFiles, replaceImageUrls, trimContent
 } from './courseEditService.js';
 import {
   cacheConceptUsage,
@@ -55,7 +55,6 @@ const courseEditController = {
     let courseConfig = await getCourseData(course, 'draft');
     res.locals.course = course;
     res.locals.config = courseConfig;
-
     /**
      * Collect docs arrays from config under one object array.
      */
@@ -188,6 +187,8 @@ const courseEditController = {
     const generalContent = await getCourseGeneralContent(
       owner, repo, 'docs', 'draft');
     res.locals = { ...res.locals, ...generalContent };
+    res.locals.readme.content = trimContent(res.locals.readme.content);
+    res.locals.materials.content = trimContent(res.locals.materials.content);
     res.locals.partial = 'course-edit.general';
     next();
   },
@@ -222,6 +223,8 @@ const courseEditController = {
         );
         await handleCourseItemFiles(
           owner, repo, '', oldFiles, newFiles, 'docs');
+        cacheConceptUsage.del('conceptUsages+' + courseId);
+        cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
       }
     }
     return res.redirect('back');
@@ -237,9 +240,6 @@ const courseEditController = {
     res.locals.readme = await getFile(
       owner, repo, `concepts/${ req.params.slug }/README.md`, 'draft');
     if (res.locals.readme) { // existing concept
-      //remove extra whitespaces and replace line endings
-      /*res.locals.readme.content = res.locals.readme.content.split('\r\n')
-       .map(line => line.trim() + '\r');*/
       res.locals.readme.slug = req.params.slug;
       res.locals.readme.data = res.locals.config.config.concepts.find(
         c => c.slug === req.params.slug);
@@ -249,15 +249,9 @@ const courseEditController = {
       res.locals.files = await getImageFiles(
         owner, repo, `concepts/${ req.params.slug }/files`, 'draft');
       // replace relative image urls in markdown with absolute path
-      const imageUrls = extractAllImageDetails(res.locals.readme.content);
-      imageUrls.forEach((image) => {
-        const dest = res.locals.files.find(
-          (img) => image.imageUrl === 'files/' + img.name);
-        if (dest) {
-          res.locals.readme.content = res.locals.readme.content.replace(
-            `](${ image.imageUrl })`, `](${ dest.thumbUrl })`);
-        }
-      });
+      res.locals.readme.content = replaceImageUrls(
+        res.locals.readme.content, res.locals.files);
+      res.locals.readme.content = trimContent(res.locals.readme.content);
     } else { // create new
       res.locals.readme = {
         slug: 'new', data: {}, sources: {}
@@ -345,9 +339,17 @@ const courseEditController = {
     res.locals.allConcepts = await fetchAndProcessCourseData();
     if (folderContent && req.params.slug !== 'new') {
       // add config data
-
       res.locals.readme.data = res.locals.config.config.lessons.find(
         c => c.slug === req.params.slug);
+      // replace relative image urls in markdown with absolute path
+      res.locals.readme.content = replaceImageUrls(
+        res.locals.readme.content, res.locals.files);
+      res.locals.readme.content = trimContent(res.locals.readme.content);
+      // replace relative image urls in markdown with absolute path
+      res.locals.materials.content = replaceImageUrls(
+        res.locals.materials.content, res.locals.files);
+      res.locals.materials.content = trimContent(res.locals.materials.content);
+      // find used concepts and/or practices and add these data
       res.locals.readme.data.components = res.locals.readme.data.components.map(
         uuid => {
           const concept = res.locals.config.config.concepts.find(
@@ -385,7 +387,7 @@ const courseEditController = {
     if (!(courseId && lessonName)) {
       return res.redirect('back');
     } else {
-      const course = await apiRequests.getCourseById(data.courseId);
+      const course = await apiRequests.getCourseById(courseId);
       // if we have course
       if (course) {
         const [owner, repo] = course.repository.replace(
@@ -393,12 +395,13 @@ const courseEditController = {
           .split('/');
         const url = await handleLessonUpdate(
           owner, repo, course, req.body, lessonSlug);
-        cacheConceptUsage.del('conceptUsages+' + courseId);
-        console.log('🚨uued failid:', req.files);
         // add files
         await handleCourseItemFiles(owner, repo, lessonSlug,
           req.body['files[]'], req.files, 'lessons'
         );
+        // clear cache
+        cacheConceptUsage.del('conceptUsages+' + courseId);
+        cacheConfig.del(`getConfig:${ owner }/${ repo }+draft`);
         return res.redirect(url);
       }
       return res.redirect('back');
@@ -437,10 +440,6 @@ const courseEditController = {
     // Get main content
     res.locals.readme = await getFile(
       owner, repo, `practices/${ req.params.slug }/README.md`, 'draft');
-    //remove extra whitespaces and replace line endings
-    /*res.locals.readme.content = res.locals.readme.content.split('\r\n')
-     .map(line => line.trim() + '\r');*/
-    //console.log(res.locals.readme.content);
     if (res.locals.readme) { // existing practice
       res.locals.readme.slug = req.params.slug;
       res.locals.readme.data = res.locals.config.config.practices.find(
@@ -451,18 +450,12 @@ const courseEditController = {
       res.locals.files = await getImageFiles(
         owner, repo, `practices/${ req.params.slug }/files`, 'draft');
       // replace relative image urls in markdown with absolute path
-      const imageUrls = extractAllImageDetails(res.locals.readme.content);
-      imageUrls.forEach((image) => {
-        const dest = res.locals.files.find(
-          (img) => image.imageUrl === 'files/' + img.name);
-        if (dest) {
-          res.locals.readme.content = res.locals.readme.content.replace(
-            `](${ image.imageUrl })`, `](${ dest.thumbUrl })`);
-        }
-      });
+      res.locals.readme.content = replaceImageUrls(
+        res.locals.readme.content, res.locals.files);
+      res.locals.readme.content = trimContent(res.locals.readme.content);
     } else { // create new
       res.locals.readme = {
-        slug: 'new', data: {}, sources: {}
+        slug: 'new', data: {}
       };
     }
     res.locals.partial = 'course-edit.practices';
@@ -478,7 +471,7 @@ const courseEditController = {
       if (course) {
         const [owner, repo] = course.repository.replace(
           'https://github.com/', '').split('/');
-        // create new concept object
+        // create new practice object
         const practice = { name, content, slug, sha: sha.length ? sha : null };
         // update course config and concept data
         const updated = await handleCourseItemData(

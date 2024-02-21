@@ -22,13 +22,15 @@
         <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
         <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
         <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
+        <input type="hidden" id="readmeContent" name="readmeContent">
+        <input type="hidden" id="materialsContent" name="materialsContent">
         <label>Üldinfo</label>
-        <div id="editor1" class="bg-white text-system-black"></div>
+        <div id="editor1" class="bg-white text-system-black py-4 rounded-2xl"></div>
     </div>
 
     <div class="block mb-4">
         <label>Lisamaterjalid:</label>
-        <div id="editor2" class="bg-white text-system-black"></div>
+        <div id="editor2" class="bg-white text-system-black py-4 rounded-2xl"></div>
     </div>
     {{> files-input files=files prefix="docs"}}
 </form>
@@ -58,7 +60,8 @@
             }).then((res) => {
                 editor1.setMarkdown(res.data);
                 document.getElementById('readmeContent').value = res.data;
-                console.log(res.data);
+                isFormDirty = true;
+                document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
             }).catch((e) => {
                 console.log(e);
             });
@@ -79,22 +82,21 @@
             ['ul', 'ol', 'task', 'indent', 'outdent'],
             ['table', 'image', 'link'],
             ['code', 'codeblock'],
-            // Using Option: Customize the last button
+            // Customize the last button
             [
                 {
                     el: createOisButton(),
-                    //command: 'bold',
                     tooltip: 'Uuenda õisist'
                 }]
-        ],
-        events: {
+        ]
+        /*events: {
             change: () => {isFormDirty = true;}
-        }
+        }*/
     });
 
     const editor2 = new Editor({
         el: document.querySelector('#editor2'),
-        height: '500px',
+        height: 'auto',
         initialEditType: 'wysiwyg',
         initialValue: `{{#each materials.content}}{{this}}{{/each}}`
     });

@@ -13,6 +13,8 @@
                     <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
                     <input type="hidden" id="slug" value="{{readme.slug}}">
                     <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
+                    <input type="hidden" id="readmeContent" name="readmeContent">
+                    <input type="hidden" id="materialsContent" name="materialsContent">
                     <label class="text-lg font-bold mb-4">
                         Loengu nimetus
                         <input type="text" name="lessonName" class="input-single" required
@@ -20,7 +22,7 @@
                     </label>
                     <label class="text-lg font-bold mt-4">Loengu kirjeldus</label>
                     <div class="text-sm mb-4">Selle faili sisu kuvatakse õppekeskkonnas vastava loengu avalehel.</div>
-                    <div id="editor1" class="bg-white text-system-black"></div>
+                    <div id="editor1" class="bg-white text-system-black py-4 rounded-2xl"></div>
                 </div>
 
                 <div class="block mb-4">
@@ -67,7 +69,7 @@
                     <div class="text-sm mb-4">Siin saad viidata vastava loenguga seonduvatele lisamaterjalidele, mis
                         kuvatakse õppekeskkonnas "Loengu lisamaterjalid" lehel.
                     </div>
-                    <div id="editor2" class="bg-white text-system-black"></div>
+                    <div id="editor2" class="bg-white text-system-black py-4 rounded-2xl"></div>
                 </div>
                 <hr class="w-full py-4">
 
@@ -110,6 +112,8 @@
         conceptList.insertBefore(newLi, penultimateLi);
         sel.options[sel.selectedIndex].disabled = true;
         sel.selectedIndex = -1;
+        isFormDirty = true;
+        document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
     }
 
     function deleteConcept(el) {
@@ -121,6 +125,8 @@
 
         li.remove(); // Remove the list item
         optionToEnable.disabled = false; // Re-enable the option in the select element
+        isFormDirty = true;
+        document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
     }
 
     function deleteLesson() {
@@ -131,7 +137,7 @@
                 {
                     method: 'DELETE'
                 }
-        ).then((data) => {
+        ).then(() => {
             document.getElementById('modal').style.display = 'none';
             history.back();
         });
@@ -146,5 +152,4 @@
         };
         document.getElementById('delOK').onclick = deleteLesson;
     };
-
 </script>

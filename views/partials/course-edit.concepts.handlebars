@@ -36,12 +36,13 @@
                 <input type="hidden" name="sha" value="{{readme.sha}}">
                 <input type="hidden" name="slug" id="slug" value="{{readme.slug}}">
                 <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
+                <input type="hidden" name="content" id="content">
                 <label for="name">Sisuteema nimetus</label>
                 <input type="text" name="name" id="name" value="{{readme.data.name}}"
                        class="input-single" required>
-                <div class="block my-4 border-b">
+                <div class="block my-4">
                     <label>Sisuteema kirjeldus:</label>
-                    <div id="editor" class="bg-white text-system-black"></div>
+                    <div id="editor" class="bg-white text-system-black py-4 rounded-2xl"></div>
                 </div>
                 {{> files-input files=files prefix=(concatActivePath "concepts" readme.slug) }}
             </div>
