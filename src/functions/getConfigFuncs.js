@@ -205,13 +205,13 @@ const getConfig = async (selectedCourse, refBranch) => {
   }
 
   /** Convert all lessons component array elements to lowercase */
-  configObj.lessons.forEach((lesson, indexLesson) => {
-    if (Array.isArray(lesson.components)) {
-      const arr = lesson.components;
-      configObj.lessons[indexLesson].components = arr.map(
-        (item) => item.toLowerCase());
-    }
-  });
+  /*configObj.lessons.forEach((lesson, indexLesson) => {
+   if (Array.isArray(lesson.components)) {
+   const arr = lesson.components;
+   configObj.lessons[indexLesson].components = arr.map(
+   (item) => item.toLowerCase());
+   }
+   });*/
   // console.log('configObj.lessons[0].components10:',
   // configObj.lessons[0].components);
 

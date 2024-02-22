@@ -249,22 +249,23 @@ const apiRequests = {
     } = res.locals;
 
     const routePath = `${ req.url }+${ refBranch }+components`;
-    const routePathSources = `${ req.url }+${ refBranch }+sources`;
+    //const routePathSources = `${ req.url }+${ refBranch }+sources`;
 
     let components;
     let sources;
     let componentsRaw;
-    let sourcesRaw;
+    //let sourcesRaw;
 
     if (path.type === 'concept') {
+      //console.log(path);
       if (!cachePageContent.get(routePath)) {
         console.log(`❌❌ concept components IS NOT from cache: ${ routePath }`);
-        console.log(
-          `❌❌ concept sources IS NOT from cache: ${ routePathSources }`);
+        //console.log(`❌❌ concept sources IS NOT from cache: ${
+        // routePathSources }`);
 
         try {
           componentsRaw = await axios.get(
-            requestConcepts(coursePathInGithub, `${ path.componentSlug }`,
+            requestConcepts(path.componentRepo, `${ path.componentSlug }`,
               refBranch
             ), authToken).catch(() => {
             console.log('unable to fetch ' + path.componentSlug);
@@ -273,30 +274,30 @@ const apiRequests = {
           console.log('Unable to get componentsRaw');
           console.error(error);
         }
-        try {
-          sourcesRaw = await axios.get(
-            requestSources(coursePathInGithub, `${ path.componentSlug }`,
-              refBranch
-            ), authToken).catch(() => {
-            console.log('unable to fetch ' + path.componentSlug);
-          });
-        } catch (error) {
-          console.log('Unable to get sourcesRaw');
-          console.error(error);
-        }
+        /*try {
+         sourcesRaw = await axios.get(
+         requestSources(coursePathInGithub, `${ path.componentSlug }`,
+         refBranch
+         ), authToken).catch(() => {
+         console.log('unable to fetch ' + path.componentSlug);
+         });
+         } catch (error) {
+         console.log('Unable to get sourcesRaw');
+         console.error(error);
+         }*/
 
-        await axios.all([componentsRaw, sourcesRaw])
+        await axios.all([componentsRaw])
           .then(axios.spread((...responses) => {
-            [components, sources] = responses;
+            [components] = responses;
             cachePageContent.set(routePath, components);
-            cachePageContent.set(routePathSources, sources);
+            //cachePageContent.set(routePathSources, sources);
           }))
           .catch((error) => error);
       } else {
         console.log(`✅✅ concept components FROM CACHE: ${ routePath }`);
-        console.log(`✅✅ concept sources FROM CACHE: ${ routePathSources }`);
+        //console.log(`✅✅ concept sources FROM CACHE: ${ routePathSources }`);
         components = cachePageContent.get(routePath);
-        sources = cachePageContent.get(routePathSources);
+        //sources = cachePageContent.get(routePathSources);
       }
     }
 

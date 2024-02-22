@@ -25,6 +25,7 @@ import { getCombinedUserData } from '../../functions/githubUsersFuncs.js';
 import { axios } from '../../setup/setupGithub.js';
 import * as cheerio from 'cheerio';
 import { createConfig } from '../../functions/getConfigFuncs.js';
+import { getAllConcepts } from './courseEditService.js';
 
 /** responseAction function defines what to do after info about courses and current course page is received.
  * This step gets the data from GitHub, by doing Axios requests via
@@ -812,9 +813,9 @@ const allCoursesController = {
     let componentUUId = '';
     let componentName = '';
     let componentType = '';
+    let componentRepo = '';
+    let componentPath = '';
 
-    //console.log(courseConfig.config);
-    //return res.send(courseConfig.config);
     courseConfig.config?.docs?.forEach((x) => {
       if (x.slug === contentSlug) {
         contentName = x.name;
@@ -843,25 +844,62 @@ const allCoursesController = {
      * componentUUID and set componentType.
      */
 
-    courseConfig.config?.concepts?.forEach((x) => {
-      if (x.slug === componentSlug) {
-        const lesson = courseConfig.config.lessons?.find(
-          (les) => les.components.includes(componentSlug));
-        // console.log('lesson1:', lesson);
+      // meil on teada 'loeng_01' ja 'protsessorid'
+      // 1. leia loeng, mille slug=loeng_01
+      // 2. leia sealt see comp, mille slug=protsessorid
+    const lesson = courseConfig.config?.lessons.find(
+        (l) => l.slug === contentSlug);
+    if (lesson) {
+      const comp = lesson.components.find(
+        (comp) => comp.slug === componentSlug);
+      if (comp) {
+        componentName = comp.name;
+        componentRepo = comp.repo;
+        componentPath = comp.path;
+        componentUUId = comp.uuid;
+        componentType = 'concept';
+        githubRequest = 'lessonComponentsService';
+      } else {
+        courseConfig.config?.concepts?.forEach((x) => {
+          if (x.slug === componentSlug) {
+            const lesson = courseConfig.config.lessons?.find(
+              (les) => les.components.find(
+                (comp) => comp.slug === componentSlug));
+            //console.log('lesson1:', lesson);
+            //console.log('comp:', lesson);
 
-        if (lesson && lesson.slug === contentSlug) {
-          componentName = x.name;
-          componentUUId = x.uuid;
-          componentType = 'concept';
-          githubRequest = 'lessonComponentsService';
-          // console.log('Slug found in config.concepts');
-        }
+            if (lesson && lesson.slug === contentSlug) {
+              componentName = x.name;
+              componentUUId = x.uuid;
+              componentType = 'concept';
+              githubRequest = 'lessonComponentsService';
+              //console.log('Slug found in config.concepts');
+            }
+          }
+        });
       }
-    });
+    }
+
+    /*courseConfig.config?.concepts?.forEach((x) => {
+     if (x.slug === componentSlug) {
+     const lesson = courseConfig.config.lessons?.find(
+     (les) => les.components.find((comp) => comp.slug === componentSlug));
+     //console.log('lesson1:', lesson);
+     //console.log('comp:', lesson);
+
+     if (lesson && lesson.slug === contentSlug) {
+     componentName = x.name;
+     componentUUId = x.uuid;
+     componentType = 'concept';
+     githubRequest = 'lessonComponentsService';
+     //console.log('Slug found in config.concepts');
+     }
+     }
+     });*/
     courseConfig.config?.practices?.forEach((x) => {
       if (x.slug === componentSlug) {
         const lesson = courseConfig.config?.lessons?.find(
-          (les) => les.components.includes(componentSlug));
+          (les) => les.components.find((comp) => comp.slug === componentSlug));
         // console.log('lesson1:', lesson);
 
         if (lesson && lesson.slug === contentSlug) {
@@ -874,7 +912,8 @@ const allCoursesController = {
       }
     });
     courseConfig.config?.lessons?.forEach((x) => {
-      if (x.additionalMaterials[0].slug === componentSlug && x.slug ===
+      if (x.additionalMaterials && x.additionalMaterials.length &&
+        x.additionalMaterials[0].slug === componentSlug && x.slug ===
         contentSlug) {
         componentName = x.additionalMaterials[0].name;
         componentType = 'docs';
@@ -885,15 +924,15 @@ const allCoursesController = {
 
     /** You can check all relevant values about current endpoint:
      */
-    // console.log('courseSlug1:', courseSlug);
-    // console.log('course.courseName1:', course.courseName);
-    // console.log('contentSlug1:', contentSlug);
-    // console.log('contentName1:', contentName);
-    // console.log('contentUUID1:', contentUUID);
-    // console.log('componentSlug1:', componentSlug);
-    // console.log('componentName1:', componentName);
-    //console.log('componentUUID1:', componentUUId);
-    // console.log('githubRequest1:', githubRequest);
+    //console.log('courseSlug1:', courseSlug);
+    console.log('course.courseName1:', course.courseName);
+    console.log('contentSlug1:', contentSlug);
+    console.log('contentName1:', contentName);
+    //console.log('contentUUID1:', contentUUID);
+    console.log('componentSlug1:', componentSlug);
+    console.log('componentName1:', componentName);
+    console.log('componentUUID1:', componentUUId);
+    console.log('githubRequest1:', githubRequest);
 
     /**
      * IF contentSlug exists, but contentName is NOT returned from config file.
@@ -951,6 +990,8 @@ const allCoursesController = {
       courseId,
       contentSlug,
       componentSlug,
+      componentRepo,
+      componentPath,
       refBranch: 'master',
       contentUUId,
       componentUUId,

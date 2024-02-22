@@ -41,10 +41,10 @@ const setCourseButtonPaths = (config) => {
       // *** Comment out x.components.map() if you don't want to show buttons on
       // Components pages (sisulehed ja praktikumid) ***
       x.components.map((y) => backAndForwardPaths.push({
-        path: `${ x.slug }/${ y }`
+        path: `${ x.slug }/${ y.slug }`
       }));
       x.components.map((y) => markAsDonePaths.push({
-        path: `${ x.slug }/${ y }`
+        path: `${ x.slug }/${ y.slug }`
       }));
       // *** Comment out x.additionalMaterials.map() if you don't want to show
       // buttons on Aine Lisamaterjalid pages ***

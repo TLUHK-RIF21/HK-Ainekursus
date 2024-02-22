@@ -69,23 +69,27 @@
 
                         <!-- Themes links -->
                         {{#each this.components}}
-                            <div class="tab-content flex gap-2 {{#if_equal (concatActivePath ../this.slug this)
+                            <div class="tab-content flex gap-2 {{#if_equal (concatActivePath ../this.slug this.slug)
                                                                            ../../path.fullPath }}active-tab-content menu-card{{/if_equal }}">
                                 <a class="flex flex-row justify-between grow py-3 !no-underline"
-                                   href="/course/{{../../path.courseId}}/{{../this.slug}}/{{this}}?ref={{../../path.refBranch}}
+                                   href="/course/{{../../path.courseId}}/{{../this.slug}}/{{this.slug}}?ref={{../../path.refBranch}}
                                 ">
                                 <div class="flex gap-2">
                                     <span class="material-symbols-outlined">
-                                        {{{showComponentType this ../../course.config.concepts
-                                                             ../../course.config.practices }}}
+                                        {{#if_equal this.path 'concepts'}}
+                                            sticky_note_2
+                                        {{else}}
+                                            {{#if_equal this.path 'practices'}}
+                                                build
+                                            {{else}}
+                                                attach_file
+                                            {{/if_equal}}
+                                        {{/if_equal}}
                                     </span>
-                                    {{{showComponentName this ../../course.config.concepts
-                                                         ../../course.config.practices}}}
+                                    {{this.name}}
                                 </div>
                                 {{#if_not_equal ../../user.team.slug 'teachers' }}
-                                    {{#ifInMarkedComponents
-                                            (showComponentUUID ../this ../../../concepts ../../../practices)
-                                            ../../../markedAsDoneComponentsArr }}
+                                    {{#ifInMarkedComponents this.uuid ../../../markedAsDoneComponentsArr }}
                                         <span class="material-symbols-outlined">task_alt</span>
                                     {{else }}
                                         <span class="material-symbols-outlined">radio_button_unchecked</span>
