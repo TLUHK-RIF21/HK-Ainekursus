@@ -31,7 +31,10 @@
                         {{#each readme.data.components}}
                             <li class="ml-4 pb-4 flex items-center justify-between">
                                 <input type="hidden" name="components[]" value="{{this.uuid}}">
-                                <a href="/show/{{this.uuid}}">{{this.name}}</a>
+                                <a href="/show/{{this.uuid}}" class="flex items-center">
+                                    <i class="material-symbols-outlined mr-2" aria-hidden="true">sticky_note_2</i>
+                                    {{this.name}}
+                                </a>
                                 <button class="btn btn-primary ml-2 self-end p-2 min-h-0 min-w-0"
                                         title="Eemalda sisuteema"
                                         type="button" onclick="deleteConcept(this)">
@@ -39,7 +42,7 @@
                                 </button>
                             </li>
                         {{/each}}
-                        <li class="flex w-100 items-end justify-between mb-2 border-t mt-4 pt-4">
+                        <li class="flex w-100 items-end mb-2 border-t mt-4 pt-4">
                             <div>
                                 <label class="text-md font-bold mb-4" for="concepts">Lisa sisuteema:</label>
                                 <select name="linkConcept" id="concepts" class="input-single">
@@ -54,7 +57,7 @@
                                     {{/each}}
                                 </select>
                             </div>
-                            <button class="btn btn-primary" title="Lisa uus sisuteema" type="button"
+                            <button class="btn btn-primary ml-2" title="Lisa uus sisuteema" type="button"
                                     onclick="addConcept()">
                                 <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
                             </button>
@@ -106,7 +109,10 @@
         newLi.innerHTML = `
         <input type="hidden" name="components[]" value="${ document.getElementById('concepts').value }">
             <a href="/show/${ document.getElementById(
-                'concepts').value }">${ sel.options[sel.selectedIndex].dataset.name }</a>
+                'concepts').value }" class="flex items-center">
+                <i class="material-symbols-outlined mr-2" aria-hidden="true">sticky_note_2</i>
+                ${ sel.options[sel.selectedIndex].dataset.name }
+            </a>
         <button class="btn btn-primary ml-2 self-end p-2 min-h-0 min-w-0" title="Eemalda sisuteema" type="button" onclick="deleteConcept(this)">
             <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
         </button>`;

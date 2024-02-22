@@ -361,15 +361,17 @@ const courseEditController = {
               practice.type = 'practices';
               return practice;
             } else {
-              // check external concepts
-              return res.locals.allConcepts.find(c => c.uuid === uuid);
+              // check for external concepts
+              return {
+                ...res.locals.allConcepts.find(
+                  c => c.uuid === uuid), ...{ type: 'concepts', repo: repo }
+              };
             }
           } else {
             concept.type = 'concepts';
             return concept;
           }
         });
-
     } else { // new lesson
       res.locals.readme = {
         slug: '', data: {}, sources: {}
