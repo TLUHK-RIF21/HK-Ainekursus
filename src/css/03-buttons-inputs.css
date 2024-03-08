@@ -7,7 +7,11 @@
 }
 
 .btn-danger {
-    @apply text-system-white bg-system-red-tlu active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    @apply text-system-white bg-danger active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.btn-success {
+    @apply text-system-white bg-success active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
 }
 
 .btn-secondary {

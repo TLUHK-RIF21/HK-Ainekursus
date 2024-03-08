@@ -949,7 +949,8 @@ body{
   background-color: var(--button-active, #4d2e6b);
 }
 .btn-danger{
-  background-color: var(--system-red-tlu, #b71234);
+  --tw-bg-opacity: 1;
+  background-color: rgb(128 0 32 / var(--tw-bg-opacity));
   color: var(--system-white, #ffffff);
 }
 .btn-danger:focus-visible{
@@ -960,6 +961,21 @@ body{
   outline-color: var(--system-focus, #EB6424);
 }
 .btn-danger:active{
+  background-color: var(--button-active, #4d2e6b);
+}
+.btn-success{
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 128 0 / var(--tw-bg-opacity));
+  color: var(--system-white, #ffffff);
+}
+.btn-success:focus-visible{
+  border-style: solid;
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 2px;
+  outline-color: var(--system-focus, #EB6424);
+}
+.btn-success:active{
   background-color: var(--button-active, #4d2e6b);
 }
 .btn-secondary{
@@ -1773,35 +1789,8 @@ input:checked ~ .tab-content {
         background-size: 45%;
     }
 }
-.TinyMDE {
-    height: auto;
-    min-height: 300px;
-    border-radius: 0 0 32px 32px;
-    border-width: 2px;
-    border-style: solid;
-    border-color: var(--system-primary, #80609f);
-    border-top: none;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    color: var(--primary-900, #331a4d);
-}
-.TMCommandBar {
-    -ms-overflow-style: none;
-    border-radius: 32px 32px 0 0;
-    border-width: 2px;
-    border-style: solid;
-    border-color: var(--system-primary, #80609f);
-    border-bottom: none;
-    padding: 1.5rem;
-    color: var(--primary-900, #331a4d);
-    box-sizing: content-box;
-    display: flex;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-         user-select: none;
+.toastui-editor-contents {
+    font-size: 16px !important;
 }
 .tab-btn{
   cursor: pointer;
@@ -2538,6 +2527,10 @@ input:checked ~ .tab-content {
 }
 .text-primary-100{
   color: var(--primary-100, #f2eff5);
+}
+.text-success{
+  --tw-text-opacity: 1;
+  color: rgb(0 128 0 / var(--tw-text-opacity));
 }
 .text-system-black{
   color: var(--system-black, #000000);

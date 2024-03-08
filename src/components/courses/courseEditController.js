@@ -75,6 +75,8 @@ const courseEditController = {
     let contentUUId = '';
     let componentUUId = '';
     let componentName = '';
+    let componentRepo = '';
+    let componentPath = '';
     let componentType = '';
 
     courseConfig.config?.docs?.forEach((x) => {
@@ -99,27 +101,59 @@ const courseEditController = {
       }
     });
 
+    const lesson = courseConfig.config?.lessons.find(
+      (l) => l.slug === contentSlug);
+    if (lesson) {
+      const comp = lesson.components.find(
+        (comp) => comp.slug === componentSlug);
+      if (comp) {
+        componentName = comp.name;
+        componentRepo = comp.repo;
+        componentPath = comp.path;
+        componentUUId = comp.uuid;
+        componentType = 'concept';
+        githubRequest = 'lessonComponentsService';
+      } else {
+        courseConfig.config?.concepts?.forEach((x) => {
+          if (x.slug === componentSlug) {
+            const lesson = courseConfig.config.lessons?.find(
+              (les) => les.components.find(
+                (comp) => comp.slug === componentSlug));
+            //console.log('lesson1:', lesson);
+            //console.log('comp:', lesson);
+
+            if (lesson && lesson.slug === contentSlug) {
+              componentName = x.name;
+              componentUUId = x.uuid;
+              componentType = 'concept';
+              githubRequest = 'lessonComponentsService';
+              //console.log('Slug found in config.concepts');
+            }
+          }
+        });
+      }
+    }
     /**
      * Check for matching slug from concepts, practices and lessons
      * additionalMaterials arrays. If a match, get the componentName,
      * componentUUID and set componentType.
      */
 
-    courseConfig.config?.concepts?.forEach((x) => {
-      if (x.slug === componentSlug) {
-        const lesson = courseConfig.config.lessons?.find(
-          (les) => les.components.includes(componentSlug));
-        // console.log('lesson1:', lesson);
+    /*courseConfig.config?.concepts?.forEach((x) => {
+     if (x.slug === componentSlug) {
+     const lesson = courseConfig.config.lessons?.find(
+     (les) => les.components.includes(componentSlug));
+     // console.log('lesson1:', lesson);
 
-        if (lesson && lesson.slug === contentSlug) {
-          componentName = x.name;
-          componentUUId = x.uuid;
-          componentType = 'concept';
-          githubRequest = 'lessonComponentsService';
-          // console.log('Slug found in config.concepts');
-        }
-      }
-    });
+     if (lesson && lesson.slug === contentSlug) {
+     componentName = x.name;
+     componentUUId = x.uuid;
+     componentType = 'concept';
+     githubRequest = 'lessonComponentsService';
+     // console.log('Slug found in config.concepts');
+     }
+     }
+     });*/
     courseConfig.config?.practices?.forEach((x) => {
       if (x.slug === componentSlug) {
         const lesson = courseConfig.config?.lessons?.find(

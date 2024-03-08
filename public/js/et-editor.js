@@ -2,7 +2,7 @@ const Editor = toastui.Editor;
 
 Editor.setLanguage('et-EE', {
   Markdown: 'Markdown',
-  WYSIWYG: 'WYSIWYG',
+  WYSIWYG: 'Visuaalne',
   Write: 'Kirjuta',
   Preview: 'Eelvaade',
   Headings: 'Pealkirjad',

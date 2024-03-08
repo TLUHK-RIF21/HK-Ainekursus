@@ -2,7 +2,6 @@
 .
 ├── docs/
 │   ├── README.md
-│   ├── lisamaterjalid.md
 │   ├── files/
 │   │   └── somefile.pdf
 ├── concepts/

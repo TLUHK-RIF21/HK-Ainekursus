@@ -925,14 +925,14 @@ const allCoursesController = {
     /** You can check all relevant values about current endpoint:
      */
     //console.log('courseSlug1:', courseSlug);
-    console.log('course.courseName1:', course.courseName);
-    console.log('contentSlug1:', contentSlug);
-    console.log('contentName1:', contentName);
+    //console.log('course.courseName1:', course.courseName);
+    //console.log('contentSlug1:', contentSlug);
+    //console.log('contentName1:', contentName);
     //console.log('contentUUID1:', contentUUID);
-    console.log('componentSlug1:', componentSlug);
-    console.log('componentName1:', componentName);
-    console.log('componentUUID1:', componentUUId);
-    console.log('githubRequest1:', githubRequest);
+    //console.log('componentSlug1:', componentSlug);
+    //console.log('componentName1:', componentName);
+    //console.log('componentUUID1:', componentUUId);
+    //console.log('githubRequest1:', githubRequest);
 
     /**
      * IF contentSlug exists, but contentName is NOT returned from config file.
@@ -953,9 +953,9 @@ const allCoursesController = {
     }
 
     /** Function to set correct fullPath, depending on if componentSlug and/or contentSlug exist.
-     * This defines correct fullPath, depending how deep into subpages you are.
-     * This is used to assign correct a href-s for sidebar elements and for
-     * Back/Forward buttons.
+     * This defines correct fullPath, depending on how deep into subpages you
+     * are. This is used to assign correct a href-s for sidebar elements and
+     * for Back/Forward buttons.
      */
     function getFullPath() {
       if (componentSlug) {
@@ -968,7 +968,7 @@ const allCoursesController = {
     }
 
     /** Function to set correct componentType, depending on if componentSlug and/or contentSlug exist.
-     * This defines correct componentType, depeonding how deep into subpages
+     * This defines correct componentType, depending on how deep into subpages
      * you are. This is used to assign correct sidebar icons.
      */
     function getType() {
