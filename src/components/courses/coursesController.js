@@ -1,5 +1,4 @@
 import 'core-js/actual/array/group-by.js';
-
 import { performance } from 'perf_hooks';
 import markdown from '../../setup/setupMarkdown.js';
 import base64 from 'base-64';
@@ -19,13 +18,12 @@ import {
   getMarkedAsDoneComponents
 } from '../../functions/getListOfDoneComponentUUIDs.js';
 import { getFolder } from '../../functions/githubFileFunctions.js';
-import { cacheConcepts, cacheLessons } from '../../setup/setupCache.js';
+import { cacheLessons } from '../../setup/setupCache.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getCombinedUserData } from '../../functions/githubUsersFuncs.js';
 import { axios } from '../../setup/setupGithub.js';
 import * as cheerio from 'cheerio';
 import { createConfig } from '../../functions/getConfigFuncs.js';
-import { getAllConcepts } from './courseEditService.js';
 
 /** responseAction function defines what to do after info about courses and current course page is received.
  * This step gets the data from GitHub, by doing Axios requests via
@@ -37,7 +35,6 @@ import { getAllConcepts } from './courseEditService.js';
 const responseAction = async (req, res, next) => {
   const { githubRequest } = res.locals;
   let apiResponse;
-  // if (apiRequests.hasOwnProperty(githubRequest)) {
   if (Object.prototype.hasOwnProperty.call(apiRequests, githubRequest)) {
     let func;
 
@@ -368,7 +365,7 @@ const allCoursesController = {
        * Filter allCoursesActive where the user is logged-in user
        */
       allCourses = allCourses?.filter(
-        (course) => course?.students.some(t => t.id === req.user.userId));
+        (course) => course.students?.some(t => t.id === req.user.userId));
 
       // Create an object to store the grouped data
       const allCoursesGroupedByTeacher = {};
@@ -880,22 +877,6 @@ const allCoursesController = {
       }
     }
 
-    /*courseConfig.config?.concepts?.forEach((x) => {
-     if (x.slug === componentSlug) {
-     const lesson = courseConfig.config.lessons?.find(
-     (les) => les.components.find((comp) => comp.slug === componentSlug));
-     //console.log('lesson1:', lesson);
-     //console.log('comp:', lesson);
-
-     if (lesson && lesson.slug === contentSlug) {
-     componentName = x.name;
-     componentUUId = x.uuid;
-     componentType = 'concept';
-     githubRequest = 'lessonComponentsService';
-     //console.log('Slug found in config.concepts');
-     }
-     }
-     });*/
     courseConfig.config?.practices?.forEach((x) => {
       if (x.slug === componentSlug) {
         const lesson = courseConfig.config?.lessons?.find(
@@ -912,6 +893,8 @@ const allCoursesController = {
       }
     });
     courseConfig.config?.lessons?.forEach((x) => {
+      console.log(
+        x.additionalMaterials, componentSlug, x.slug, contentSlug);
       if (x.additionalMaterials && x.additionalMaterials.length &&
         x.additionalMaterials[0].slug === componentSlug && x.slug ===
         contentSlug) {

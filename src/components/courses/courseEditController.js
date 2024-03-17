@@ -384,7 +384,7 @@ const courseEditController = {
         res.locals.materials.content, res.locals.files);
       res.locals.materials.content = trimContent(res.locals.materials.content);
       // find used concepts and/or practices and add these data
-      res.locals.readme.data.components = res.locals.readme.data.components.map(
+      res.locals.readme.data.components = res.locals.readme.data.components?.map(
         uuid => {
           const concept = res.locals.config.config.concepts.find(
             concept => concept.uuid === uuid);

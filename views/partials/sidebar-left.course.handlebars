@@ -100,7 +100,7 @@
                         {{/each}}
 
                         <!-- Lesson extra material -->
-                        {{#each this.config.config.additionalMaterials}}
+                        {{#each this.additionalMaterials}}
                             <div class="tab-content flex gap-2 {{#if_equal (concatActivePath ../this.slug this.slug)
                                                                            ../../path.fullPath }}active-tab-content{{/if_equal }}">
                                 <a class="py-3 w-full !no-underline"
