@@ -144,3 +144,107 @@
     </div>
 
 </div>
+<script src="/js/h5p/jquery.js"></script>
+<script src="/js/h5p/h5p.js"></script>
+<script src="/js/h5p/h5p-event-dispatcher.js"></script>
+<script src="/js/h5p/h5p-x-api-event.js"></script>
+<script src="/js/h5p/h5p-x-api.js"></script>
+<script src="/js/h5p/h5p-content-type.js"></script>
+<script src="/js/h5p/h5p-confirmation-dialog.js"></script>
+<script src="/js/h5p/h5p-action-bar.js"></script>
+<script src="/js/h5p/request-queue.js"></script>
+<script src="/js/h5p/h5p-tooltip.js"></script>
+<!--script src="https://h5p.org/sites/all/modules/h5p/library/js/jquery.js"></script>
+<script src="https://h5p.org/sites/all/modules/h5p/library/js/h5p.js"></script>
+<script src="https://h5p.org/sites/all/modules/h5p/library/js/h5p-x-api.js"></script!-->
+<script>
+    var H5PIntegration = {
+        'baseUrl': 'http://localhost:3000', // No trailing slash
+        'url': '/',          // Relative to web root
+        'postUserStatistics': true,         // Only if user is logged in
+        //'ajaxPath': '/path/to/h5p-ajax',     // Only used by older Content Types
+        'ajax': {
+            // Where to post user results
+            'setFinished': '/interactive-contents/123/results/new',
+            // Words beginning with : are placeholders
+            'contentUserData': '/interactive-contents/:contentId/user-data?data_type=:dataType&subContentId=:subContentId'
+        },
+        'saveFreq': 30, // How often current content state should be saved. false to disable.
+        'user': { // Only if logged in !
+            'name': 'User Name',
+            'mail': 'user@mysite.com'
+        },
+        'siteUrl': 'http://localhost:3000', // Only if NOT logged in!
+        'l10n': { // Text string translations
+            'H5P': {
+                'fullscreen': 'Fullscreen',
+                'disableFullscreen': 'Disable fullscreen',
+                'download': 'Download',
+                'copyrights': 'Rights of use',
+                'embed': 'Embed',
+                'size': 'Size',
+                'showAdvanced': 'Show advanced',
+                'hideAdvanced': 'Hide advanced',
+                'advancedHelp': 'Include this script on your website if you want dynamic sizing of the embedded content:',
+                'copyrightInformation': 'Rights of use',
+                'close': 'Close',
+                'title': 'Title',
+                'author': 'Author',
+                'year': 'Year',
+                'source': 'Source',
+                'license': 'License',
+                'thumbnail': 'Thumbnail',
+                'noCopyrights': 'No copyright information available for this content.',
+                'downloadDescription': 'Download this content as a H5P file.',
+                'copyrightsDescription': 'View copyright information for this content.',
+                'embedDescription': 'View the embed code for this content.',
+                'h5pDescription': 'Visit H5P.org to check out more cool content.',
+                'contentChanged': 'This content has changed since you last used it.',
+                'startingOver': 'You\'ll be starting over.',
+                'by': 'by',
+                'showMore': 'Show more',
+                'showLess': 'Show less',
+                'subLevel': 'Sublevel'
+            }
+        },
+        'loadedJs': [], // Only required when Embed Type = div
+        'loadedCss': [],
+        'core': { // Only required when Embed Type = iframe
+            'scripts': ['jquery.js', 'h5p.js'],
+            'styles': []
+        }
+    };
+    window.addEventListener('message', function (event) {
+        // Make sure the message is from the iframe
+
+        if (event.data.source == 'react-devtools-content-script') return;
+
+        // The 'data' property contains the message
+        console.log('Received message:', event);
+    });
+
+    /*var h5p = new H5P.Player({
+        id: 207,
+        frame: document.querySelector('iframe')
+    });
+
+    h5p.on('ready', function () {
+        var score = h5p.getScore();
+        console.log('scoor', score);
+        // Kuva skoor oma veebilehel
+    });*/
+    console.log(H5P);
+    H5P.communicator.on('message', (m) => {
+        console.log(m);
+    });
+    H5P.externalDispatcher.on('xAPI', function (event) {
+        console.log(event.data);
+        // Check if it was a completed event:
+        if (event.data.statement.verb.display['en-US'] === 'completed') {
+            // Extract the score:
+            var score = event.data.statement.result.score.raw;
+            console.log('Score:', score);
+            // TODO: Send 'score' to your server and save it to your database
+        }
+    });
+</script>
