@@ -21,7 +21,12 @@
             </li>
         {{/each}}
     </ul>
+    <ul class="added-files flex-col column justify-center" id="fileList">
 
+    </ul>
+    <button type="button" id="removeButton" class="btn btn-danger py-2 min-h-0 min-w-0 mt-4 hidden" disabled>Eemalda
+        valitud
+    </button>
     <div class="mt-4 max-w-xs">
         <label for="fileInput" class="mb-1 block font-medium text-gray-700">Lisa fail</label>
         <input id="fileInput" type="file" name="{{prefix}}/files[]" multiple placeholder="vali fail"
@@ -29,6 +34,57 @@
     </div>
 </div>
 <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const removeButton = document.getElementById('removeButton');
+
+    fileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        for (const file of files) {
+            const listItem = document.createElement('li');
+            listItem.classList.add('cursor-pointer', 'flex', 'flex-wrap', 'align-center', 'gap-4');
+            listItem.innerHTML = `<span class="material-symbols-outlined">radio_button_unchecked</span>` + file.name;
+            fileList.appendChild(listItem);
+            newFiles.push(file);
+        }
+        if (newFiles.length > 0) {
+            removeButton.classList.remove('hidden');
+        }
+    });
+
+    removeButton.addEventListener('click', () => {
+        const selectedFile = fileList.querySelector('.selected');
+        if (selectedFile) {
+            fileList.removeChild(selectedFile);
+            const fileName = selectedFile.childNodes[1].nodeValue;
+            newFiles = newFiles.filter(f => f.name !== fileName);
+            const selectedCount = fileList.querySelectorAll('.selected').length;
+            removeButton.disabled = selectedCount === 0;
+        }
+        if (newFiles.length === 0)
+            removeButton.classList.add('hidden');
+
+    });
+
+    fileList.addEventListener('click', (event) => {
+        let clickedItem = event.target;
+        if (clickedItem.tagName === 'LI' || clickedItem.tagName === 'SPAN') {
+            if (clickedItem.tagName === 'SPAN') {
+                clickedItem = clickedItem.parentElement;
+            }
+            clickedItem.classList.toggle('selected');
+            const span = clickedItem.childNodes[0];
+            if (span.textContent === 'radio_button_checked') {
+                span.textContent = 'radio_button_unchecked';
+            } else {
+                span.textContent = 'radio_button_checked';
+            }
+            // todo get selected li count
+            const selectedCount = fileList.querySelectorAll('.selected').length;
+            removeButton.disabled = selectedCount === 0;
+        }
+    });
+
     function removeImage(el) {
         el.closest('li').remove();
         isFormDirty = true;

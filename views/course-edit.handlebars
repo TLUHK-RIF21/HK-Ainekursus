@@ -50,13 +50,15 @@
 </div>
 <script>
     const form = document.getElementById('courseEditForm');
+    let newFiles = [];
+
     form.addEventListener('input', () => {
         isFormDirty = true;
         document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
     });
 
     function submitEditForm() {
-        window.removeEventListener('beforeunload', beforeUnloadHandler); // Remove the listener
+        window.removeEventListener('beforeunload', beforeUnloadHandler);
         // concept and practice pages use one editor
         const editorElement = document.getElementById('editor');
         const contentElement = document.getElementById('content');
@@ -73,6 +75,18 @@
         }
         if (editor2Element && content2Element) {
             content2Element.value = editor2.getMarkdown();
+        }
+        if (newFiles.length > 0) {
+            // Create a new FormData object
+            const formData = new FormData(form);
+            const element = document.getElementById('fileInput');
+            const name = element.name;
+            // Deletes an existing form data entry.
+            formData.delete(name);
+            // Append new data to the form
+            newFiles.forEach(file => {
+                formData.append(name, file);
+            });
         }
         form.submit();
     }

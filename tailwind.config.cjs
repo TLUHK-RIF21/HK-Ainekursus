@@ -26,6 +26,10 @@ module.exports = {
       fontFamily: {
         sans: ['Montserrat', 'sans-serif'],
         serif: ['Roboto', 'serif']
+      },
+      colors: {
+        success: '#00b300',
+        danger: '#800020'
       }
     },
     screens: {
