@@ -4,9 +4,7 @@ import {
 } from '../../functions/githubFileFunctions.js';
 import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  cacheConcepts, cacheConfig, cacheTeamCourses
-} from '../../setup/setupCache.js';
+import { cacheConcepts, cacheConfig } from '../../setup/setupCache.js';
 import { usersApi } from '../../setup/setupUserAPI.js';
 
 const GITHUB_URL_PREFIX = 'https://github.com/';
@@ -31,47 +29,6 @@ function makeUniqueSlug(slug, array) {
     slug = originalSlug + '-' + counter;
   }
 }
-
-/*async function createFileContent(
- owner, repo, concept, course, branch) {
- // create unique slug from name
- const slug = makeUniqueSlug(
- slugify(concept.name.toLowerCase().trim()), course.config.concepts);
-
- // add README.md file
- await uploadFile(owner, repo, `concepts/${ slug }/README.md`, concept.content,
- `created concept: ${ concept.name }`, branch
- );
- // update config.json
- course.config.concepts.push({
- name: concept.name,
- slug: slug,
- uuid: uuidv4(),
- repo: concept.repo
- });
- await updateFile(owner, repo, 'config.json', {
- content: JSON.stringify(course.config), sha: course.config.sha
- }, 'concept added to the config.json', branch);
-
- // return redirect url
- return `/course-edit/${ course.id }/concept/${ slug }`;
- }*/
-
-/*async function handleCourseAndConceptFiles(owner, repo, course, concept) {
- const courseConfig = await getCourseData(course, 'draft');
- concept.repo = course.repository;
- // if we have sha - update existing file
- if (concept.sha) {
- await updateFile(owner, repo, `concepts/${ concept.slug }/README.md`,
- { content: concept.content, sha: concept.sha },
- `edit concept: ${ concept.name }`, 'draft'
- );
- return 'back';
- } else { // no sha - create new content
- return await createFileContent(
- owner, repo, concept, courseConfig, 'draft');
- }
- }*/
 
 /**
  * General function for updating course data (lesson, practice, etc.)
@@ -459,18 +416,19 @@ function trimContent(content) {
 }
 
 export {
-  makeUniqueSlug,
-  handleCourseItemData,
-  handleCourseGeneralFiles,
-  updateCourseName,
-  getCourseGeneralContent,
-  handleLessonUpdate,
-  fetchAndProcessCourseData,
-  getAllConcepts,
-  getImageFiles,
-  handleCourseItemFiles,
-  extractAllImageDetails,
-  handleContentImages,
-  replaceImageUrls,
-  trimContent
+  makeUniqueSlug, //ok
+  handleCourseItemData, //ok
+  handleCourseGeneralFiles, //ok
+  updateCourseName, //ok
+  getCourseGeneralContent, //ok
+  handleLessonUpdate, //ok
+  fetchAndProcessCourseData, //ok
+  getAllConcepts, //ok
+  getImageFiles, //ok
+  handleCourseItemFiles, // ok
+  extractAllImageDetails, //ok
+  handleContentImages, //ok
+  replaceImageUrls, //ok
+  trimContent,
+  uploadNewFiles //ok
 };

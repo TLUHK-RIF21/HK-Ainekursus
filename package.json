@@ -102,6 +102,7 @@
     "read-markdown": "^1.0.2",
     "serve-favicon": "^2.5.0",
     "shelljs": "^0.8.5",
+    "sinon": "^17.0.1",
     "slugify": "^1.6.6",
     "tooltip": "^1.6.1",
     "use": "^3.1.1",

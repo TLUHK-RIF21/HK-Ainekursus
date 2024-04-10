@@ -31,7 +31,6 @@ const courseEditController = {
   getSpecificCourse: async (req, res, next) => {
     const { courseId } = req.params;
     let course = await apiRequests.getCourseById(courseId);
-
     if (!course) {
       return res.redirect('/notfound');
     }

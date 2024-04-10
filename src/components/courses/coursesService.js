@@ -23,7 +23,6 @@ const {
   requestLessonAdditionalMaterials,
   requestLessonFiles,
   requestConcepts,
-  requestSources,
   requestPractices,
   requestRepoBranches
 } = githubReposRequests;
