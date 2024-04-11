@@ -70,7 +70,7 @@ const allOverviewController = {
         return {
           ...course,
           ttlMarkedAsDoneCount: result,
-          studentCount: course.students.length,
+          studentCount: course.students?.length || 0,
           UUIDLength,
           donePercentage: result * 100 / UUIDLength
         };

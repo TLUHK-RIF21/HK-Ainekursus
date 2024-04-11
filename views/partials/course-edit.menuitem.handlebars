@@ -1,0 +1,20 @@
+<button onclick="showMenu{{index}}(true)"
+        class="focus:outline-none focus:text-indigo-400 text-left text-white flex justify-between items-center w-full py-5 space-x-14">
+    <span class="leading-5 whitespace-nowrap">{{label}} ({{items.length}})</span>
+    <i class="material-symbols-outlined mr-2" id="icon{{index}}">expand_more</i>
+</button>
+<div id="menu{{index}}" class="hidden justify-start flex-col w-full items-start pb-1">
+    {{#each items}}
+        <a href="/course-edit/{{../course.id}}/{{../type}}/{{this.slug}}"
+           class="flex justify-start items-center space-x-2 hover:text-white focus:bg-gray-700 focus:text-white hover:bg-gray-700 text-gray-400 py-2 w-full">
+            <i class="material-symbols-outlined">sticky_note_2</i>
+            <span class="leading-4">{{this.name}}</span>
+        </a>
+    {{/each}}
+</div>
+<a href="/course-edit/{{course.id}}/{{type}}/new"
+   class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4">
+    <span class="whitespace-nowrap">Lisa uus</span>
+    <i class="material-symbols-outlined">add</i>
+</a>
+<hr class="w-full pb-1">

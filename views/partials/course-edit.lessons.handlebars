@@ -1,109 +1,162 @@
-<div class="tab-pane">
-
-    {{#each lessons}}
-        <!-- Accordion Section 1 -->
-        <div class="card mb-2">
-            <div class="card-title p-2 flex items-center justify-between cursor-pointer lesson">
-                <div class="flex gap-2">
-                    {{this.name}}
-                </div>
-                <button class="btn btn-primary" title="Kustuta loeng">
-                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
-                </button>
-            </div>
-            <div class="p-2 hidden transition">
-                <label for="lessons[{{@index}}][name]">Loengu nimetus:</label>
-                <input type="text" name="lessons[{{@index}}][name]" id="lessons[{{@index}}][name]" value="{{this.name}}"
-                       class="input-single" required>
-                <input type="hidden" name="lessons[{{@index}}][content][sha]" value="{{this.content.sha}}">
-                <input type="hidden" name="lessons[{{@index}}][additionalMaterials][sha]"
-                       value="{{this.additionalMaterials.sha}}">
-                <div class="block my-4">
-                    <label for="tinymde_commandbar_lessons_content_{{@index}}">Loengu kirjeldus:</label>
-                    <div id="tinymde_commandbar_lessons_content_{{@index}}"></div>
-                    <div class="txtcontainer w-full">
-                        <textarea id="lessons_content_{{@index}}" cols="30" rows="30"
-                                  name="lessons[{{@index}}][content][content]">{{this.content.content}}</textarea>
-                    </div>
+<div class="">
+    <div class="mb-2">
+        <div class="card-title p-2 flex items-center justify-between ">
+            <h4 class="my-0">Loengu {{#if readme.sha }}muutmine{{else}}lisamine{{/if}}</h4>
+        </div>
+    </div>
+    <div class="card mb-2">
+        <form action="/course-edit/{{course.id}}/lesson/{{readme.slug}}" method="post" id="courseEditForm"
+              enctype="multipart/form-data">
+            <div class="p-2">
+                <div class="block mb-4">
+                    <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
+                    <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
+                    <input type="hidden" id="slug" value="{{readme.slug}}">
+                    <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
+                    <input type="hidden" id="readmeContent" name="readmeContent">
+                    <input type="hidden" id="materialsContent" name="materialsContent">
+                    <label class="text-lg font-bold mb-4">
+                        Loengu nimetus
+                        <input type="text" name="lessonName" class="input-single" required
+                               value="{{readme.data.name}}">
+                    </label>
+                    <label class="text-lg font-bold mt-4">Loengu kirjeldus</label>
+                    <div class="text-sm mb-4">Selle faili sisu kuvatakse õppekeskkonnas vastava loengu avalehel.</div>
+                    <div id="editor1" class="bg-white text-system-black py-4 rounded-2xl"></div>
                 </div>
 
                 <div class="block mb-4">
-                    <label for="tinymde_commandbar_lessons_add_{{@index}}">Lisamaterjalid:</label>
-                    <div id="tinymde_commandbar_lessons_add_{{@index}}"></div>
-                    <div class="txtcontainer w-full">
-                        <textarea id="lessons_add_{{@index}}" cols="30" rows="30"
-                                  name="lessons[{{@index}}][additionalMaterials][content]">{{this.additionalMaterials.content}}</textarea>
-                    </div>
-                </div>
-
-                <div class="block mb-4">
-                    Loengu sisuteemad:
-                    <ul>
-                        {{#each this.components}}
-                            <li class="flex w-100 items-center justify-between mb-2">
-                                <div>
-                                    <i class="material-symbols-outlined text-xxxl mr-4" aria-hidden="true">sticky_note_2</i>
-                                    {{this}}
-                                </div>
-                                <button class="btn btn-primary" title="Kustuta lisamaterjal">
-                                    <i class="material-symbols-outlined text-xxxl" aria-hidden="true">delete</i>
+                    <label class="text-lg font-bold mb-4">Loengus kasutatud sisuteemad:</label>
+                    <ul class="list-disc" id="conceptList">
+                        {{#each readme.data.components}}
+                            <li class="ml-4 pb-4 flex items-center justify-between">
+                                <input type="hidden" name="components[]" value="{{this.uuid}}">
+                                <a href="/show/{{this.uuid}}" class="flex items-center">
+                                    <i class="material-symbols-outlined mr-2" aria-hidden="true">sticky_note_2</i>
+                                    {{this.name}}
+                                </a>
+                                <button class="btn btn-primary ml-2 self-end p-2 min-h-0 min-w-0"
+                                        title="Eemalda sisuteema"
+                                        type="button" onclick="deleteConcept(this)">
+                                    <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
                                 </button>
                             </li>
                         {{/each}}
-                        <li class="flex w-100 items-center justify-between mb-2 border-t">
+                        <li class="flex w-100 items-end mb-2 border-t mt-4 pt-4">
                             <div>
-                                <label for="concepts">Lingi teema:</label>
+                                <label class="text-md font-bold mb-4" for="concepts">Lisa sisuteema:</label>
                                 <select name="linkConcept" id="concepts" class="input-single">
-                                    {{#each ../allConcepts}}
-                                        <option value="{{this.uuid}}">{{this.name}} - <span class="text-gray-500">{{this.course}}</span></option>
+                                    {{#each allConcepts}}
+                                        <option value="{{this.uuid}}"
+                                                data-name="{{this.name}}"
+                                            {{#contains this.uuid ../readme.data.components}}
+                                                disabled
+                                            {{/contains}}>
+                                            {{this.name}} - <span class="text-gray-500">{{this.course}}</span>
+                                        </option>
                                     {{/each}}
                                 </select>
-
                             </div>
-                            <button class="btn btn-primary" title="Kustuta lisamaterjal">
+                            <button class="btn btn-primary ml-2" title="Lisa uus sisuteema" type="button"
+                                    onclick="addConcept()">
                                 <i class="material-symbols-outlined text-xxxl" aria-hidden="true">add</i>
                             </button>
                         </li>
                     </ul>
                 </div>
 
-                {{> files-input files=this.files prefix=this.slug}}
-            </div>
-        </div>
-    {{/each}}
-    <div class="card mb-2">
-        <div class="card-title p-2 flex items-center gap-2 cursor-pointer lesson">
-            <i class="material-symbols-outlined text-xxxl mr-4" aria-hidden="true">sticky_note_2</i>Lisa uus loeng
-        </div>
-        <div class="p-2 hidden transition">
-            <label for="lessons[{{lessons.length}}][name]">Loengu nimetus:</label>
-            <input type="text" name="lessons[{{lessons.length}}][name]" id="lessons[{{lessons.length}}][name]"
-                   class="input-single">
-            <input type="hidden" name="lessons[{{lessons.length}}][additionalMaterials][sha]">
-            <div class="block my-4">
-                <label for="tinymde_commandbar_lessons_content_{{lessons.length}}">Loengu kirjeldus:</label>
-                <div id="tinymde_commandbar_lessons_content_{{lessons.length}}"></div>
-                <div class="txtcontainer w-full">
-                        <textarea id="lessons_content_{{lessons.length}}" cols="30" rows="30"
-                                  name="lessons[{{lessons.length}}][content][content]"></textarea>
+                <hr class="w-full py-4">
+
+                <div class="block mb-4">
+                    <label class="text-lg font-bold mb-2">Lisamaterjalid:</label>
+                    <div class="text-sm mb-4">Siin saad viidata vastava loenguga seonduvatele lisamaterjalidele, mis
+                        kuvatakse õppekeskkonnas "Loengu lisamaterjalid" lehel.
+                    </div>
+                    <div id="editor2" class="bg-white text-system-black py-4 rounded-2xl"></div>
                 </div>
-            </div>
+                <hr class="w-full py-4">
 
-            <div class="block mb-4">
-                <label for="tinymde_commandbar_lessons_add_{{lessons.length}}">Lisamaterjalid:</label>
-                <div id="tinymde_commandbar_lessons_add_{{lessons.length}}"></div>
-                <div class="txtcontainer w-full">
-                        <textarea id="lessons_add_{{lessons.length}}" cols="30" rows="30"
-                                  name="lessons[{{lessons.length}}][additionalMaterials][content]"></textarea>
-                </div>
+                {{> files-input files=files prefix=(concatActivePath "lessons" readme.slug) }}
             </div>
-
-            <div class="block mb-4">
-                Loengu sisuteemad:
-                <ul>
-                </ul>
-            </div>
-
-        </div>
+        </form>
     </div>
 </div>
+<script src="/js/et-editor.js"></script>
+<script>
+    const editor1 = new Editor({
+        el: document.querySelector('#editor1'),
+        height: '500px',
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
+    });
+
+    const editor2 = new Editor({
+        el: document.querySelector('#editor2'),
+        height: '300px',
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each materials.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
+    });
+
+    function addConcept() {
+        const conceptList = document.getElementById('conceptList');
+        const penultimateLi = conceptList.lastChild.previousSibling;
+        const sel = document.getElementById('concepts');
+
+        const newLi = document.createElement('li');
+        newLi.classList.add('ml-4', 'pb-4', 'flex', 'items-center', 'justify-between');
+        newLi.innerHTML = `
+        <input type="hidden" name="components[]" value="${ document.getElementById('concepts').value }">
+            <a href="/show/${ document.getElementById(
+                'concepts').value }" class="flex items-center">
+                <i class="material-symbols-outlined mr-2" aria-hidden="true">sticky_note_2</i>
+                ${ sel.options[sel.selectedIndex].dataset.name }
+            </a>
+        <button class="btn btn-primary ml-2 self-end p-2 min-h-0 min-w-0" title="Eemalda sisuteema" type="button" onclick="deleteConcept(this)">
+            <i class="material-symbols-outlined text-base" aria-hidden="true">delete</i>
+        </button>`;
+        conceptList.insertBefore(newLi, penultimateLi);
+        sel.options[sel.selectedIndex].disabled = true;
+        sel.selectedIndex = -1;
+        isFormDirty = true;
+        document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
+    }
+
+    function deleteConcept(el) {
+        const li = el.closest('li');
+        const disabledOption = li.querySelector('input[type="hidden"]').value; // Get the value of the disabled option
+
+        const sel = document.getElementById('concepts'); // Get the select element
+        const optionToEnable = sel.querySelector(`option[value="${ disabledOption }"]`); // Find the option to enable
+
+        li.remove(); // Remove the list item
+        optionToEnable.disabled = false; // Re-enable the option in the select element
+        isFormDirty = true;
+        document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
+    }
+
+    function deleteLesson() {
+        const slug = document.getElementById('slug').value;
+        const id = document.getElementById('courseId').value;
+        fetch(
+                '/course-edit/' + id + '/lesson/' + slug,
+                {
+                    method: 'DELETE'
+                }
+        ).then(() => {
+            document.getElementById('modal').style.display = 'none';
+            history.back();
+        });
+
+    }
+
+    window.onload = function () {
+        document.getElementById('saveBtn').innerHTML = 'Salvesta loeng';
+        document.getElementById('delBtn').onclick = function () {
+            document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle loengu kustutada?';
+            document.getElementById('modal').style.display = 'flex';
+        };
+        document.getElementById('delOK').onclick = deleteLesson;
+    };
+</script>

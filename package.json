@@ -35,8 +35,10 @@
   "homepage": "https://github.com/tluhk/rif20-valikpraktika-1#readme",
   "dependencies": {
     "-": "^0.0.1",
+    "@octokit/rest": "^20.0.2",
     "@peaceroad/markdown-it-renderer-image": "^0.1.9",
     "@tailwindcss/forms": "^0.5.3",
+    "@toast-ui/editor": "^3.2.2",
     "@toycode/markdown-it-class": "^1.2.4",
     "alert": "^5.1.1",
     "axios": "^0.27.2",
@@ -51,9 +53,9 @@
     "copy-text-to-clipboard": "^3.0.1",
     "core-js": "^3.29.0",
     "dotenv": "^16.0.3",
-    "express": "^4.18.1",
-    "express-fileupload": "^1.4.1",
-    "express-handlebars": "^6.0.6",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.2",
+    "express-handlebars": "^7.1.2",
     "express-passport-logout": "^0.1.0",
     "express-session": "^1.17.3",
     "flowbite": "^1.6.3",
@@ -100,6 +102,7 @@
     "read-markdown": "^1.0.2",
     "serve-favicon": "^2.5.0",
     "shelljs": "^0.8.5",
+    "sinon": "^17.0.1",
     "slugify": "^1.6.6",
     "tooltip": "^1.6.1",
     "use": "^3.1.1",
@@ -126,6 +129,6 @@
     "prettier": "^1.19.1",
     "prettier-airbnb-config": "^1.0.0",
     "style-dictionary": "^3.8.0",
-    "tailwindcss": "^3.3.5"
+    "tailwindcss": "^3.4.1"
   }
 }

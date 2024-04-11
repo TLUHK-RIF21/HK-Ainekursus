@@ -1,17 +1,60 @@
-<!-- sidebar-left.course.handlebars -->
+<!-- sidebar-left.course-edit.handlebars -->
 <nav class="sidebar h-fit relative md:sticky top-36 md:top-52 lg:top-36" id="sidebar">
-    <!-- sidebar sticky behavior beginning from lg size -->
-    <div class="p-2 w-full">
-        <div class="sidebarheight card !p-6">
-            <div class="mb-4 pr-4">
-                <!-- Topic name and code -->
-                <button class="tab-btn w-full text-left hover:border-link-action">Üldinfo</button>
-                <button class="tab-btn w-full text-left">Loengud</button>
-                <button class="tab-btn w-full text-left">Sisuteemad</button>
-                <button class="tab-btn w-full text-left">Praktikumid</button>
-            </div>
+    <div class="card flex justify-start items-start h-full w-full flex-col">
+        <div class="flex flex-col justify-start items-center w-full">
+            <a href="/course-edit/{{course.id}}"
+               class="focus:outline-none focus:text-indigo-400 text-left text-white flex justify-between items-center w-full py-5">
+                <span class="leading-4">Üldised andmed</span>
+            </a>
+            <hr class="w-full pb-1">
+            {{> course-edit.menuitem index='1' items=config.config.concepts label='Sisuteemad' type='concept'}}
+            {{> course-edit.menuitem index='2' items=config.config.lessons label='Loengud' type='lesson'}}
+            {{> course-edit.menuitem index='3' items=config.config.practices label='Praktikumid' type='practice'}}
         </div>
     </div>
 </nav>
 
+<script>
+    let icon1 = document.getElementById('icon1');
+    let menu1 = document.getElementById('menu1');
+    const showMenu1 = (flag) => {
+        if (flag) {
+            icon1.classList.toggle('rotate-180');
+            menu1.classList.toggle('hidden');
+            menu1.classList.toggle('flex');
+        }
+    };
 
+    let icon2 = document.getElementById('icon2');
+    let menu2 = document.getElementById('menu2');
+    const showMenu2 = (flag) => {
+        if (flag) {
+            icon2.classList.toggle('rotate-180');
+            menu2.classList.toggle('hidden');
+            menu2.classList.toggle('flex');
+        }
+    };
+
+    let icon3 = document.getElementById('icon3');
+    let menu3 = document.getElementById('menu3');
+    const showMenu3 = (flag) => {
+        if (flag) {
+            icon3.classList.toggle('rotate-180');
+            menu3.classList.toggle('hidden');
+            menu3.classList.toggle('flex');
+        }
+    };
+
+    /*let Main = document.getElementById('Main');
+    let open = document.getElementById('open');
+    let close = document.getElementById('close');
+
+    const showNav = (flag) => {
+        if (flag) {
+            Main.classList.toggle('-translate-x-full');
+            Main.classList.toggle('translate-x-0');
+            open.classList.toggle('hidden');
+            close.classList.toggle('hidden');
+        }
+    };*/
+</script>

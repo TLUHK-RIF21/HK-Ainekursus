@@ -90,25 +90,24 @@ const validateConfig = (configObj, selectedCourse, refBranch) => {
         `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson keys missing.`);
       return false;
     }
-    if (!Array.isArray(lesson.components) || !lesson.components.length > 0 ||
-      !Array.isArray(lesson.additionalMaterials) ||
-      !lesson.additionalMaterials.length > 0) {
-      console.log(
-        `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson keys with incorrect type, or empty array.`);
-      return false;
-    }
-    const lessonKeysAdditionalMaterials = Object.keys(
-      lesson.additionalMaterials[0]);
+    /*if (!Array.isArray(lesson.components) || !lesson.components.length > 0 ||
+     !Array.isArray(lesson.additionalMaterials)) {
+     console.log(
+     `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson keys with incorrect type, or empty array.`);
+     return false;
+     }*/
+    //const lessonKeysAdditionalMaterials = Object.keys(
+    //  lesson.additionalMaterials[0] || []);
 
     // console.log('lessonKeysAdditionalMaterials1:',
     // lessonKeysAdditionalMaterials);
-    const lessonAddMaterialsHaveKeys = expectedKeys2.every(
-      (key) => lessonKeysAdditionalMaterials.includes(key));
-    if (!lessonAddMaterialsHaveKeys) {
-      console.log(
-        `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson additionalMaterials array with missing keys.`);
-      return false;
-    }
+    /*const lessonAddMaterialsHaveKeys = expectedKeys2.every(
+     (key) => lessonKeysAdditionalMaterials.includes(key));
+     if (!lessonAddMaterialsHaveKeys) {
+     console.log(
+     `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected lesson additionalMaterials array with missing keys.`);
+     return false;
+     }*/
     return true;
   });
 
@@ -206,13 +205,13 @@ const getConfig = async (selectedCourse, refBranch) => {
   }
 
   /** Convert all lessons component array elements to lowercase */
-  configObj.lessons.forEach((lesson, indexLesson) => {
-    if (Array.isArray(lesson.components)) {
-      const arr = lesson.components;
-      configObj.lessons[indexLesson].components = arr.map(
-        (item) => item.toLowerCase());
-    }
-  });
+  /*configObj.lessons.forEach((lesson, indexLesson) => {
+   if (Array.isArray(lesson.components)) {
+   const arr = lesson.components;
+   configObj.lessons[indexLesson].components = arr.map(
+   (item) => item.toLowerCase());
+   }
+   });*/
   // console.log('configObj.lessons[0].components10:',
   // configObj.lessons[0].components);
 

@@ -1,5 +1,4 @@
 import 'core-js/actual/array/group-by.js';
-
 import { performance } from 'perf_hooks';
 import markdown from '../../setup/setupMarkdown.js';
 import base64 from 'base-64';
@@ -18,25 +17,13 @@ import {
   getComponentsUUIDs,
   getMarkedAsDoneComponents
 } from '../../functions/getListOfDoneComponentUUIDs.js';
-import {
-  getFile,
-  getFolder,
-  updateFile, uploadFile
-} from '../../functions/githubFileFunctions.js';
-import {
-  cacheConcepts,
-  cacheConfig,
-  cacheLessons
-} from '../../setup/setupCache.js';
-import { usersApi } from '../../setup/setupUserAPI.js';
-import membersRequests from '../../functions/usersHkTluRequests.js';
+import { getFolder } from '../../functions/githubFileFunctions.js';
+import { cacheLessons } from '../../setup/setupCache.js';
 import getCourseData from '../../functions/getCourseData.js';
 import { getCombinedUserData } from '../../functions/githubUsersFuncs.js';
 import { axios } from '../../setup/setupGithub.js';
 import * as cheerio from 'cheerio';
-import { createConfig, getConfig } from '../../functions/getConfigFuncs.js';
-import { updateConfigFile } from './courseEditService.js';
-import fs from 'fs';
+import { createConfig } from '../../functions/getConfigFuncs.js';
 
 /** responseAction function defines what to do after info about courses and current course page is received.
  * This step gets the data from GitHub, by doing Axios requests via
@@ -48,7 +35,6 @@ import fs from 'fs';
 const responseAction = async (req, res, next) => {
   const { githubRequest } = res.locals;
   let apiResponse;
-  // if (apiRequests.hasOwnProperty(githubRequest)) {
   if (Object.prototype.hasOwnProperty.call(apiRequests, githubRequest)) {
     let func;
 
@@ -215,121 +201,6 @@ const renderPage = async (req, res) => {
   });
 };
 
-const renderEditPage = async (req, res) => {
-  const {
-    config,
-    path,
-    allCourses,
-    coursePathInGithub,
-    teachers,
-    branches,
-    selectedVersion,
-    allTeams,
-    resComponents, resFiles, resSources, refBranch
-  } = res.locals;
-
-  //console.log(res.locals);
-  /** Sisulehe sisu lugemine */
-  const resComponentsContent = resComponents.data.content;
-  const componentDecoded = base64.decode(resComponentsContent);
-  const componentDecodedUtf8 = utf8.decode(componentDecoded);
-
-  /**  Sisulehe piltide kuvamine
-   * - functions: https://stackoverflow.com/a/58542933
-   * - changing img src:
-   * https://www.npmjs.com/package/modify-image-url-md?activeTab=explore
-   */
-  const start1 = performance.now();
-  const markdownWithModifiedImgSources = await function1(coursePathInGithub,
-    path, componentDecodedUtf8, refBranch
-  );
-  const end1 = performance.now();
-  console.log(
-    `Execution time markdownWithModifiedImgSources: ${ end1 - start1 } ms`);
-
-  /** Each sisuleht (concepts, practices) has a sources reference which is stored in sources.json file in GitHub. */
-    // define sources as NULL by default.
-  let sourcesJSON = null;
-
-  // NB! Sources are sent only with "Teemade endpointid" axios call. If
-  // sourcesJSON stays NULL (is false), then content.handlebars does not
-  // display "Allikad" div. If sourcesJSON gets filled (is true), then
-  // "Allikad" div is displayed.
-  if (resSources && resSources.data && resSources.data.content &&
-    resSources.data.content !== '') {
-    const sources = resSources.data;
-    const sourcesDecoded = base64.decode(sources.content);
-    const sourcesDecodedUtf8 = utf8.decode(sourcesDecoded);
-    if (sourcesDecodedUtf8) {
-      sourcesJSON = JSON.parse(sourcesDecodedUtf8);
-    }
-  }
-
-  // used for adding new branch
-  const curYear = new Date().getFullYear();
-  const years = [curYear, curYear + 1, curYear + 2];
-
-  // get docs/lisamaterjalid.md
-  const repoPath = coursePathInGithub.split('/').pop();
-
-  const additionalMaterials = await getFile(process.env.REPO_ORG_NAME, repoPath,
-    'docs/lisamaterjalid.md', refBranch
-  );
-
-  // for each lessons get README and lisamaterjalid.md
-  for await (const _m of config.config.lessons.map((lesson) => {
-    getFile(process.env.REPO_ORG_NAME, repoPath,
-      `lessons/${ lesson.slug }/lisamaterjalid.md`, refBranch
-    ).then((material) => (lesson.additionalMaterials = material));
-  })) {
-    // console.log(material);
-  }
-  for await (const about of config.config.lessons.map(
-    (lesson) => getFile(process.env.REPO_ORG_NAME, repoPath,
-      `lessons/${ lesson.slug }/README.md`, refBranch
-    ).then((about) => (lesson.content = about)))) {
-    // console.log(material);
-  }
-
-  const allConcepts = await allCoursesController.getAllConcepts(
-    allCourses,
-    refBranch
-  );
-
-  // replace each lesson.component slug with object
-  config.config.lessons.map((l) => {
-    l.components.map((slug) => {
-      const def = allConcepts.find((concept) => concept.slug === slug);
-      return def || null;
-    });
-  });
-
-  /** Finally you can render the course view with all correct information you've collected from GitHub, and with all correctly rendered Markdown content! */
-  const viewVars = {
-    component: markdownWithModifiedImgSources,
-    docs: config.config.docs,
-    additionalMaterials: additionalMaterials,
-    concepts: config.config.concepts,
-    practices: config.config.practices,
-    lessons: config.config.lessons,
-    sources: sourcesJSON,
-    path,
-    courses: allCourses,
-    config: config.config,
-    files: resFiles,
-    user: req.user,
-    teachers,
-    branches,
-    selectedVersion,
-    refBranch,
-    currentPath: req.body.currentPath,
-    //allTeams,
-    //years,
-    allConcepts
-  };
-
-  res.render('course-edit', viewVars);
-};
 const allCoursesController = {
   /** For '/dashboard' route: */
   getAllCourses: async (req, res) => {
@@ -494,7 +365,7 @@ const allCoursesController = {
        * Filter allCoursesActive where the user is logged-in user
        */
       allCourses = allCourses?.filter(
-        (course) => course?.students.some(t => t.id === req.user.userId));
+        (course) => course.students?.some(t => t.id === req.user.userId));
 
       // Create an object to store the grouped data
       const allCoursesGroupedByTeacher = {};
@@ -677,7 +548,6 @@ const allCoursesController = {
       courseId, contentSlug, componentSlug
     } = req.params;
 
-    //return res.send(`${ courseId }, ${ contentSlug }, ${ componentSlug }`);
     res.locals.user = req.user;
     const { ref } = req.query;
     const isTeacher = req.user.roles.includes('teacher');
@@ -940,9 +810,9 @@ const allCoursesController = {
     let componentUUId = '';
     let componentName = '';
     let componentType = '';
+    let componentRepo = '';
+    let componentPath = '';
 
-    //console.log(courseConfig.config);
-    //return res.send(courseConfig.config);
     courseConfig.config?.docs?.forEach((x) => {
       if (x.slug === contentSlug) {
         contentName = x.name;
@@ -971,25 +841,46 @@ const allCoursesController = {
      * componentUUID and set componentType.
      */
 
-    courseConfig.config?.concepts?.forEach((x) => {
-      if (x.slug === componentSlug) {
-        const lesson = courseConfig.config.lessons?.find(
-          (les) => les.components.includes(componentSlug));
-        // console.log('lesson1:', lesson);
+      // meil on teada 'loeng_01' ja 'protsessorid'
+      // 1. leia loeng, mille slug=loeng_01
+      // 2. leia sealt see comp, mille slug=protsessorid
+    const lesson = courseConfig.config?.lessons.find(
+        (l) => l.slug === contentSlug);
+    if (lesson) {
+      const comp = lesson.components.find(
+        (comp) => comp.slug === componentSlug);
+      if (comp) {
+        componentName = comp.name;
+        componentRepo = comp.repo;
+        componentPath = comp.path;
+        componentUUId = comp.uuid;
+        componentType = 'concept';
+        githubRequest = 'lessonComponentsService';
+      } else {
+        courseConfig.config?.concepts?.forEach((x) => {
+          if (x.slug === componentSlug) {
+            const lesson = courseConfig.config.lessons?.find(
+              (les) => les.components.find(
+                (comp) => comp.slug === componentSlug));
+            //console.log('lesson1:', lesson);
+            //console.log('comp:', lesson);
 
-        if (lesson && lesson.slug === contentSlug) {
-          componentName = x.name;
-          componentUUId = x.uuid;
-          componentType = 'concept';
-          githubRequest = 'lessonComponentsService';
-          // console.log('Slug found in config.concepts');
-        }
+            if (lesson && lesson.slug === contentSlug) {
+              componentName = x.name;
+              componentUUId = x.uuid;
+              componentType = 'concept';
+              githubRequest = 'lessonComponentsService';
+              //console.log('Slug found in config.concepts');
+            }
+          }
+        });
       }
-    });
+    }
+
     courseConfig.config?.practices?.forEach((x) => {
       if (x.slug === componentSlug) {
         const lesson = courseConfig.config?.lessons?.find(
-          (les) => les.components.includes(componentSlug));
+          (les) => les.components.find((comp) => comp.slug === componentSlug));
         // console.log('lesson1:', lesson);
 
         if (lesson && lesson.slug === contentSlug) {
@@ -1002,7 +893,10 @@ const allCoursesController = {
       }
     });
     courseConfig.config?.lessons?.forEach((x) => {
-      if (x.additionalMaterials[0].slug === componentSlug && x.slug ===
+      console.log(
+        x.additionalMaterials, componentSlug, x.slug, contentSlug);
+      if (x.additionalMaterials && x.additionalMaterials.length &&
+        x.additionalMaterials[0].slug === componentSlug && x.slug ===
         contentSlug) {
         componentName = x.additionalMaterials[0].name;
         componentType = 'docs';
@@ -1013,15 +907,15 @@ const allCoursesController = {
 
     /** You can check all relevant values about current endpoint:
      */
-    // console.log('courseSlug1:', courseSlug);
-    // console.log('course.courseName1:', course.courseName);
-    // console.log('contentSlug1:', contentSlug);
-    // console.log('contentName1:', contentName);
-    // console.log('contentUUID1:', contentUUID);
-    // console.log('componentSlug1:', componentSlug);
-    // console.log('componentName1:', componentName);
+    //console.log('courseSlug1:', courseSlug);
+    //console.log('course.courseName1:', course.courseName);
+    //console.log('contentSlug1:', contentSlug);
+    //console.log('contentName1:', contentName);
+    //console.log('contentUUID1:', contentUUID);
+    //console.log('componentSlug1:', componentSlug);
+    //console.log('componentName1:', componentName);
     //console.log('componentUUID1:', componentUUId);
-    // console.log('githubRequest1:', githubRequest);
+    //console.log('githubRequest1:', githubRequest);
 
     /**
      * IF contentSlug exists, but contentName is NOT returned from config file.
@@ -1042,9 +936,9 @@ const allCoursesController = {
     }
 
     /** Function to set correct fullPath, depending on if componentSlug and/or contentSlug exist.
-     * This defines correct fullPath, depending how deep into subpages you are.
-     * This is used to assign correct a href-s for sidebar elements and for
-     * Back/Forward buttons.
+     * This defines correct fullPath, depending on how deep into subpages you
+     * are. This is used to assign correct a href-s for sidebar elements and
+     * for Back/Forward buttons.
      */
     function getFullPath() {
       if (componentSlug) {
@@ -1057,7 +951,7 @@ const allCoursesController = {
     }
 
     /** Function to set correct componentType, depending on if componentSlug and/or contentSlug exist.
-     * This defines correct componentType, depeonding how deep into subpages
+     * This defines correct componentType, depending on how deep into subpages
      * you are. This is used to assign correct sidebar icons.
      */
     function getType() {
@@ -1079,6 +973,8 @@ const allCoursesController = {
       courseId,
       contentSlug,
       componentSlug,
+      componentRepo,
+      componentPath,
       refBranch: 'master',
       contentUUId,
       componentUUId,
@@ -1091,7 +987,6 @@ const allCoursesController = {
       'https://github.com/', '');
     res.locals.breadcrumbNames = breadcrumbNames;
     res.locals.path = path;
-
     return next();
   },
 
@@ -1135,50 +1030,6 @@ const allCoursesController = {
     });
 
     return allCoursesActive;
-  },
-  getAllConcepts: async (courses, refBranch) => {
-    if (cacheConcepts.has('concepts')) {
-      return new Promise((resolve) => {
-        console.log('✅✅  concepts IS from cache');
-        resolve(cacheConcepts.get('concepts'));
-      });
-    }
-    console.log('❌❌ concepts IS NOT from cache');
-    const allConcepts = [];
-    await Promise.all(courses.map(async (course) => {
-      const folderContent = await getFolder(process.env.REPO_ORG_NAME,
-        course.courseSlugInGithub, 'concepts', refBranch
-      );
-      course.config.concepts.forEach((concept) => {
-        // find where is concept defined
-        if (folderContent.filter((f) => f.name === concept.slug).length) {
-          concept.course = course.courseSlugInGithub;
-        }
-        // vaata kas sama uuid'ga on juba kirje, kui on, siis lisa sellele
-        // usedIn
-        const isDefined = allConcepts.find((c) => c.uuid === concept.uuid);
-        if (isDefined) {
-          if (Array.isArray(isDefined.usedIn)) {
-            isDefined.usedIn.push(course.courseSlugInGithub);
-          } else {
-            isDefined.usedIn = [course.courseSlugInGithub];
-          }
-        } else {
-          concept.course = course.courseSlugInGithub;
-          if (Array.isArray(concept.usedIn)) {
-            concept.usedIn.push(course.courseSlugInGithub);
-          } else {
-            concept.usedIn = [course.courseSlugInGithub];
-          }
-          allConcepts.push(concept);
-        }
-      });
-    }));
-    cacheConcepts.set('concepts', allConcepts);
-
-    return allConcepts.filter((c) => !!c.course)
-      .sort((a, b) => a.name > b.name ? 1 : b.name > a.name ? -1 : a.course >
-      b.course ? 1 : b.course > a.course ? -1 : 0);
   },
 
   getOtherTeachersCourses: async (req, res) => {
@@ -1230,40 +1081,28 @@ const allCoursesController = {
   },
   getOisContent: async (req, res) => {
     let longDescription = '';
-    let course = await usersApi.get(
-      membersRequests.getCourse + req.query.courseId)
-      .catch((error) => {
-        console.error(error);
-      });
+    await axios('https://ois2.tlu.ee/tluois/aine/' + req.query.courseId)
+      .then((response) => {
+        const { data } = response;
+        const $ = cheerio.load(data);
 
-    if (course) {
-      course = course.data.data;
-      await axios('https://ois2.tlu.ee/tluois/aine/' + course.code)
-        .then((response) => {
-          const { data } = response;
-          const $ = cheerio.load(data);
+        $('.yldaine_r', data).each(function () {
+          const yldaineC1 = $(this).find('div.yldaine_c1').text();
+          const yldaineC2 = $(this).find('div.yldaine_c2').text();
 
-          $('.yldaine_r', data).each(function () {
-            const yldaineC1 = $(this).find('div.yldaine_c1').text();
-            const yldaineC2 = $(this).find('div.yldaine_c2').text();
-
-            switch (yldaineC1) {
-              case 'Õppeaine sisu lühikirjeldus':
-                longDescription = yldaineC2;
-                break;
-              case 'Õppeaine õpiväljundid':
-                longDescription += '\n\n ' + yldaineC2;
-                break;
-            }
-          });
-
-          return res.json(conf);
-        })
-        .catch(() => {
-          console.log('ois fetch error');
+          switch (yldaineC1) {
+            case 'Õppeaine sisu lühikirjeldus':
+              longDescription = yldaineC2;
+              break;
+            case 'Õppeaine õpiväljundid':
+              longDescription += '\n\n ' + yldaineC2;
+              break;
+          }
         });
-    }
-
+      })
+      .catch(() => {
+        console.log('ois fetch error');
+      });
     return res.json({ data: longDescription });
   },
   getAllLessons: async (searchTerm, courses, refBranch) => {
@@ -1288,101 +1127,12 @@ const allCoursesController = {
     }));
     cacheLessons.set('lessons', allLessons);
     return allLessons;
-  },
-  updateCourseData: async (req, res) => {
-    const body = req.body;
-    const keys = Object.keys(body);
-    const values = Object.values(body);
-    const response = {};
-    const courseId = req.body.courseId;
-    if (courseId) {
-      const course = await apiRequests.getCourseById(courseId);
-      const repoName = course.repository.replace('https://github.com/', '');
-      const [owner, repo] = repoName.split('/');
-
-      // handle file uploads
-      if (req.files) {
-        const fileKey = Object.keys(req.files)[0];
-        const path = fileKey + req.files[fileKey].name;
-        const content = req.files[fileKey].data.toString('base64');
-        await uploadFile(
-          owner, repo, path, content, 'file added: ' + path,
-          'draft',
-          true
-        );
-        // todo update files data
-      }
-      // courseId is always there, so we start from index 1
-      for (let i = 1; i < keys.length; i++) {
-        response[keys[i]] = values[i];
-        console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-        if (keys[i].startsWith('config/')) { // update config file
-          // key = config/courseName
-          const config = await getConfig(repoName, 'draft');
-          const updatedConfig = updateConfigFile(keys[i], values[i], config);
-          await updateFile(
-            owner, repo, 'config.json',
-            { content: JSON.stringify(updatedConfig), sha: updatedConfig.sha },
-            'course edit', 'draft'
-          );
-          cacheConfig.set(`getConfig:${ repoName }+draft`, updatedConfig);
-        } else if (keys[i].endsWith('.md')) { // update file in folder
-          // get file sha
-          const oldFile = await getFile(owner, repo, keys[i], 'draft');
-          await updateFile(
-            owner, repo, keys[i],
-            { content: values[i], sha: oldFile.sha },
-            'file edit: ' + keys[i], 'draft'
-          );
-        } else {
-          console.log(`Key: ${ keys[i] }, Value: ${ values[i] }`);
-        }
-      }
-      return res.json(response);
-    }
-    return res.status(500).send('error');
-  },
-  /*
-   Kursuse muutmine:
-   concepts = [
-   {
-   "slug": "naidis-sisuteema",
-   "name": "Näidis Sisuteema",
-   "uuid": "7cc19837-3dfe-4da7-ac2e-b4f7132fb3a4"
-   }, {
-   "slug": "sisu-loomise-juhend",
-   "name": "Sisu loomise juhend",
-   "uuid": "49b640ef-5c58-41e2-9392-4514f49a9c17"
-   }],
-
-   kasutaja peab saama "linkida" teistest repodest.
-   Link tähendab, et config.json concepts osas on objekt, mis kuulub tegelikult teise reposse.
-   Kasutaja peab saama otsida concepte (esialgu nime järgi, aga ka sisu järgi),
-   kasutaja peab nägema eelvaadet,
-   kasutaja peab saama muuta concepti - kui on lingitud sisu, siis näeb, kus veel on kasutatud,
-   kui hakkab sisu muutma, siis peaks saama valida, kas muudab originaali kõikjal, või luuakse orig põhjal uus sisu
-
-   Äkki võiks sama loogika olla ka teiste plokkide kohta (lessons, praktikumid)
-
-   */
-  async publishCourse(course) {
-    const mergeResponse = await apiRequests.mergeMasterWithDraft(
-      course.repository.replace('https://github.com/', ''),
-      'Shipped cool_feature!'
-    );
-    if (mergeResponse.status === 204 || mergeResponse.status === 201) { // delete draft branch
-      return await apiRequests.deleteBranch(
-        course.repository.replace('https://github.com/', ''),
-        'draft'
-      );
-    }
-    return false;
   }
 };
+
 export {
   allCoursesController,
   responseAction,
   renderPage,
-  renderEditPage,
   getMarkedAsDoneComponents
 };

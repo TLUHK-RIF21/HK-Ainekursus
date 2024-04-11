@@ -1,8 +1,10 @@
 import axios from 'axios';
 import {
   cacheBranches,
+  cacheConceptUsage,
   cacheFiles,
-  cachePageContent, cacheTeamCourses
+  cachePageContent,
+  cacheTeamCourses
 } from '../../setup/setupCache.js';
 import githubReposRequests from '../../functions/githubReposRequests.js';
 import { authToken } from '../../setup/setupGithub.js';
@@ -10,6 +12,8 @@ import { getConfig } from '../../functions/getConfigFuncs.js';
 import { Octokit } from 'octokit';
 import { usersApi } from '../../setup/setupUserAPI.js';
 import membersRequests from '../../functions/usersHkTluRequests.js';
+import getAllCoursesData from '../../functions/getAllCoursesData.js';
+import getCourseData from '../../functions/getCourseData.js';
 
 const {
   requestDocs,
@@ -19,7 +23,6 @@ const {
   requestLessonAdditionalMaterials,
   requestLessonFiles,
   requestConcepts,
-  requestSources,
   requestPractices,
   requestRepoBranches
 } = githubReposRequests;
@@ -51,9 +54,7 @@ const apiRequests = {
       console.log(`❌❌ branches IS NOT from cache: ${ routePath }`);
 
       const branchesRaw = await axios.get(
-        requestRepoBranches(coursePathInGithub),
-        authToken
-      );
+        requestRepoBranches(coursePathInGithub), authToken);
 
       branches = branchesRaw.data.map((branch) => branch.name);
 
@@ -63,17 +64,16 @@ const apiRequests = {
         return acc;
       }, {});
 
-      const validBranchesRaw = await Promise.all(
-        Object.entries(branchPromises)
-          .map(([key, promise]) => promise.then((value) => [key, value]))
-      ).then((resolvedArr) => {
-        const resolvedObj = Object.fromEntries(resolvedArr);
-        return Object.entries(resolvedObj).filter(
-          ([, value]) => value && value.active
-        );
-      }).catch((error) => {
-        console.error(error); // handle error
-      });
+      const validBranchesRaw = await Promise.all(Object.entries(branchPromises)
+        .map(([key, promise]) => promise.then((value) => [key, value])))
+        .then((resolvedArr) => {
+          const resolvedObj = Object.fromEntries(resolvedArr);
+          return Object.entries(resolvedObj)
+            .filter(([, value]) => value && value.active);
+        })
+        .catch((error) => {
+          console.error(error); // handle error
+        });
 
       if (!validBranchesRaw) {
         return [];
@@ -88,8 +88,7 @@ const apiRequests = {
     }
 
     return validBranches;
-  },
-  docsService: async (req, res) => {
+  }, docsService: async (req, res) => {
     const { repository } = res.locals.course;
     const { refBranch } = res.locals;
     const routePath = `${ req.url }+${ refBranch }+components`;
@@ -113,8 +112,7 @@ const apiRequests = {
     }
 
     return { components };
-  },
-  courseAdditionalMaterialsService: async (req, res) => {
+  }, courseAdditionalMaterialsService: async (req, res) => {
     const { repository } = res.locals.course;
     const coursePathInGithub = repository.replace('https://github.com/', '');
     const { refBranch } = res.locals;
@@ -127,11 +125,9 @@ const apiRequests = {
 
     if (!cachePageContent.get(routePath) || !cacheFiles.get(routePathFiles)) {
       console.log(
-        `❌❌ courseAdditionalMaterials components IS NOT from cache: ${ routePath }`
-      );
+        `❌❌ courseAdditionalMaterials components IS NOT from cache: ${ routePath }`);
       console.log(
-        `❌❌ courseAdditionalMaterials files IS NOT from cache: ${ routePathFiles }`
-      );
+        `❌❌ courseAdditionalMaterials files IS NOT from cache: ${ routePathFiles }`);
 
       const componentsRaw = await axios.get(
         requestCourseAdditionalMaterials(coursePathInGithub, refBranch),
@@ -142,43 +138,35 @@ const apiRequests = {
       // Download_url token muutub iga 7 päeva tagant Githubi poolt:
       // https://github.com/orgs/community/discussions/23845#discussioncomment-3241866
       const filesRaw = await axios.get(
-        requestCourseFiles(coursePathInGithub, refBranch),
-        authToken
-      );
+        requestCourseFiles(coursePathInGithub, refBranch), authToken);
 
-      await axios.all([componentsRaw, filesRaw]).then(
-        axios.spread((...responses) => {
+      await axios.all([componentsRaw, filesRaw])
+        .then(axios.spread((...responses) => {
           [components, files] = responses;
           files = responses[1].data.filter(
-            (x) => !ignoreFiles.includes(x.name)
-          );
+            (x) => !ignoreFiles.includes(x.name));
           cachePageContent.set(routePath, components);
           cacheFiles.set(routePathFiles, files);
-        })
-      ).catch((error) => {
-        console.error(error);
-      });
+        }))
+        .catch((error) => {
+          console.error(error);
+        });
     } else {
       console.log(
-        `✅✅ courseAdditionalMaterials components FROM CACHE: ${ routePath }`
-      );
+        `✅✅ courseAdditionalMaterials components FROM CACHE: ${ routePath }`);
       console.log(
-        `✅✅ courseAdditionalMaterials files FROM CACHE: ${ routePathFiles }`
-      );
+        `✅✅ courseAdditionalMaterials files FROM CACHE: ${ routePathFiles }`);
       components = cachePageContent.get(routePath);
       files = cacheFiles.get(routePathFiles);
     }
     return {
-      components,
-      files
+      components, files
     };
-  },
-  lessonsService: async (req, res) => {
+  }, lessonsService: async (req, res) => {
     const { repository } = res.locals.course;
     const coursePathInGithub = repository.replace('https://github.com/', '');
     const {
-      path,
-      refBranch
+      path, refBranch
     } = res.locals;
 
     const routePath = `${ req.url }+${ refBranch }+components`;
@@ -196,14 +184,12 @@ const apiRequests = {
     }
 
     return { components };
-  },
-  lessonAdditionalMaterialsService: async (req, res) => {
+  }, lessonAdditionalMaterialsService: async (req, res) => {
     const { repository } = res.locals.course;
     const coursePathInGithub = repository.replace('https://github.com/', '');
 
     const {
-      path,
-      refBranch
+      path, refBranch
     } = res.locals;
 
     const routePath = `${ req.url }+${ refBranch }+components`;
@@ -214,127 +200,103 @@ const apiRequests = {
 
     if (!cachePageContent.get(routePath) || !cacheFiles.get(routePathFiles)) {
       console.log(
-        `❌❌ lessonAdditionalMaterials components IS NOT from cache: ${ routePath }`
-      );
+        `❌❌ lessonAdditionalMaterials components IS NOT from cache: ${ routePath }`);
       console.log(
-        `❌❌ lessonAdditionalMaterials files IS NOT from cache: ${ routePathFiles }`
-      );
+        `❌❌ lessonAdditionalMaterials files IS NOT from cache: ${ routePathFiles }`);
 
       const componentsRaw = await axios.get(
-        requestLessonAdditionalMaterials(
-          coursePathInGithub,
-          `${ path.contentSlug }`,
-          refBranch
-        ),
-        authToken
-      );
+        requestLessonAdditionalMaterials(coursePathInGithub,
+          `${ path.contentSlug }`, refBranch
+        ), authToken);
       // Github raw download_url juhend:
       // https://stackoverflow.com/questions/73819136/how-do-i-get-and-download-the-contents-of-a-file-in-github-using-the-rest-api/73824136
       // Download_url token muutub iga 7 päeva tagant Githubi poolt:
       // https://github.com/orgs/community/discussions/23845#discussioncomment-3241866
       const filesRaw = await axios.get(
-        requestLessonFiles(
-          coursePathInGithub,
-          `${ path.contentSlug }`,
+        requestLessonFiles(coursePathInGithub, `${ path.contentSlug }`,
           refBranch
-        ),
-        authToken
-      );
+        ), authToken);
 
-      await axios.all([componentsRaw, filesRaw]).then(
-        axios.spread((...responses) => {
+      await axios.all([componentsRaw, filesRaw])
+        .then(axios.spread((...responses) => {
           [components, files] = responses;
           files = responses[1].data.filter(
-            (x) => !ignoreFiles.includes(x.name)
-          );
+            (x) => !ignoreFiles.includes(x.name));
           cachePageContent.set(routePath, components);
           cacheFiles.set(routePathFiles, files);
-        })
-      ).catch((error) => {
-        console.error(error);
-      });
+        }))
+        .catch((error) => {
+          console.error(error);
+        });
     } else {
       console.log(
-        `✅✅ lessonAdditionalMaterials components FROM CACHE: ${ routePath }`
-      );
+        `✅✅ lessonAdditionalMaterials components FROM CACHE: ${ routePath }`);
       console.log(
-        `✅✅ lessonAdditionalMaterials files FROM CACHE: ${ routePathFiles }`
-      );
+        `✅✅ lessonAdditionalMaterials files FROM CACHE: ${ routePathFiles }`);
       components = cachePageContent.get(routePath);
       files = cacheFiles.get(routePathFiles);
     }
 
     return {
-      components,
-      files
+      components, files
     };
-  },
-  lessonComponentsService: async (req, res) => {
+  }, lessonComponentsService: async (req, res) => {
     const { repository } = res.locals.course;
     const coursePathInGithub = repository.replace('https://github.com/', '');
     const {
-      path,
-      refBranch
+      path, refBranch
     } = res.locals;
 
     const routePath = `${ req.url }+${ refBranch }+components`;
-    const routePathSources = `${ req.url }+${ refBranch }+sources`;
+    //const routePathSources = `${ req.url }+${ refBranch }+sources`;
 
     let components;
     let sources;
     let componentsRaw;
-    let sourcesRaw;
+    //let sourcesRaw;
 
     if (path.type === 'concept') {
+      //console.log(path);
       if (!cachePageContent.get(routePath)) {
         console.log(`❌❌ concept components IS NOT from cache: ${ routePath }`);
-        console.log(
-          `❌❌ concept sources IS NOT from cache: ${ routePathSources }`
-        );
+        //console.log(`❌❌ concept sources IS NOT from cache: ${
+        // routePathSources }`);
 
         try {
           componentsRaw = await axios.get(
-            requestConcepts(
-              coursePathInGithub,
-              `${ path.componentSlug }`,
+            requestConcepts(path.componentRepo, `${ path.componentSlug }`,
               refBranch
-            ),
-            authToken
-          ).catch(() => {
+            ), authToken).catch(() => {
             console.log('unable to fetch ' + path.componentSlug);
           });
         } catch (error) {
           console.log('Unable to get componentsRaw');
           console.error(error);
         }
-        try {
-          sourcesRaw = await axios.get(
-            requestSources(
-              coursePathInGithub,
-              `${ path.componentSlug }`,
-              refBranch
-            ),
-            authToken
-          ).catch(() => {
-            console.log('unable to fetch ' + path.componentSlug);
-          });
-        } catch (error) {
-          console.log('Unable to get sourcesRaw');
-          console.error(error);
-        }
+        /*try {
+         sourcesRaw = await axios.get(
+         requestSources(coursePathInGithub, `${ path.componentSlug }`,
+         refBranch
+         ), authToken).catch(() => {
+         console.log('unable to fetch ' + path.componentSlug);
+         });
+         } catch (error) {
+         console.log('Unable to get sourcesRaw');
+         console.error(error);
+         }*/
 
-        await axios.all([componentsRaw, sourcesRaw]).then(
-          axios.spread((...responses) => {
-            [components, sources] = responses;
+        await axios.all([componentsRaw])
+          .then(axios.spread((...responses) => {
+            [components] = responses;
             cachePageContent.set(routePath, components);
-            cachePageContent.set(routePathSources, sources);
-          })
-        ).catch((error) => error);
+            //cachePageContent.set(routePathSources, sources);
+          }))
+          .catch((error) => error);
       } else {
         console.log(`✅✅ concept components FROM CACHE: ${ routePath }`);
-        console.log(`✅✅ concept sources FROM CACHE: ${ routePathSources }`);
+        //console.log(`✅✅ concept sources FROM CACHE: ${ routePathSources }`);
         components = cachePageContent.get(routePath);
-        sources = cachePageContent.get(routePathSources);
+        //sources = cachePageContent.get(routePathSources);
       }
     }
 
@@ -342,13 +304,9 @@ const apiRequests = {
       if (!cachePageContent.get(routePath)) {
         console.log(`❌❌ practice components IS NOT from cache: ${ routePath }`);
         components = await axios.get(
-          requestPractices(
-            coursePathInGithub,
-            `${ path.componentSlug }`,
+          requestPractices(coursePathInGithub, `${ path.componentSlug }`,
             refBranch
-          ),
-          authToken
-        ).catch(() => {
+          ), authToken).catch(() => {
           console.log('unable to fetch practice components');
         });
         cachePageContent.set(routePath, components);
@@ -359,60 +317,44 @@ const apiRequests = {
     }
 
     return {
-      components,
-      sources
+      components, sources
     };
-  },
-  async createNewBranch(repo, from, to) {
+  }, async createNewBranch(repo, from, to) {
     const parent = await octokit.request(
-      `GET /repos/${ repo }/git/ref/heads/${ from }`,
-      {
+      `GET /repos/${ repo }/git/ref/heads/${ from }`, {
         headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
-      }
-    );
+      });
     const parentSha = parent.data.object.sha;
     //console.log('sha', parentSha);
 
     // 4. create new branch/ref
-    return await octokit.request(
-      `POST /repos/${ repo }/git/refs`,
-      {
-        ref: `refs/heads/${ to }`,
-        sha: parentSha,
-        headers: {
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
+    return await octokit.request(`POST /repos/${ repo }/git/refs`, {
+      ref: `refs/heads/${ to }`, sha: parentSha, headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
       }
-    );
-  },
-  async listBranches(repo) {
+    });
+  }, async listBranches(repo) {
     const resp = await octokit.request(
       `GET /repos/${ repo }/branches?per_page=100`, {
-        owner: 'OWNER',
-        repo: 'REPO',
-        headers: {
+        owner: 'OWNER', repo: 'REPO', headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
-      }).catch(() => {
-      console.log('Unable to fetch branches');
+      }).catch((e) => {
+      console.log('Unable to fetch branches', e);
     });
     return (resp && resp.data) ? resp.data : [];
-  },
-  getAllCourses: async () => {
+  }, getAllCourses: async () => {
     return await usersApi.get(membersRequests.getAllCourses)
       .catch((error) => {
         console.error(error);
       });
 
-  },
-  getCourseById: async (courseId) => {
+  }, getCourseById: async (courseId) => {
     const cacheName = `course+${ courseId }`;
     if (!cacheTeamCourses.has(cacheName)) {
-      console.log(
-        `❌❌ course ${ courseId } IS NOT from cache`
-      );
+      console.log(`❌❌ course ${ courseId } IS NOT from cache`);
 
       const course = await usersApi.get(membersRequests.getCourse + courseId)
         .catch((error) => {
@@ -421,29 +363,54 @@ const apiRequests = {
       cacheTeamCourses.set(cacheName, course?.data?.data);
       return course?.data?.data;
     } else {
-      console.log(
-        `✅✅ course for ${ courseId } FROM CACHE`
-      );
+      console.log(`✅✅ course for ${ courseId } FROM CACHE`);
       return cacheTeamCourses.get(cacheName);
     }
-  },
-  async mergeMasterWithDraft(repo, message) {
+  }, async mergeMasterWithDraft(repo, message) {
     return await octokit.request(`POST /repos/${ repo }/merges`, {
-      base: 'master',
-      head: 'draft',
-      commit_message: message,
-      headers: {
+      base: 'master', head: 'draft', commit_message: message, headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-  },
-  async deleteBranch(repo, branch) {
+  }, async deleteBranch(repo, branch) {
     return await octokit.request(
       `DELETE /repos/${ repo }/git/refs/heads/${ branch }`, {
         headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
       });
+  }, conceptUsage: async (req, uuid) => {
+    const usages = [];
+    if (cacheConceptUsage.has('conceptUsages+' + req.params.courseId)) {
+      return cacheConceptUsage.get('conceptUsages+' + req.params.courseId);
+    } else {
+      const allCourses = await getAllCoursesData(req);
+      for await (const contents of allCourses.map(async course => {
+        // get config from draft (this course) or from master (other courses)
+        const courseConfig = await getCourseData(
+          course, parseInt(course.id) === parseInt(req.params.courseId)
+            ? 'draft'
+            : 'master');
+        if (courseConfig) {
+          // find matches by slug (this course) or by uuid (other courses)
+          /*const match = parseInt(course.id) === parseInt(req.params.courseId)
+           ? req.params.slug
+           : uuid;*/
+          const lessons = courseConfig.config.lessons.filter(
+            lesson => lesson.components.includes(uuid));
+          if (lessons.length) {
+            usages.push({
+              course: course,
+              lessons: lessons
+            });
+          }
+        }
+      })) {
+        //console.log(usages);
+      }
+      cacheConceptUsage.set('conceptUsages+' + req.params.courseId, usages);
+      return usages;
+    }
   }
 };
 

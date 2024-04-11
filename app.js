@@ -11,7 +11,6 @@ import fileUpload from 'express-fileupload';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as GitHubStrategy } from 'passport-github2';
-import pkg from 'body-parser';
 import { fileURLToPath } from 'url';
 import pool from './db.js';
 import {
@@ -60,6 +59,7 @@ app.use(favicon(join(__dirname, '/public/images', 'favicon.ico')));
 app.use(fileUpload());
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /** Testing API endpoints */
 app.get('/ping', (req, res) => {
@@ -97,14 +97,6 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-
-/** Middleware for parsing bodies from URL. Options can be found here. Source code can be found here.
- * https://github.com/expressjs/body-parser#bodyparserurlencodedoptions
- * // { extended: true } precises that the req.Body object will contain values
- * of any type instead of just strings. https://stackoverflow.com/a/55558485
- */
-const { urlencoded } = pkg;
-app.use(urlencoded({ extended: true }));
 
 /** Setup passport session.
  To support persistent login sessions, Passport needs to be able to
@@ -264,6 +256,7 @@ app.get(
 );
 
 app.use('/role-select', roleRoutes);
+app.get('/get-ois-content', allCoursesController.getOisContent);
 
 /** From here on, following endpoints are available only with successful login and authentication */
 app.use(ensureAuthenticated);
@@ -333,8 +326,6 @@ app.use('/add-version', addNewVersionRoutes);
 
 app.use('/course', courseRoutes);
 app.use('/course-edit', courseEditRoutes);
-
-app.get('/get-ois-content', allCoursesController.getOisContent);
 
 /** Redirect all unknown paths to 404 page */
 app.all('*', resetSelectedVersion, otherController.notFound);

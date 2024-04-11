@@ -1,0 +1,91 @@
+<div>
+    <div class="mb-2">
+        <div class="card-title p-2 flex items-center justify-between">
+            <h4 class="my-0">Praktikumi {{#if readme.data.slug }}muutmine{{else}}lisamine{{/if}}</h4>
+        </div>
+    </div>
+    <div>
+        {{#if conceptUsage.length}}
+            <p class="p-2 my-0 cursor-pointer flex items-center text-system-red-tlu"
+               onclick="document.getElementById('showUsage').classList.toggle('hidden')">
+                NB! Antud praktikum on kasutuses ({{conceptUsage.length}})
+                <i class="material-symbols-outlined ml-2">expand_more</i>
+            </p>
+            <ul class="hidden transition" id="showUsage">
+                {{#each conceptUsage}}
+                    <li><strong>{{this.course.name}}</strong> [{{this.course.code}}]:
+                        <ul class="list-disc ml-4">
+                            {{#each this.lessons}}
+                                <li>
+                                    {{this.name}}
+                                </li>
+                            {{/each}}
+                        </ul>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            {{#if readme.sha}}
+                <p class="my-0 p-2">Antud praktikumi ei kasutata</p>
+            {{/if}}
+        {{/if}}
+    </div>
+</div>
+<div class="card mb-2">
+    <form action="/course-edit/{{course.id}}/practice/{{readme.slug}}" method="post" id="courseEditForm"
+          enctype="multipart/form-data">
+        <div class="p-2">
+            <input type="hidden" name="sha" value="{{readme.sha}}">
+            <input type="hidden" name="slug" id="slug" value="{{readme.slug}}">
+            <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
+            <input type="hidden" name="content" id="content">
+            <label for="name">Praktikumi nimetus</label>
+            <input type="text" name="name" id="name" value="{{readme.data.name}}"
+                   class="input-single" required>
+            <div class="block my-4">
+                <label>Praktikumi kirjeldus:</label>
+                <div id="editor" class="bg-white text-system-black py-4 rounded-2xl"></div>
+            </div>
+            {{> files-input files=files prefix=(concatActivePath "practices" readme.slug) }}
+        </div>
+    </form>
+</div>
+<script src="/js/et-editor.js"></script>
+<script>
+
+    const editor = new Editor({
+        el: document.querySelector('#editor'),
+        height: 'auto',
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
+    });
+
+    function deletePractice() {
+        const id = document.getElementById('courseId').value;
+        const slug = document.getElementById('slug').value;
+        fetch(
+                '/course-edit/' + id + '/practice/' + slug,
+                {
+                    method: 'DELETE'
+                }
+        ).then(() => {
+            document.getElementById('modal').style.display = 'none';
+            history.back();
+        });
+    }
+
+    window.onload = function () {
+        document.getElementById('saveBtn').innerHTML = 'Salvesta praktikum';
+        if (document.getElementById('showUsage')) {
+            document.getElementById('delBtn').disabled = true;
+        } else {
+            document.getElementById('delBtn').onclick = function () {
+                document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle praktikumi kustutada?';
+                document.getElementById('modal').style.display = 'flex';
+            };
+            document.getElementById('delOK').onclick = deleteConcept;
+        }
+    };
+
+</script>

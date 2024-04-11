@@ -1,7 +1,8 @@
-// check which theme is choosed and if it is dark then let the mode switcher will be selected
+// check which theme is chosen and if it is dark then let the mode switcher
+// will be selected
 window.onload = function () {
-  var htmlElement = document.documentElement;
-  var checkboxElement = document.getElementById('switch');
+  const htmlElement = document.documentElement;
+  const checkboxElement = document.getElementById('switch');
 
   if (htmlElement.classList.contains('light-theme')) {
     checkboxElement.checked = false;

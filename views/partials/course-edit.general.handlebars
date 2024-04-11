@@ -1,46 +1,115 @@
-<div class="tab-pane">
+<form action="/course-edit/{{course.id}}" method="post" id="courseEditForm" enctype="multipart/form-data">
+    <div class="card-title p-2 flex items-center justify-between mb-4">
+        <h4 class="my-0">Üldandmete muutmine</h4>
+    </div>
     <label class="text-lg font-bold">
-        <span class="flex items-center">
-            <i class="material-symbols-outlined mr-2">home</i>
-            Kursuse nimi
-        </span>
-        <span class="input-w-button">
-            <input type="text" name="config/courseName" class="input-single" required value="{{config.courseName}}">
-            <!--button class="btn btn-primary" type="submit" value="Sisene">
-                <i class="material-symbols-outlined">save</i>
-            </button!-->
-        </span>
+            <span class="flex items-center">
+                <i class="material-symbols-outlined mr-2">home</i>
+                Kursuse nimi
+            </span>
+        <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
     </label>
 
-    <label class="text-lg font-bold mt-4">
-        <span class="flex items-center">
-            <i class="material-symbols-outlined mr-2">link</i> Kursuse link
+    <div class="text-lg font-bold mt-4 whitespace-nowrap">
+        <span>
+            <i class="material-symbols-outlined mr-2">link</i> Kursuse link:
         </span>
-        <input type="text" name="config/courseUrl" id="oisUrl" class="input-single" required
-               value="{{config.courseUrl}}">
-    </label>
+        <a href="{{config.courseUrl}}" target="_blank">{{config.courseUrl}}</a>
+    </div>
     <hr class="my-4">
 
     <div class="block mb-4">
-        <label for="component">Üldinfo</label>
-        <div id="tinymde_commandbar"></div>
-        <div class="txtcontainer w-full relative">
-            <button class="btn btn-primary absolute -top-16 right-4" id="sync" title="Uuenda õisist" type="button">
-                <i class="material-symbols-outlined">sync</i>
-            </button>
-            <textarea id="component" cols="30" rows="30" name="docs/README.md">{{component}}</textarea>
-        </div>
+        <input type="hidden" name="courseId" id="courseId" value="{{course.id}}">
+        <input type="hidden" name="readmeSHA" value="{{readme.sha}}">
+        <input type="hidden" name="materialsSHA" value="{{materials.sha}}">
+        <input type="hidden" id="readmeContent" name="readmeContent">
+        <input type="hidden" id="materialsContent" name="materialsContent">
+        <label>Üldinfo</label>
+        <div id="editor1" class="bg-white text-system-black py-4 rounded-2xl"></div>
     </div>
 
     <div class="block mb-4">
         <label>Lisamaterjalid:</label>
-        <input type="hidden" name="additionalMaterials[sha]" value="{{additionalMaterials.sha}}">
-        <div id="tinymde_commandbar2"></div>
-        <div class="txtcontainer w-full">
-            <textarea id="additionalMaterials[content]" cols="30" rows="30"
-                      name="docs/lisamaterjalid.md">{{additionalMaterials.content}}</textarea>
-        </div>
-
+        <div id="editor2" class="bg-white text-system-black py-4 rounded-2xl"></div>
     </div>
     {{> files-input files=files prefix="docs"}}
-</div>
+</form>
+
+<div class="border-4 border-system-focus hidden"></div>
+<script src="/js/et-editor.js"></script>
+<script>
+
+    function createOisButton() {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'toastui-editor-toolbar-icons last';
+        button.style.backgroundImage = 'none';
+        button.style.margin = '0';
+        button.innerHTML = `<i class="material-symbols-outlined">sync</i>`;
+        button.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            fetch('/get-ois-content?courseId={{course.code}}', {
+                method: 'get', headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then((res) => {
+                if (res.ok) {
+                    return res.json();
+                }
+                return Promise.reject(res); // 2. reject instead of throw
+            }).then((res) => {
+                editor1.setMarkdown(res.data);
+                document.getElementById('readmeContent').value = res.data;
+                isFormDirty = true;
+                document.getElementById('saveBtn').classList.add('border-4', 'border-system-focus');
+            }).catch((e) => {
+                console.log(e);
+            });
+        });
+
+        return button;
+    }
+
+    const editor1 = new Editor({
+        usageStatistics: false,
+        el: document.querySelector('#editor1'),
+        height: '500px',
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
+        toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['hr', 'quote'],
+            ['ul', 'ol', 'task', 'indent', 'outdent'],
+            ['table', 'image', 'link'],
+            ['code', 'codeblock'],
+            // Customize the last button
+            [
+                {
+                    el: createOisButton(),
+                    tooltip: 'Uuenda õisist'
+                }
+            ]
+        ],
+        /*events: {
+            change: () => {isFormDirty = true;}
+        }*/
+        language: 'et-EE'
+    });
+
+    const editor2 = new Editor({
+        el: document.querySelector('#editor2'),
+        height: 'auto',
+        initialEditType: 'wysiwyg',
+        initialValue: `{{#each materials.content}}{{this}}{{/each}}`,
+        language: 'et-EE'
+    });
+
+    window.onload = function () {
+        document.getElementById('saveBtn').innerHTML = 'Salvesta üldandmed';
+        document.getElementById('delBtn').onclick = function () {
+            document.getElementById('delMsg').innerText = 'Oled kindel, et tahad selle ainekursuse kustutada?';
+            document.getElementById('modal').style.display = 'flex';
+        };
+        //document.getElementById('delOK').onclick = deleteCourse;
+    };
+</script>

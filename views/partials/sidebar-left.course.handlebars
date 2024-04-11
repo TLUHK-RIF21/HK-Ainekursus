@@ -10,7 +10,7 @@
             <div class="!no-underline mb-4 pr-4">
                 <!-- Topic name and code -->
                 {{#with course}}
-                    <a href="/course/{{../path.courseId}}/{{../docs.[0].slug}}?ref={{../path.refBranch}}"
+                    <a href="/course/{{../path.courseId}}/{{this.config.docs.[0].slug}}?ref={{../path.refBranch}}"
                     class="!no-underline">
                     <div class="mb-2 w-[22rem] max-w-full">
                         <div class="card-header mb-2 flex justify-between hover:ml-[-10px] hover:pl-[8px] hover:border-l-2 hover:border-link-action">
@@ -69,23 +69,27 @@
 
                         <!-- Themes links -->
                         {{#each this.components}}
-                            <div class="tab-content flex gap-2 {{#if_equal (concatActivePath ../this.slug this)
+                            <div class="tab-content flex gap-2 {{#if_equal (concatActivePath ../this.slug this.slug)
                                                                            ../../path.fullPath }}active-tab-content menu-card{{/if_equal }}">
                                 <a class="flex flex-row justify-between grow py-3 !no-underline"
-                                   href="/course/{{../../path.courseId}}/{{../this.slug}}/{{this}}?ref={{../../path.refBranch}}
+                                   href="/course/{{../../path.courseId}}/{{../this.slug}}/{{this.slug}}?ref={{../../path.refBranch}}
                                 ">
                                 <div class="flex gap-2">
                                     <span class="material-symbols-outlined">
-                                        {{{showComponentType this ../../course.config.concepts
-                                                             ../../course.config.practices }}}
+                                        {{#if_equal this.path 'concepts'}}
+                                            sticky_note_2
+                                        {{else}}
+                                            {{#if_equal this.path 'practices'}}
+                                                build
+                                            {{else}}
+                                                attach_file
+                                            {{/if_equal}}
+                                        {{/if_equal}}
                                     </span>
-                                    {{{showComponentName this ../../course.config.concepts
-                                                         ../../course.config.practices}}}
+                                    {{this.name}}
                                 </div>
                                 {{#if_not_equal ../../user.team.slug 'teachers' }}
-                                    {{#ifInMarkedComponents
-                                            (showComponentUUID ../this ../../../concepts ../../../practices)
-                                            ../../../markedAsDoneComponentsArr }}
+                                    {{#ifInMarkedComponents this.uuid ../../../markedAsDoneComponentsArr }}
                                         <span class="material-symbols-outlined">task_alt</span>
                                     {{else }}
                                         <span class="material-symbols-outlined">radio_button_unchecked</span>
@@ -96,7 +100,7 @@
                         {{/each}}
 
                         <!-- Lesson extra material -->
-                        {{#each this.config.config.additionalMaterials}}
+                        {{#each this.additionalMaterials}}
                             <div class="tab-content flex gap-2 {{#if_equal (concatActivePath ../this.slug this.slug)
                                                                            ../../path.fullPath }}active-tab-content{{/if_equal }}">
                                 <a class="py-3 w-full !no-underline"
@@ -121,7 +125,7 @@
                 {{#if_equal selectedVersion 'master'}}
                     {{#if (isTeacher ../user)}}
                         <hr class="my-4">
-                        <a href="/course-edit/{{../../path.courseId}}/{{../../docs.[0].slug}}about?ref=draft"
+                        <a href="/course-edit/{{../../path.courseId}}"
                            class="btn btn-primary w-full mt-2">Muuda kursust</a>
                     {{/if}}
                 {{/if_equal}}

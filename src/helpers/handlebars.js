@@ -79,10 +79,15 @@ export default function hbsHelpers(hbs) {
         }
         return options.inverse(this);
       },
-      if_contains: (a, opts) => {
-        if (opts) {
-          return opts.includes(a);
-        }
+      contains: (value, array, options) => {
+        // fallback...
+        array = (array instanceof Array) ? array : [array];
+        return (array.some(item => (item && item.uuid === value)))
+          ? options.fn(this)
+          : '';
+      },
+      showDelBtn: (partial, slug) => {
+        return !!(slug !== 'new' && partial !== 'course-edit.general');
       },
       componentIcon: (type) => {
         switch (type) {
@@ -136,7 +141,6 @@ export default function hbsHelpers(hbs) {
         return user?.roles?.includes('teacher') || false;
       },
       findTeacher: (teacherName, teachers) => {
-        console.log(teacherName, teachers);
         const teacherData = teachers?.find(
           (x) => (x.firstName + ' ' + x.lastName) === teacherName);
         // console.log('teacherData2:', teacherData);
@@ -236,14 +240,6 @@ export default function hbsHelpers(hbs) {
         markedAsDoneComponentsUUIDs,
         courseBranchComponentsUUIDs
       ) => {
-        /*console.log(
-         'markedAsDoneComponentsUUIDs7:',
-         markedAsDoneComponentsUUIDs
-         );
-         console.log(
-         'courseBranchComponentsUUIDs7:',
-         courseBranchComponentsUUIDs
-         );*/
         if (markedAsDoneComponentsUUIDs) {
           return markedAsDoneComponentsUUIDs.filter(
             (item) => courseBranchComponentsUUIDs.includes(item)).length;
@@ -267,7 +263,10 @@ export default function hbsHelpers(hbs) {
           return 0;
         }
       },
-      jsonStringify: (context) => JSON.stringify(context)
+      jsonStringify: (context) => JSON.stringify(context),
+      whichPartial: (partial) => {
+        return partial;
+      }
     }
   });
 }

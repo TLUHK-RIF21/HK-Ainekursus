@@ -1,28 +1,97 @@
 <div class="block">
-    <label>Failid:</label>
-    <ul>
+    <label class="text-lg font-bold mb-4">Lisatud failid:</label>
+    <ul class="flex flex-wrap justify-center gap-4 after:basis-60 after:content-['']">
         {{#each files}}
-            <input type="hidden" name="{{prefix}}/files/{{this.name}}" value="{{this.name}}">
-            <input type="hidden" name="{{prefix}}_files[][slug]" value="{{this.slug}}">
-            <li>{{this.name}} {{this.slug}}
+            <li class="basis-60 relative">
+                <input type="hidden" name="files[]" value="{{this.path}}"/>
+                <a href="{{this.url}}" target="_blank">
+                    <img class="object-cover object-center w-full h-auto max-w-full rounded-lg"
+                         src="{{this.thumbUrl}}"
+                         alt="{{this.name}}"/>
+                    <p class="m-0 p-0 text-sm overflow-x-hidden">{{this.name}}</p>
+                </a>
+                <button type="button" class="btn btn-primary min-h-0 w-full py-1 mb-4 px-4 cursor-pointer"
+                        onclick="copyFileLink('[{{this.name}}]({{this.shortUrl}})')">Kopeeri
+                    faili link
+                    <i class="material-symbols-outlined text-sm" aria-hidden="true">link</i>
+                </button>
+                <button class="absolute top-1 right-1 btn btn-primary p-1 min-h-0 min-w-0" onclick="removeImage(this)">
+                    <i class="material-symbols-outlined" aria-hidden="true">delete</i>
+                </button>
             </li>
         {{/each}}
-        <li class="card flex justify-content-between items-center mb-2">
-            <!--
-            <label for="{{prefix}}_newFile" class="hidden"></label>
-            <input type="file" id="{{prefix}}_newFile" name="{{prefix}}_newFile"
-                   class="input-single" placeholder="Lisa uus fail">
-            <button class="btn btn-primary ml-4">
-                <i class="material-symbols-outlined text-xxxl text-brand_red  transition ease-in-out duration-1000"
-                   aria-hidden="true">attach_file</i>
-            </button>
-!-->
-            <div class="max-w-xs">
-                <label for="example1" class="mb-1 block text-sm font-medium text-gray-700">Lisa fail</label>
-                <input id="example1" type="file" name="{{prefix}}/files/"
-                       class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
-            </div>
-
-        </li>
     </ul>
+    <ul class="added-files flex-col column justify-center" id="fileList">
+
+    </ul>
+    <button type="button" id="removeButton" class="btn btn-danger py-2 min-h-0 min-w-0 mt-4 hidden" disabled>Eemalda
+        valitud
+    </button>
+    <div class="mt-4 max-w-xs">
+        <label for="fileInput" class="mb-1 block font-medium text-gray-700">Lisa fail</label>
+        <input id="fileInput" type="file" name="{{prefix}}/files[]" multiple placeholder="vali fail"
+               class="mt-2 block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-500 file:py-2 file:px-4 file:font-semibold file:text-white hover:file:bg-teal-700 focus:outline-none disabled:pointer-events-none disabled:opacity-60"/>
+    </div>
 </div>
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const removeButton = document.getElementById('removeButton');
+
+    fileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        for (const file of files) {
+            const listItem = document.createElement('li');
+            listItem.classList.add('cursor-pointer', 'flex', 'flex-wrap', 'align-center', 'gap-4');
+            listItem.innerHTML = `<span class="material-symbols-outlined">radio_button_unchecked</span>` + file.name;
+            fileList.appendChild(listItem);
+            newFiles.push(file);
+        }
+        if (newFiles.length > 0) {
+            removeButton.classList.remove('hidden');
+        }
+    });
+
+    removeButton.addEventListener('click', () => {
+        const selectedFile = fileList.querySelector('.selected');
+        if (selectedFile) {
+            fileList.removeChild(selectedFile);
+            const fileName = selectedFile.childNodes[1].nodeValue;
+            newFiles = newFiles.filter(f => f.name !== fileName);
+            const selectedCount = fileList.querySelectorAll('.selected').length;
+            removeButton.disabled = selectedCount === 0;
+        }
+        if (newFiles.length === 0)
+            removeButton.classList.add('hidden');
+
+    });
+
+    fileList.addEventListener('click', (event) => {
+        let clickedItem = event.target;
+        if (clickedItem.tagName === 'LI' || clickedItem.tagName === 'SPAN') {
+            if (clickedItem.tagName === 'SPAN') {
+                clickedItem = clickedItem.parentElement;
+            }
+            clickedItem.classList.toggle('selected');
+            const span = clickedItem.childNodes[0];
+            if (span.textContent === 'radio_button_checked') {
+                span.textContent = 'radio_button_unchecked';
+            } else {
+                span.textContent = 'radio_button_checked';
+            }
+            const selectedCount = fileList.querySelectorAll('.selected').length;
+            removeButton.disabled = selectedCount === 0;
+        }
+    });
+
+    function removeImage(el) {
+        el.closest('li').remove();
+        isFormDirty = true;
+        // trigger input event, so Save btn can be updated
+        form.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function copyFileLink(copyText) {
+        navigator.clipboard.writeText(copyText);
+    }
+</script>

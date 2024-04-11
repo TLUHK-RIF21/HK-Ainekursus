@@ -46,9 +46,10 @@ function submitInput(input) {
   const formData = new FormData();
   formData.append('courseId', courseId);
   // Append the changed field to the FormData
-  if (input.files && input.files[0])
-    formData.append(input.name, input.files[0], input.value);
-  else formData.append(input.name, input.value);
+  //if (input.files && input.files[0])
+  //  formData.append(input.name, input.files[0], input.value);
+  //else
+  formData.append(input.name, input.value);
 
   // Submit the form with only the changed field
   // todo save indicator
@@ -87,19 +88,19 @@ function submitInput(input) {
  * @return {void}
  */
 function handleInputChange(input) {
-  input.dataset.initialValue = input.value;
-  input.addEventListener('input', debounce(function () {
-    // Check if the input value has changed
-    if (this.value !== this.dataset.initialValue) {
-      submitInput(input);
-    }
-  }, 500)); // 500ms debounce
+  /*input.dataset.initialValue = input.value;
+   input.addEventListener('input', debounce(function () {
+   // Check if the input value has changed
+   if (this.value !== this.dataset.initialValue) {
+   submitInput(input);
+   }
+   }, 500)); // 500ms debounce*/
 }
 
 // Select all input elements in the form
-document.querySelectorAll('form input, form input[type="file"]')
-  .forEach(input => {
-    // Store the initial value of the input
-    handleInputChange(input);
-  });
+/*document.querySelectorAll('form input, form input[type="file"]')
+ .forEach(input => {
+ // Store the initial value of the input
+ handleInputChange(input);
+ });*/
 

@@ -1,32 +1,5 @@
-.TinyMDE {
-    height: auto;
-    min-height: 300px;
-    border-radius: 0 0 32px 32px;
-    border-width: 2px;
-    border-style: solid;
-    border-color: var(--system-primary, #80609f);
-    border-top: none;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    color: var(--primary-900, #331a4d);
-}
-
-.TMCommandBar {
-    -ms-overflow-style: none;
-    border-radius: 32px 32px 0 0;
-    border-width: 2px;
-    border-style: solid;
-    border-color: var(--system-primary, #80609f);
-    border-bottom: none;
-    padding: 1.5rem;
-    color: var(--primary-900, #331a4d);
-    box-sizing: content-box;
-    display: flex;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-user-select: none;
-    user-select: none;
+.toastui-editor-contents {
+    font-size: 16px !important;
 }
 
 .tab-btn {
