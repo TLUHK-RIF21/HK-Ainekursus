@@ -97,8 +97,8 @@
 
     const beforeUnloadHandler = (event) => {
         if (isFormDirty) {
-            event.returnValue = 'Are you sure you want to leave? You have unsaved changes.'; // For older browsers
-            return 'Are you sure you want to leave? You have unsaved changes.'; // Standard
+            event.returnValue = 'Kas soovite kindlasti lahkuda? Teil on salvestamata muudatusi.'; // For older browsers
+            return 'Kas soovite kindlasti lahkuda? Teil on salvestamata muudatusi.'; // Standard
         }
     };
 
