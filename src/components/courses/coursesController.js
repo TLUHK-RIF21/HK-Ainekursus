@@ -6,16 +6,13 @@ import utf8 from 'utf8';
 import getAllCoursesData from '../../functions/getAllCoursesData.js';
 import { function1 } from '../../functions/imgFunctions.js';
 import {
-  returnNextPage,
-  returnPreviousPage,
-  setCourseButtonPaths
+  returnNextPage, returnPreviousPage, setCourseButtonPaths
 } from '../../functions/navButtonFunctions.js';
 import apiRequests from './coursesService.js';
 import allNotificationsController
   from '../notifications/notificationsController.js';
 import {
-  getComponentsUUIDs,
-  getMarkedAsDoneComponents
+  getComponentsUUIDs, getMarkedAsDoneComponents
 } from '../../functions/getListOfDoneComponentUUIDs.js';
 import { getFolder } from '../../functions/githubFileFunctions.js';
 import { cacheLessons } from '../../setup/setupCache.js';
@@ -129,8 +126,7 @@ const renderPage = async (req, res) => {
   console.log(`Execution time componentMarkdown: ${ end2 - start2 } ms`);
 
   /** Select html from rendered Markdown, but exclude Table of Contents */
-  const componentMarkdownWithoutTOC = componentMarkdown.substring(
-    0,
+  const componentMarkdownWithoutTOC = componentMarkdown.substring(0,
     componentMarkdown.indexOf(
       '<nav class="table-of-contents-from-markdown-123">')
   );
@@ -572,9 +568,7 @@ const allCoursesController = {
 
     // console.log('markedAsDoneComponentsArr10:', markedAsDoneComponentsArr);
     res.locals.markedAsDoneComponentsArr = await getMarkedAsDoneComponents(
-      req.user.userId,
-      courseId
-    );
+      req.user.userId, courseId);
 
     //console.log(
     //  'markedAsDoneComponentsArr10:', res.locals.markedAsDoneComponentsArr);
@@ -591,7 +585,6 @@ const allCoursesController = {
 
     /** Get the selected course that was accessed with current endpoint  */
     let course = await apiRequests.getCourseById(courseId);
-
     if (!course) {
       return res.redirect('/notfound');
     }
@@ -604,21 +597,19 @@ const allCoursesController = {
         course.repository.replace('https://github.com/', ''));
 
       validBranches = validBranches.map((b) => b.name);
-    }
+      if (validBranches.length === 0) { // repo not found
+        return res.redirect('/notfound');
+      }
 
-    if (validBranches.length === 0) { // repo not found
-      return res.redirect('/notfound');
+      // if selectedVersion='draft', check if branch exists, if not create it
+      // from master
+      if (selectedVersion === 'draft' && !validBranches.includes('draft')) {
+        const newBranch = await apiRequests.createNewBranch(
+          course.repository.replace('https://github.com/', ''), 'master',
+          'draft'
+        );
+      }
     }
-
-    // if selectedVersion='draft', check if branch exists, if not create it
-    // from master
-    if (selectedVersion === 'draft' && !validBranches.includes('draft')) {
-      const newBranch = await apiRequests.createNewBranch(
-        course.repository.replace('https://github.com/', ''), 'master',
-        'draft'
-      );
-    }
-
     let courseConfig = await getCourseData(course, selectedVersion);
     // if we are missing config file, create it...
     if (!courseConfig || !courseConfig.config) {
@@ -893,8 +884,7 @@ const allCoursesController = {
       }
     });
     courseConfig.config?.lessons?.forEach((x) => {
-      console.log(
-        x.additionalMaterials, componentSlug, x.slug, contentSlug);
+      console.log(x.additionalMaterials, componentSlug, x.slug, contentSlug);
       if (x.additionalMaterials && x.additionalMaterials.length &&
         x.additionalMaterials[0].slug === componentSlug && x.slug ===
         contentSlug) {
@@ -928,9 +918,8 @@ const allCoursesController = {
      */
     if ((contentSlug && !contentName) ||
       (contentSlug && contentName && componentSlug && !componentName)) {
-      console.log(
-        'no contentName or componentName found', contentSlug, contentName,
-        componentSlug, componentName
+      console.log('no contentName or componentName found', contentSlug,
+        contentName, componentSlug, componentName
       );
       return res.redirect('/notfound');
     }
@@ -1042,28 +1031,23 @@ const allCoursesController = {
     }
 
     let teacherCourses = allCourses.data.data.filter(
-      course => !course.teachers.some(teacher => user.userId === teacher.id)
-    );
+      course => !course.teachers.some(teacher => user.userId === teacher.id));
 
     // Flatten the array
-    let flatArray = await Promise.all(
-      teacherCourses.flatMap(
-        async course => {
-          return await Promise.all(course.teachers.map(
-            async teacher => {
-              const teacherData = await getCombinedUserData(teacher.id);
-              teacher.displayName = teacher.firstName + ' ' +
-                teacher.lastName;
-              teacher.avatar_url = teacherData.github.avatar_url;
-              delete course.teachers;
-              delete course.students;
-              return { ...teacher, course: course };
-            }));
-        }));
+    let flatArray = await Promise.all(teacherCourses.flatMap(async course => {
+      return await Promise.all(course.teachers.map(async teacher => {
+        const teacherData = await getCombinedUserData(teacher.id);
+        teacher.displayName = teacher.firstName + ' ' + teacher.lastName;
+        teacher.avatar_url = teacherData.github.avatar_url;
+        delete course.teachers;
+        delete course.students;
+        return { ...teacher, course: course };
+      }));
+    }));
 
     //Sort by teacher name
-    let sortedArray = flatArray.flat().sort(
-      (a, b) => a.displayName.localeCompare(b.displayName));
+    let sortedArray = flatArray.flat()
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     //const result = [];
     teacherCourses = Object.values(
@@ -1074,12 +1058,10 @@ const allCoursesController = {
       }, {}));
 
     return res.render('other-teachers', {
-      teacherCourses,
-      user
+      teacherCourses, user
     });
 
-  },
-  getOisContent: async (req, res) => {
+  }, getOisContent: async (req, res) => {
     let longDescription = '';
     await axios('https://ois2.tlu.ee/tluois/aine/' + req.query.courseId)
       .then((response) => {
@@ -1104,8 +1086,7 @@ const allCoursesController = {
         console.log('ois fetch error');
       });
     return res.json({ data: longDescription });
-  },
-  getAllLessons: async (searchTerm, courses, refBranch) => {
+  }, getAllLessons: async (searchTerm, courses, refBranch) => {
     if (cacheLessons.has('lessons')) {
       return new Promise((resolve) => {
         console.log('✅✅  lessons IS from cache');
@@ -1131,8 +1112,5 @@ const allCoursesController = {
 };
 
 export {
-  allCoursesController,
-  responseAction,
-  renderPage,
-  getMarkedAsDoneComponents
+  allCoursesController, responseAction, renderPage, getMarkedAsDoneComponents
 };
