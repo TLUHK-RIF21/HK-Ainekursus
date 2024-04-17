@@ -13,10 +13,16 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     nextPagePath
   } = req.body;
 
+  /*
+   courseId: 2
+   componentSlug: protsessorid
+   componentUUId: b7b67ce3-ce66-4abf-941c-1c4e86d593d9
+   nextPagePath: /course/2/loeng_01/lisamaterjalid?ref=master
+   */
+
   const githubID = req.user.userId;
 
   if (!githubID || !courseId || !componentSlug || !componentUUId) {
-    console.log(githubID, courseId, componentSlug, componentUUId);
     return res.redirect('/notfound');
   }
 
@@ -29,12 +35,12 @@ router.post('/', ensureAuthenticated, async (req, res) => {
         [githubID, courseId]
       );
 
-      if (!res1[0]) {
+      if (!res1[0] || res1[0].length === 0) {
         const keyValue = {};
         keyValue[componentUUId] = componentSlug;
-        await conn.query(
+        const stat = await conn.query(
           'INSERT INTO users_progress (githubID, courseCode, markedAsDoneComponents) VALUES (?, ?, ?);',
-          [githubID, courseId, keyValue]
+          [githubID, courseId, JSON.stringify(keyValue)]
         );
       } else {
         await conn.query(
