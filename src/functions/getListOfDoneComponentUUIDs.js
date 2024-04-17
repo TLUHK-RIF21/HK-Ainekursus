@@ -58,20 +58,20 @@ const getMarkedAsDoneComponents = async (githubID, courseId) => {
       }
 
       // remove the curly braces around DB entry (that's string type)
-      const string = res10[0].markedAsDoneComponents.slice(1, -1);
+      //const string = res10[0].markedAsDoneComponents.slice(1, -1);
 
       // convert DB string entry to object
-      const obj = {};
+      //const obj = {};
 
-      string.split(',').forEach((pair) => {
-        const [key, value] = pair.trim().split(':');
-        const keyUnqouted = key.slice(1, -1);
-        const valueUnquoted = value.slice(1, -1);
-        obj[keyUnqouted] = valueUnquoted;
-      });
-
+      /*string.split(',').forEach((pair) => {
+       const [key, value] = pair.trim().split(':');
+       const keyUnqouted = key.slice(1, -1);
+       const valueUnquoted = value.slice(1, -1);
+       obj[keyUnqouted] = valueUnquoted;
+       });*/
+      const obj = res10[0].markedAsDoneComponents;
       // Finally, save keys from object to array and return the array of keys.
-      keysArray = Object.keys(obj);
+      keysArray = Object.keys(obj).filter(Boolean).flat();
     }
 
     cacheMarkedAsDoneComponents.set(cacheName, keysArray);
@@ -97,28 +97,26 @@ const getComponentsUUIDs = async (repoUrl) => {
   let keysArray = [];
 
   if (!cacheComponentsUUIds.has(cacheName)) {
-    const configJson = await getFile(owner, repo, 'config.json');
+    const configJson = await getFile(owner, repo, 'config.json', 'master');
     if (configJson) {
       const config = JSON.parse(configJson.content);
-      const allComponentSlugs = [];
 
-      config.lessons.filter(lesson => lesson.components).forEach((lesson) => {
-        allComponentSlugs.push(lesson.components);
-      });
-
-      if (allComponentSlugs.length) {
-        const allComponentSlugsFlat = [].concat(...allComponentSlugs);
-        console.log('allComponentSlugsFlat5:', allComponentSlugsFlat);
-
-        keysArray = [
-          ...config.concepts?.filter(
-            (concept) => allComponentSlugsFlat.includes(concept.slug))
-            .map((concept) => concept.uuid),
-          ...config.practices?.filter(
-            (practice) => allComponentSlugsFlat.includes(practice.slug))
-            .map((practice) => practice.uuid)
-        ];
-      }
+      keysArray = config.lessons
+        .filter(lesson => lesson.components)
+        .flatMap(lesson => lesson.components.map(component => component.uuid));
+      keysArray = keysArray.filter(Boolean);
+      /*if (allComponentSlugs.length) {
+       const allComponentSlugsFlat = [].concat(...allComponentSlugs);
+       //console.log('allComponentSlugsFlat5:', allComponentSlugsFlat);
+       keysArray = [
+       ...config.concepts?.filter(
+       (concept) => allComponentSlugsFlat.includes(concept.slug))
+       .map((concept) => concept.uuid),
+       ...config.practices?.filter(
+       (practice) => allComponentSlugsFlat.includes(practice.slug))
+       .map((practice) => practice.uuid)
+       ];
+       }*/
       //keysArray = data.practices.map(
       //  (p) => p.uuid);
     }
@@ -144,7 +142,7 @@ const ttlMarkedAsDone = async (courseId) => {
         conn = await pool.getConnection();
 
         [res10] = await conn.query(
-          'SELECT count(githubID) as done FROM users_progress WHERE courseCode = ?;',
+          'SELECT count(githubID) as done FROM users_progress WHERE courseCode = ?',
           [courseId]
         );
         //console.log('res10:', res10);

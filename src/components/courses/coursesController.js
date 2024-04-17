@@ -126,7 +126,8 @@ const renderPage = async (req, res) => {
   console.log(`Execution time componentMarkdown: ${ end2 - start2 } ms`);
 
   /** Select html from rendered Markdown, but exclude Table of Contents */
-  const componentMarkdownWithoutTOC = componentMarkdown.substring(0,
+  const componentMarkdownWithoutTOC = componentMarkdown.substring(
+    0,
     componentMarkdown.indexOf(
       '<nav class="table-of-contents-from-markdown-123">')
   );
@@ -406,7 +407,7 @@ const allCoursesController = {
       let courses;
       if (req.user && req.user.userId) {
         courses = await allCoursesController.allCoursesActiveWithComponentsData(
-          allCourses, req.user.id);
+          allCourses, req.user.userId);
       } else {
         courses = allCourses;
       }
@@ -1001,7 +1002,7 @@ const allCoursesController = {
     });
 
     /** You now have a list of active courses where each course has a list of markedAsDone components' UUIDs by the given user. */
-    // console.log('allCoursesActive1:', allCoursesActive);
+    //console.log('allCoursesActive1:', allCoursesActive);
     return allCoursesActive;
   },
 
