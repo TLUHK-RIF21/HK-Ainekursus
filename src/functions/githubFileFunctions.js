@@ -58,7 +58,7 @@ async function getFolder(owner, repo, path, ref = null, files = false) {
 async function getTree(owner, repo, branch = 'master') {
   const branchData = await getBranch(owner, repo, branch);
   if (!branchData) return false;
-  const content = github.git.getTree({
+  const content = await github.git.getTree({
     owner: owner, repo: repo, tree_sha: branchData.commit.sha, recursive: true
   }).catch(() => {
     console.log('get tree error');
@@ -151,7 +151,7 @@ async function uploadFile(owner, repo, path, // folder + new filename
 }
 
 async function getBranch(owner, repo, branch = 'master') {
-  const content = github.repos.getBranch({
+  const content = await github.repos.getBranch({
     owner: owner, repo: repo, branch: branch
   }).catch(() => {
     console.log('get tree error');

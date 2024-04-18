@@ -27,22 +27,15 @@ const validateConfig = (configObj, selectedCourse, refBranch) => {
   /** Validate that config includes all expected keys */
 
   const expectedKeys = refBranch === 'master' ? [
-      'courseUrl',
-      'active',
-      'docs',
-      'lessons',
-      'concepts',
-      'practices'
-    ]
-    : [
-      'courseUrl',
-      'active',
-      'semester',
-      'docs',
-      'teacherUsername',
-      'lessons',
-      'concepts',
-      'practices'];
+    'courseUrl', 'active', 'docs', 'lessons', 'concepts', 'practices'] : [
+    'courseUrl',
+    'active',
+    'semester',
+    'docs',
+    'teacherUsername',
+    'lessons',
+    'concepts',
+    'practices'];
 
   const objectKeys = Object.keys(configObj);
   const hasAllKeys = expectedKeys.every((key) => objectKeys.includes(key));
@@ -59,10 +52,8 @@ const validateConfig = (configObj, selectedCourse, refBranch) => {
     !Array.isArray(configObj.additionalMaterials) ||
     !configObj.additionalMaterials.length > 0 ||
     !Array.isArray(configObj.lessons) || !configObj.lessons.length > 0 ||
-    !Array.isArray(configObj.concepts) || !configObj.concepts.length > 0
-    || !Array.isArray(configObj.practices)
-    || !configObj.practices.length > 0
-  ) {
+    !Array.isArray(configObj.concepts) || !configObj.concepts.length > 0 ||
+    !Array.isArray(configObj.practices) || !configObj.practices.length > 0) {
     console.log(
       `Config file of ${ selectedCourse }, branch ${ refBranch } has one or more expected keys with incorrect type or empty array.`);
     return false;
@@ -232,6 +223,8 @@ const getConfig = async (selectedCourse, refBranch) => {
 };
 
 const createConfig = async (course, refBranch) => {
+  const gitPath = course.repository.replace('https://github.com/', '');
+  const [owner, repo] = gitPath.split('/');
 
   const conf = {
     courseName: course.name,
@@ -242,41 +235,37 @@ const createConfig = async (course, refBranch) => {
     semester: course.semester
   };
 
-  const gitPath = course.repository.replace('https://github.com/', '');
-  const tree = await getTree(gitPath, refBranch);
-
+  const tree = await getTree(owner, repo, refBranch);
   // fix tree
   // add missing parts
   if (!tree.additionalMaterials) tree.additionalMaterials = [
     {
       slug: 'lisamaterjalid', name: 'Aine lisamaterjalid'
     }];
-  if (!tree.practices) tree.practices = [
-    {
-      slug: 'praktikum_01',
-      name: 'Näidis Praktikum',
-      uuid: 'eb040d98-f24a-43f6-92bb-12af08d2d32c'
-    }];
+  /*if (!tree.practices) tree.practices = [
+   {
+   slug: 'praktikum_01',
+   name: 'Näidis Praktikum',
+   uuid: 'eb040d98-f24a-43f6-92bb-12af08d2d32c'
+   }];*/
 
   tree.docs.push({
-    slug: 'about',
-    name: 'Aine info'
+    slug: 'about', name: 'Aine info'
   });
 
   // fix lessons
   tree.lessons.forEach(lesson => {
     if (!lesson.components) {
-      lesson.components = ['naidis-sisuteema'];
+      lesson.components = [];
     }
     if (!lesson.additionalMaterials) {
       lesson.additionalMaterials = [
-        {
-          'slug': 'lisamaterjalid', 'name': 'Loengu lisamaterjalid'
-        }];
+        /*{
+         'slug': 'lisamaterjalid', 'name': 'Loengu lisamaterjalid'
+         }*/];
     }
   });
 
-  const [owner, repo] = gitPath.split('/');
   await uploadFile(owner, repo, 'config.json',
     JSON.stringify({ ...conf, ...tree }), 'config.json lisamine'
   );

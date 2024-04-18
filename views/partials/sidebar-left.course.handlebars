@@ -59,12 +59,12 @@
                         <input type="checkbox" id="chck{{@index}}">
                         <!-- @index reads every element index in "loengud" arrays. result: unique ID-s chck0, chck1, chck2 jne -->
                         <label class="tab-label" for="chck{{@index}}">
-                            <div class="flex gap-2 w-full">
+                            <span class="flex gap-2 w-full">
                                 <a class="grow py-3 !no-underline"
                                    href="/course/{{../path.courseId}}/{{this.slug}}?ref={{../path.refBranch}}
                                 ">{{this.name}}
                                 </a>
-                            </div>
+                            </span>
                         </label>
 
                         <!-- Themes links -->
