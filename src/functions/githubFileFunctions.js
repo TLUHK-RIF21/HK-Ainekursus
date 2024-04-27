@@ -4,10 +4,6 @@ import { Octokit as Github } from '@octokit/rest';
 import utf8 from 'utf8';
 import { v4 as uuidv4 } from 'uuid';
 
-const octokit = new Octokit({
-  auth: process.env.AUTH
-});
-
 const github = new Github({ auth: process.env.AUTH });
 
 // From
@@ -71,18 +67,16 @@ async function getTree(owner, repo, branch = 'master') {
       if (pathParts[1] !== '.DS_Store') {
         const contentName = pathParts[0];
         if (!tree[contentName]) {
-          // todo get name from about.md or readme.md
           tree[contentName] = [
             {
               slug: pathParts[1].endsWith('.md')
                 ? pathParts[1].slice(0, -3)
-                : pathParts[1], name: pathParts[1], uuid: uuidv4()
+                : pathParts[1], name: pathParts[1], uuid: uuidv4(), repo: repo
             }];
         }
 
         let obj = tree[contentName].find(o => o.name === pathParts[1]);
         if (!obj) {
-          // todo get name from about.md or readme.md
           tree[contentName].push({
             slug: pathParts[1].endsWith('.md')
               ? pathParts[1].slice(0, -3)

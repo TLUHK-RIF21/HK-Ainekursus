@@ -48,5 +48,33 @@ Editor.setLanguage('et-EE', {
   'Text color': 'Teksti värv',
   'Auto scroll enabled': 'Automaatne kerimine lubatud',
   'Auto scroll disabled': 'Automaatne kerimine keelatud',
-  'Choose language': 'Vali keel'
+  'Choose language': 'Vali keel',
+  Undo: 'Võta tagasi',
+  Redo: 'Tee uuesti'
 });
+
+function createUndoButton(editor) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'toastui-editor-toolbar-icons';
+  button.style.backgroundImage = 'none';
+  button.style.margin = '0';
+  button.innerHTML = `<i class="material-symbols-outlined">undo</i>`;
+  button.addEventListener('click', () => {
+    editor.exec('undo');
+  });
+  return button;
+}
+
+function createRedoButton(editor) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'toastui-editor-toolbar-icons';
+  button.style.backgroundImage = 'none';
+  button.style.margin = '0';
+  button.innerHTML = `<i class="material-symbols-outlined">redo</i>`;
+  button.addEventListener('click', () => {
+    editor.exec('redo');
+  });
+  return button;
+}

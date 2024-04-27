@@ -30,9 +30,7 @@ describe('courseEditController', () => {
       const req = { params: { courseId: 'nonexistent' } };
       const res = { redirect: sinon.spy() };
       const next = sinon.spy();
-
       await courseEditController.getSpecificCourse(req, res, next);
-
       expect(res.redirect.calledWith('/notfound')).to.be.true;
     });
 

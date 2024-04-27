@@ -3,11 +3,12 @@
         <div class="card-title p-2 flex items-center justify-between">
             <h4 class="my-0">Sisuteema {{#if readme.data.slug }}muutmine{{else}}lisamine{{/if}}</h4>
         </div>
-        <div>
+        <div class="card">
             {{#if conceptUsage.length}}
-                <p class="p-2 my-0 cursor-pointer flex items-center text-system-red-tlu"
+                <p class="p-2 my-2 cursor-pointer flex items-center text-system-red-tlu bg-white rounded-2xl"
                    onclick="document.getElementById('showUsage').classList.toggle('hidden')">
-                    NB! Antud sisuteemat kasutab vähemalt {{conceptUsage.length}} kursust
+                    NB! Antud sisuteemat kasutab vähemalt {{conceptUsage.length}} {{#if (eq conceptUsage.length 1)}}
+                    kursus{{else}}kursust{{/if}}!
                     <i class="material-symbols-outlined ml-2">expand_more</i>
                 </p>
                 <p class="pl-2 text-sm">Sisuteemat ei saa kustutada kuna see on kasutuses!</p>
@@ -58,6 +59,15 @@
         initialEditType: 'wysiwyg',
         initialValue: `{{#each readme.content}}{{this}}{{/each}}`,
         language: 'et-EE'
+    });
+
+    editor.insertToolbarItem({ groupIndex: 2, itemIndex: 5 }, {
+        el: createUndoButton(editor),
+        tooltip: 'Undo'
+    });
+    editor.insertToolbarItem({ groupIndex: 2, itemIndex: 6 }, {
+        el: createRedoButton(editor),
+        tooltip: 'Redo'
     });
 
     function deleteConcept() {

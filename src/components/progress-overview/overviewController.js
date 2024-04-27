@@ -28,8 +28,8 @@ const allOverviewController = {
         : [];
       const done = await markedAsDone(courseId);
 
-      course.students = course.students.map((user) => {
-        let uuids = done.filter(
+      course.students = course.students?.map((user) => {
+        let uuids = done?.filter(
           courses => courses.githubID === user.id.toString())[0]?.uuid || [];
         //uuids = uuids.map(
         //  u => courseBranchComponentsUUIDs.find(c => c.uuid === u).name);

@@ -61,6 +61,15 @@
         language: 'et-EE'
     });
 
+    editor.insertToolbarItem({ groupIndex: 2, itemIndex: 5 }, {
+        el: createUndoButton(editor),
+        tooltip: 'Undo'
+    });
+    editor.insertToolbarItem({ groupIndex: 2, itemIndex: 6 }, {
+        el: createRedoButton(editor),
+        tooltip: 'Redo'
+    });
+
     function deletePractice() {
         const id = document.getElementById('courseId').value;
         const slug = document.getElementById('slug').value;

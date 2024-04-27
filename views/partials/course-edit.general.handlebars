@@ -70,6 +70,11 @@
         return button;
     }
 
+    /*editor.insertToolbarItem({ groupIndex: 0, itemIndex: 0 }, {
+        el: createUndoButton(),
+        tooltip: 'Undo'
+    });*/
+
     const editor1 = new Editor({
         usageStatistics: false,
         el: document.querySelector('#editor1'),
@@ -96,6 +101,15 @@
         language: 'et-EE'
     });
 
+    editor1.insertToolbarItem({ groupIndex: 2, itemIndex: 5 }, {
+        el: createUndoButton(editor1),
+        tooltip: 'Undo'
+    });
+    editor1.insertToolbarItem({ groupIndex: 2, itemIndex: 6 }, {
+        el: createRedoButton(editor1),
+        tooltip: 'Redo'
+    });
+
     const editor2 = new Editor({
         el: document.querySelector('#editor2'),
         height: 'auto',
@@ -104,6 +118,15 @@
         language: 'et-EE'
     });
 
+    editor2.insertToolbarItem({ groupIndex: 2, itemIndex: 5 }, {
+        el: createUndoButton(editor2),
+        tooltip: 'Undo'
+    });
+    editor2.insertToolbarItem({ groupIndex: 2, itemIndex: 6 }, {
+        el: createRedoButton(editor2),
+        tooltip: 'Redo'
+    });
+    
     window.onload = function () {
         document.getElementById('saveBtn').innerHTML = 'Salvesta üldandmed';
         document.getElementById('delBtn').onclick = function () {

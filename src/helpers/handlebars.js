@@ -23,6 +23,9 @@ export default function hbsHelpers(hbs) {
     layoutsDir: path.join(__dirname, '../..', '/views/layouts'),
     partialsDir: path.join(__dirname, '../..', '/views/partials'),
     helpers: {
+      eq: (a, b) => {
+        return a === b;
+      },
       if_equal: (a, b, opts) => {
         if (a === b) {
           return opts.fn(this);
@@ -114,25 +117,24 @@ export default function hbsHelpers(hbs) {
         return 'attach_file';
       },
       showComponentName: (componentUppercase, concepts, practices) => {
-        const component = componentUppercase.toLowerCase();
-        const components = concepts?.concat(practices);
-        // console.log('component5:', component);
-        // console.log('components5:', components);
-
-        const comp = components?.find(
-          (x) => x.slug.toLowerCase() === component);
-        // console.log('comp.name5:', comp.name);
-        return comp ? comp.name : 'ei leia :(';
+        if (componentUppercase && concepts.length) {
+          const component = componentUppercase.uuid;
+          const components = concepts?.concat(practices);
+          console.log(componentUppercase, concepts, practices);
+          const comp = components?.find(
+            (x) => x.uuid === component);
+          // console.log('comp.name5:', comp.name);
+          return comp ? comp.name : 'ei leia :(';
+        }
       },
       showComponentUUID: (componentUppercase, concepts, practices) => {
-        const component = componentUppercase.toLowerCase();
-        const components = concepts?.concat(practices);
-        // console.log('components6:', components);
-
-        const comp = components?.find(
-          (x) => x.slug.toLowerCase() === component);
-        // console.log('comp.uuid6:', comp.uuid);
-        return comp ? comp.uuid : 'ei leia :(';
+        if (componentUppercase && concepts.length) {
+          const component = componentUppercase.uuid;
+          const components = concepts?.concat(practices);
+          const comp = components?.find(
+            (x) => x.uuid === component);
+          return comp ? comp.uuid : 'ei leia :(';
+        }
       },
       capitalize: (aString) => aString?.charAt(0).toUpperCase() +
         aString?.slice(1),
