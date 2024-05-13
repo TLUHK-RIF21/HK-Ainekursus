@@ -4,17 +4,18 @@
     </div>
     <label class="text-lg font-bold">
             <span class="flex items-center">
-                <i class="material-symbols-outlined mr-2">home</i>
+                <i class="material-symbols-outlined mr-2" aria-hidden="true">home</i>
                 Kursuse nimi
             </span>
-        <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}">
+        <input type="text" name="courseName" class="input-single" required value="{{config.courseName}}"
+               aria-label="Kursuse nimi">
     </label>
 
     <div class="text-lg font-bold mt-4 whitespace-nowrap">
         <span>
-            <i class="material-symbols-outlined mr-2">link</i> Kursuse link:
+            <i class="material-symbols-outlined mr-2" aria-hidden="true">link</i> Kursuse link:
         </span>
-        <a href="{{config.courseUrl}}" target="_blank">{{config.courseUrl}}</a>
+        <a href="{{config.courseUrl}}" target="_blank" title="Kursus: {{config.courseUrl}}">{{config.courseUrl}}</a>
     </div>
     <hr class="my-4">
 
@@ -45,7 +46,8 @@
         button.className = 'toastui-editor-toolbar-icons last';
         button.style.backgroundImage = 'none';
         button.style.margin = '0';
-        button.innerHTML = `<i class="material-symbols-outlined">sync</i>`;
+        button.innerHTML = `<i class="material-symbols-outlined" aria-hidden="true">sync</i>`;
+        button.ariaLabel = 'Uuenda õisist';
         button.addEventListener('click', (ev) => {
             ev.preventDefault();
             fetch('/get-ois-content?courseId={{course.code}}', {
@@ -69,11 +71,6 @@
 
         return button;
     }
-
-    /*editor.insertToolbarItem({ groupIndex: 0, itemIndex: 0 }, {
-        el: createUndoButton(),
-        tooltip: 'Undo'
-    });*/
 
     const editor1 = new Editor({
         usageStatistics: false,
@@ -103,11 +100,11 @@
 
     editor1.insertToolbarItem({ groupIndex: 2, itemIndex: 5 }, {
         el: createUndoButton(editor1),
-        tooltip: 'Undo'
+        tooltip: 'Võta tagasi'
     });
     editor1.insertToolbarItem({ groupIndex: 2, itemIndex: 6 }, {
         el: createRedoButton(editor1),
-        tooltip: 'Redo'
+        tooltip: 'Tee uuesti'
     });
 
     const editor2 = new Editor({
@@ -120,13 +117,13 @@
 
     editor2.insertToolbarItem({ groupIndex: 2, itemIndex: 5 }, {
         el: createUndoButton(editor2),
-        tooltip: 'Undo'
+        tooltip: 'Võta tagasi'
     });
     editor2.insertToolbarItem({ groupIndex: 2, itemIndex: 6 }, {
         el: createRedoButton(editor2),
-        tooltip: 'Redo'
+        tooltip: 'Tee uuesti'
     });
-    
+
     window.onload = function () {
         document.getElementById('saveBtn').innerHTML = 'Salvesta üldandmed';
         document.getElementById('delBtn').onclick = function () {

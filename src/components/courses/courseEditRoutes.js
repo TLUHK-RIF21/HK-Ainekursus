@@ -22,6 +22,20 @@ router.get('/publish/:courseId', validateTeacher, async (req, res, next) => {
   }
 });
 
+router.post('/unpublish/:courseId', validateTeacher, async (req, res, next) => {
+  try {
+    const courseId = req.params.courseId;
+    const course = await apiRequests.getCourseById(courseId);
+    if (!course) {
+      return res.redirect('/notfound');
+    }
+    await courseEditController.unpublishCourse(course);
+    return res.send('Course unpublished');
+  } catch (error) {
+    next(error);
+  }
+});
+
 //edit general data
 router.get('/:courseId', validateTeacher,
   courseEditController.getSpecificCourse, // general data

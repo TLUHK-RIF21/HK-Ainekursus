@@ -196,13 +196,27 @@ const courseEditController = {
   publishCourse: async (course) => {
     const mergeResponse = await apiRequests.mergeMasterWithDraft(
       course.repository.replace('https://github.com/', ''),
-      'Shipped cool_feature!'
+      'Andmed muudetud!'
     );
     if (mergeResponse.status === 204 || mergeResponse.status === 201) { // delete draft branch
       return await apiRequests.deleteBranch(
         course.repository.replace('https://github.com/', ''), 'draft');
     }
     return false;
+  },
+
+  /**
+   * Unpublishes a course by deleting the 'draft' branch from the course's
+   * repository.
+   *
+   * @async
+   * @param {Object} course - The course object.
+   * @returns {Promise<Object>} The response from the GitHub API.
+   * @throws {Error} If there is an error during the API request.
+   */
+  unpublishCourse: async (course) => {
+    return await apiRequests.deleteBranch(
+      course.repository.replace('https://github.com/', ''), 'draft');
   },
 
   /**
@@ -543,16 +557,17 @@ const courseEditController = {
     const { courseId, slug } = req.params;
     const course = await apiRequests.getCourseById(courseId);
 
-    if (course) {
+    if (course && course.repository) {
       const [owner, repo] = course.repository.replace('https://github.com/', '')
         .split('/');
       await deleteFolderFromRepo(owner, repo, `practices/${ slug }`, 'draft');
       const courseConfig = await getCourseData(course.id, 'draft');
       if (courseConfig) {
-        course.config.practices = course.config.practices.filter(
+        courseConfig.config.practices = courseConfig.config.practices.filter(
           c => c.slug !== slug);
         await updateFile(owner, repo, 'config.json', {
-          content: JSON.stringify(course.config), sha: course.config.sha
+          content: JSON.stringify(courseConfig.config),
+          sha: courseConfig.config.sha
         }, 'practice removed from the config.json', 'draft');
       }
       cacheConceptUsage.del('conceptUsages+' + courseId);

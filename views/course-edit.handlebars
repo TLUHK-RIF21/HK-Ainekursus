@@ -104,5 +104,22 @@
 
     window.addEventListener('beforeunload', beforeUnloadHandler);
 
+    document.getElementById('unpublish').addEventListener('click', function (event) {
+        event.preventDefault();
+        const confirmation = confirm('Kas oled kindel, et tahad kõik muudatused tühistada?');
+        if (confirmation) {
+            fetch('/course-edit/unpublish/' + document.getElementById('courseId').value, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then((res) => {
+                if (res.ok) {
+                    window.location.href = '/course-edit/' + document.getElementById('courseId').value;
+                }
+            });
+        }
+    });
+
 </script>
 

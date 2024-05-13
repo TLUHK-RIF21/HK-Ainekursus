@@ -2,22 +2,30 @@
 <nav class="card !p-6 lg:!p-6 top-36 md:top-[13.5rem] lg:top-[9.5rem] h-fit relative md:sticky"
      id="sidebar-course-anchor">
     <div class="pl-2 pb-4 mt-4 text-sm flex flex-col gap-2">
-        <!--button class="btn btn-success mr-4 w-full"
-                onclick="submitEditForm()"
-                id="saveBtn">
-            Salvesta
-        </button!-->
         <a href="/course-edit/publish/{{course.id}}"
-           class="btn btn-primary my-4 w-full">
+           class="btn btn-primary my-4 w-full" title="Avalda kursus">
             <span class="text-system-white">Avalda kursus</span>
         </a>
         {{#if (showDelBtn partial readme.slug) }}
             <hr class="my-8">
             <button class="btn btn-danger disabled:bg-button-secondary-label-default disabled:cursor-not-allowed mt-4 mr-4 w-full"
                     type="button"
-                    id="delBtn">
+                    id="delBtn"
+                    aria-label="Kustuta">
                 Kustuta
             </button>
         {{/if}}
+        <hr class="my-8">
+        <button class="btn btn-danger disabled:bg-button-secondary-label-default disabled:cursor-not-allowed mt-4 mr-4 w-full"
+                type="button"
+                id="unpublish"
+                aria-label="Avalda kursus">
+            Kustuta mustand
+        </button>
+
+        <!--a href="/course-edit/unpublish/{{course.id}}"
+           class="btn btn-danger my-4 w-full">
+            <span class="text-system-white">Kustuta mustand</span>
+        </a!-->
     </div>
 </nav>
