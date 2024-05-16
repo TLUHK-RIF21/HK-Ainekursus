@@ -7,8 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { cacheConcepts, cacheConfig } from '../../setup/setupCache.js';
 import { usersApi } from '../../setup/setupUserAPI.js';
 
-const GITHUB_URL_PREFIX = 'https://github.com/';
-
 function makeUniqueSlug(slug, array) {
   // Create a variable that holds the original value of "slug"
   const originalSlug = slug;
@@ -179,6 +177,8 @@ async function getCourseGeneralContent(owner, repo, path, branch) {
   const readme = await getFile(owner, repo, `${ path }/README.md`, branch);
   if (readme) {
     data.readme = readme;
+  } else {
+    data.readme = { content: '', sha: '' };
   }
 
   // Get lisamaterjalid.md file
@@ -263,7 +263,6 @@ async function fetchAndProcessCourseData() {
   try {
     const allCoursesResponse = await usersApi.get('groups');
     const allCourses = allCoursesResponse.data;
-
     const coursesWithConfig = await Promise.all(
       allCourses.data.map(async (course) => {
         course.config = await getCourseData(course, 'master');

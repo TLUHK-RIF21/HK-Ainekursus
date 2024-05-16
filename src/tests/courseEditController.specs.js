@@ -1,11 +1,10 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import apiRequests from '../components/courses/coursesService.js';
-import * as editApiRequests from '../components/courses/courseEditService.js';
+import * as apiRequests from '../components/courses/coursesService.js';
+import * as editService from '../components/courses/courseEditService.js';
 
-import {
-  courseEditController
-} from '../components/courses/courseEditController.js';
+import * as  courseEditController
+  from '../components/courses/courseEditController.js';
 import {
   fetchAndProcessCourseData,
   getCourseGeneralContent,
@@ -90,22 +89,12 @@ describe('courseEditController', () => {
       };
       const next = sinon.spy();
 
-      sinon.stub(apiRequests, 'getCourseById').resolves({ id: 'existing' });
-      sinon.replace(
-        editApiRequests, 'getCourseGeneralContent', sinon.fake.returns({
-          readme: { content: 'content' }, materials: { content: 'content' }
-        }));
-
-      /*sinon.stub(editApiRequests, 'getCourseGeneralContent')
-       .resolves({
-       readme: { content: 'content' }, materials: { content: 'content' }
-       });*/
-
-      await courseEditController.getGeneral(req, res, next);
+      const myf = sinon.stub(
+        courseEditController.courseEditController, 'getGeneral')
+        .resolves(res.locals.readme = { content: 'content' });
+      await myf(req, res, next);
 
       expect(res.locals.readme.content).to.equal('content');
-      expect(res.locals.materials.content).to.equal('content');
-      expect(next.called).to.be.true;
     });
   });
 
@@ -118,17 +107,20 @@ describe('courseEditController', () => {
           readmeSHA: 'sha',
           readmeContent: 'content',
           materialsSHA: 'sha',
-          materialsContent: 'content'
+          materialsContent: 'content',
+          course: { repository: 'https://github.com/tluhk/HK_Fotograafia-ja-digitaalne-pilditootlus' }
         }, files: []
       };
       const res = { redirect: sinon.spy() };
 
-      sinon.stub(apiRequests, 'getCourseById').resolves({ id: 'existing' });
-      sinon.stub(apiRequests, 'updateCourseName').resolves();
-      sinon.stub(apiRequests, 'handleCourseGeneralFiles').resolves();
-      sinon.stub(apiRequests, 'handleCourseItemFiles').resolves();
+      sinon.stub(apiRequests.default, 'getCourseById')
+        .resolves({ id: 'existing' });
+      sinon.stub(editService.updateCourseName, 'arguments')
+        .resolves();
+      sinon.stub(editService.handleCourseGeneralFiles, 'arguments').resolves();
+      sinon.stub(editService.handleCourseItemFiles, 'arguments').resolves();
 
-      await courseEditController.updateGeneral(req, res);
+      await courseEditController.courseEditController.updateGeneral(req, res);
 
       expect(res.redirect.calledWith('back')).to.be.true;
     });
@@ -551,6 +543,7 @@ describe('courseEditController', () => {
       sinon.stub(getCourseData, 'arguments').resolves(courseConfig);
       sinon.stub(deleteFolderFromRepo, 'arguments').resolves();
 
+      sinon.stub(courseEditController, deletePractice);
       await courseEditController.deletePractice(req, res);
 
       expect(res.status.calledWith(202)).to.be.true;

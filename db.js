@@ -1,4 +1,3 @@
-import mariadb from 'mariadb';
 import mysql from 'mysql2';
 // https://stackoverflow.com/a/74320569
 import dotenv from 'dotenv';
@@ -27,6 +26,7 @@ const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
   database: 'course_management',
   waitForConnections: true,
   connectionLimit: 10,
