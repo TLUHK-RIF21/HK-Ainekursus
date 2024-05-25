@@ -10,7 +10,7 @@
         Kursuse menüü
     </button>
     <button id="right-side-button" onclick='panMainContentRight()'
-            class="hidden lg:flex items-center bg-button-default hover:bg-button-hover active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 text-primary-100 py-4 pl-8 pr-4 rounded-l-full">
+            class="md:hidden flex items-center bg-button-default hover:bg-button-hover active:bg-button-active focus-visible:outline-system-focus focus-visible:border-solid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 text-primary-100 py-4 pl-8 pr-4 rounded-l-full">
         Lehekülje menüü
         <i class="material-symbols-outlined cursor-pointer text-xxxl text-brand_red  transition ease-in-out duration-1000"
            aria-hidden="true">chevron_left</i>
@@ -32,7 +32,7 @@
         {{> sidebar-right.course-edit }}
     </aside>
 </div>
-<div class="fixed z-50 top-36 lg:top-40 lg:left-2/3 right-0">
+<div class="fixed z-50 top-44 lg:top-40 lg:left-2/3 right-0">
     <button class="btn btn-success"
             onclick="submitEditForm()"
             id="saveBtn">
